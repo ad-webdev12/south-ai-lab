@@ -15,10 +15,11 @@
   function ease(t) { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
   function rnd(a, b) { return a + Math.random() * (b - a); }
 
+  // The hands are drawn, not photographed, so their fingers can close: see hand().
   // The robot is a render cut into six pieces (assets/img/robot). Numbers are pixels in the source image:
   // where each piece sits, and the joint it turns around. Arms are posed by two-joint inverse kinematics.
-  var RIG = { head: { x: 561, y: 26, w: 94, h: 146, px: 610, py: 160 }, armL1: { x: 447, y: 183, w: 94, h: 239, px: 510, py: 215 }, armL2: { x: 415, y: 359, w: 85, h: 291, px: 476, py: 386 },
-              armR1: { x: 685, y: 183, w: 69, h: 239, px: 712, py: 215 }, armR2: { x: 702, y: 359, w: 86, h: 274, px: 732, py: 386 }, body: { x: 460, y: 148, w: 280, h: 854, px: 611, py: 470 } };
+  var RIG = { head: { x: 561, y: 26, w: 94, h: 146, px: 610, py: 160 }, armL1: { x: 447, y: 183, w: 94, h: 239, px: 510, py: 215 }, armL2: { x: 428, y: 359, w: 72, h: 179, px: 476, py: 386 },
+              armR1: { x: 685, y: 183, w: 69, h: 239, px: 712, py: 215 }, armR2: { x: 702, y: 359, w: 70, h: 179, px: 732, py: 386 }, body: { x: 460, y: 148, w: 280, h: 854, px: 611, py: 470 } };
   var GRIP = { "-1": [440, 585], "1": [762, 580] }, IMG = {};
   Object.keys(RIG).forEach(function (n) { var im = new Image(); im.src = "assets/img/robot/" + n + ".png"; IMG[n] = im; });
   function nat(a, b) { return Math.atan2(b[1] - a[1], b[0] - a[0]); }
@@ -82,7 +83,7 @@
     function lockIn(l, hard) { l.state = "home"; l.x = l.hx; l.y = l.hy; l.rot = 0; l.sc = 1; l.big = 0; l.el.classList.remove("lock"); void l.el.offsetWidth; l.el.classList.add("lock"); fx.push({ kind: "ring", x: l.hx, y: l.hy, r: l.h * (hard ? 0.9 : 0.5), t: 0, life: hard ? 0.5 : 0.35 }); if (hard) shake = Math.max(shake, 0.35); }
 
     /* ---- state ---- */
-    var rb = { x: homeX, vx: 0, moving: false, stand: 0, standTo: 0, lean: 0, leanTo: 0, yaw: -0.2, pitch: 0, walk: 0, arms: [-1, 1].map(function (s) { return { side: s, x: homeX + s * U * 0.45, y: deskY - U * 0.06, ex: homeX + s * U, ey: deskY - U * 0.5, tx: homeX + s * U * 0.45, ty: deskY - U * 0.06, curl: 0.3, curlTo: 0.3, speed: 7 }; }) };
+    var rb = { x: homeX, vx: 0, moving: false, stand: 0, standTo: 0, lean: 0, leanTo: 0, yaw: -0.2, pitch: 0, walk: 0, gait: 0, arms: [-1, 1].map(function (s) { return { side: s, x: homeX + s * U * 0.45, y: deskY - U * 0.06, ex: homeX + s * U, ey: deskY - U * 0.5, tx: homeX + s * U * 0.45, ty: deskY - U * 0.06, curl: 0.3, curlTo: 0.3, speed: 7 }; }) };
     var job = null, work = { i: 0, t: 0, k: 0 }, knocks = [], level = 0, clock = 0, sinceMeasure = 0, nextLoose = 2.6, shake = 0, fx = [], dust = [], heat = 0, heatTo = 0, cool = 0, coolTo = 0, spot = 1, spotTo = 1, flicker = 0, lamp = { a: 0, va: 0 };
     var seq = null, wrecked = false, restoring = null, wreck = null, cracks = [], monitor = ["TASK: restore title", "STATE: monitoring"], card = null, divider = 0, tilt = null;
     var tiles = ["A", "I", "R", "L", "S"].map(function (c, i) { return { c: c, ox: homeX - U * (1.15 - i * 0.2) + (i % 2) * 6, oy: deskY - U * 0.05, x: 0, y: 0, rot: (i - 2) * 0.12, vx: 0, vy: 0, vr: 0, free: false }; });
@@ -91,11 +92,19 @@
     var trayX = homeX - U * 1.78, monX = homeX + U * (wide ? 2.15 : 1.5), lampX = wide ? Math.min(S.W - U * 0.9, homeX + U * 3.7) : S.W - U * 0.55;
 
     function deskLine() { return 448 + 46 * rb.stand; }                  // which row of the render meets the desk top. It works at a standing desk: a little lower while busy at it, upright to walk
-    function bodyDrop() { return rb.lean * 34 * Z + Math.sin(rb.walk * 2) * 5 * Z * rb.stand + Math.sin(clock * 1.3) * 1.2 * Z; }
-    function shoulderY() { return deskY - (deskLine() - 215) * Z + bodyDrop(); }
-    function shoulder(side) { return { x: rb.x + side * 101 * Z + Math.sin(rb.walk) * 4 * Z, y: shoulderY() }; }
+    // rb.walk is the step phase: one half turn per step. The body is lowest as a foot lands, rolls over the standing leg, and leans into the direction of travel.
+    function bodyDrop() { return rb.lean * 34 * Z + (1 - Math.abs(Math.sin(rb.walk))) * 9 * Z * rb.gait + Math.sin(clock * 1.3) * 1.2 * Z; }
+    function hip() { return { x: rb.x + Math.sin(rb.walk) * 7 * Z * rb.gait, y: deskY + (470 - deskLine()) * Z + bodyDrop() }; }
+    function roll() { return Math.sin(rb.walk) * 0.032 * rb.gait + clamp(rb.vx * 0.00014, -0.05, 0.05); }
+    function shoulderY() { return hip().y - 255 * Z; }
+    function shoulder(side) { var h = hip(), r = roll(), lx = side * 101 * Z, ly = -255 * Z; return { x: h.x + lx * Math.cos(r) - ly * Math.sin(r), y: h.y + lx * Math.sin(r) + ly * Math.cos(r) }; }
     function headY() { return shoulderY() - 110 * Z; }
-    function moveTo(gx, quick, dt) { var maxV = U * 3.6 * quick, want = clamp((gx - rb.x) * 4, -maxV, maxV); rb.vx += (want - rb.vx) * Math.min(1, dt * 6); rb.moving = true; }
+    function grip(a) {      // the point between fingers and thumb, which is where a held letter sits
+      var fa = Math.atan2(a.dy, a.dx), ha = fa + (a.wrist || 0), wx = a.ex + a.dx * 146 * Z * (a.f || 1), wy = a.ey + a.dy * 146 * Z * (a.f || 1);
+      var sg = a.side * (1 - 2 * (a.turn || 0)); return { x: wx + Math.cos(ha) * 60 * Z - Math.sin(ha) * sg * 12 * Z, y: wy + Math.sin(ha) * 60 * Z + Math.cos(ha) * sg * 12 * Z };
+    }
+    function aim(a, x, y) { var g = grip(a); a.tx = x - (g.x - a.x); a.ty = y - (g.y - a.y); }      // put the grip, not the forearm, on the target
+    function moveTo(gx, quick, dt) { var maxV = U * 2.5 * quick, acc = 760 * Z * quick * dt, want = clamp((gx - rb.x) * 3, -maxV, maxV); rb.vx += clamp(want - rb.vx, -acc, acc); rb.moving = true; }      // heavy: it takes a moment to get going and to stop
 
     /* ---- the robot restoring one letter ---- */
     function nextJob() { var best = null, bd = 1e9; letters.forEach(function (l) { if (l.state === "rest") { var d = Math.abs(l.x - rb.x); if (d < bd) { bd = d; best = l; } } }); return best ? { l: best, phase: "notice", t: 0 } : null; }
@@ -107,19 +116,19 @@
         rb.standTo = 1; j.arm = rb.arms[l.x < rb.x ? 0 : 1]; j.goal = clamp(l.x - j.arm.side * U * 0.72, U * 0.8, S.W - U * 0.8);
         if (rb.stand > 0.85) moveTo(j.goal, quick, dt); if (rb.stand > 0.9 && Math.abs(rb.x - j.goal) < 7 && Math.abs(rb.vx) < 40) { j.phase = "down"; j.t = 0; }
       } else if (j.phase === "down") {
-        rb.leanTo = 1; j.arm.tx = l.x; j.arm.ty = l.y - 8 * Z; j.arm.speed = 5.5 * quick;
-        if (Math.hypot(j.arm.x - j.arm.tx, j.arm.y - j.arm.ty) < 10 || j.t > 1.4) { j.phase = "grip"; j.t = 0; }
-      } else if (j.phase === "grip") { j.arm.tx = l.x; j.arm.ty = l.y + 4 * Z; j.arm.speed = 9; if (j.t > 0.24 / quick) { l.state = "held"; j.phase = "carry"; j.t = 0; } }
+        rb.leanTo = 1; aim(j.arm, l.x, l.y - 4 * Z); j.arm.flatTo = 0.3; j.arm.curlTo = 0; j.arm.speed = 5.5 * quick;
+        var gp = grip(j.arm); if (Math.hypot(gp.x - l.x, gp.y - l.y) < 11 || j.t > 1.4) { j.phase = "grip"; j.t = 0; }
+      } else if (j.phase === "grip") { aim(j.arm, l.x, l.y); j.arm.flatTo = 0.3; j.arm.curlTo = 0.62; j.arm.speed = 9; if (j.t > 0.34 / quick) { l.state = "held"; j.phase = "carry"; j.t = 0; } }
       else if (j.phase === "carry") {
-        rb.leanTo = 0; var sh = shoulder(j.arm.side); j.arm.tx = rb.x + j.arm.side * U * 0.75; j.arm.ty = sh.y + U * 1.1; j.arm.speed = 4.5 * quick; focus = { x: l.hx, y: l.hy };
+        rb.leanTo = 0; var sh = shoulder(j.arm.side); j.arm.tx = rb.x + j.arm.side * U * 0.98; j.arm.ty = sh.y + U * 1.78; j.arm.speed = 4.5 * quick; j.arm.flatTo = 0; j.arm.curlTo = 0.62; j.arm.holding = true; focus = { x: l.hx, y: l.hy };
         j.goal = clamp(l.hx - j.arm.side * U * 0.62, U * 0.8, S.W - U * 0.8); if (j.t > 0.3 / quick) moveTo(j.goal, quick, dt);
         if (j.t > 0.3 && Math.abs(rb.x - j.goal) < 7 && Math.abs(rb.vx) < 40) { j.phase = "up"; j.t = 0; }
       } else if (j.phase === "up") {
-        focus = { x: l.hx, y: l.hy }; j.arm.tx = l.hx; j.arm.ty = l.hy + 14 * Z; j.arm.speed = (level >= 2 ? 9 : 4.6) * quick;
+        focus = { x: l.hx, y: l.hy }; aim(j.arm, l.hx, l.hy); j.arm.flatTo = 0; j.arm.curlTo = 0.62; j.arm.holding = true; j.arm.speed = (level >= 2 ? 9 : 4.6) * quick;
         var shd = shoulder(j.arm.side), reach = L1 + L2 - 3, dx = j.arm.tx - shd.x, dy = j.arm.ty - shd.y, d = Math.hypot(dx, dy), cx = d > reach ? shd.x + dx / d * reach : j.arm.tx, cy = d > reach ? shd.y + dy / d * reach : j.arm.ty;
-        if (Math.hypot(j.arm.x - cx, j.arm.y - cy) < 8 || j.t > 1.3) { l.state = "magnet"; l.t = 0; l.from = { x: l.x, y: l.y, rot: l.rot }; l.dur = clamp(Math.hypot(l.x - l.hx, l.y - l.hy) / 900, 0.16, 0.6) / (level >= 2 ? 1.6 : 1); l.hard = level >= 2; j.arm.curlTo = 0; j.phase = "release"; j.t = 0; }
-      } else if (j.phase === "release") { focus = { x: l.hx, y: l.hy }; if (l.state === "home" && j.t > 0.25) job = null; }
-      if (l.state === "held") { l.x = j.arm.x + j.arm.dx * 16 * Z; l.y = j.arm.y + j.arm.dy * 16 * Z - 6 * Z; l.rot += (0 - l.rot) * Math.min(1, dt * 6); }
+        if (Math.hypot(j.arm.x - cx, j.arm.y - cy) < 8 || j.t > 1.3) { l.state = "magnet"; l.t = 0; l.from = { x: l.x, y: l.y, rot: l.rot }; l.dur = clamp(Math.hypot(l.x - l.hx, l.y - l.hy) / 900, 0.16, 0.6) / (level >= 2 ? 1.6 : 1); l.hard = level >= 2; j.phase = "release"; j.t = 0; }
+      } else if (j.phase === "release") { focus = { x: l.hx, y: l.hy }; j.arm.curlTo = 0; j.arm.flatTo = 0; j.arm.tx = j.arm.x; j.arm.ty = j.arm.y + 10 * Z * j.t; if (l.state === "home" && j.t > 0.25) job = null; }
+      if (l.state === "held") { var gh = grip(j.arm); l.x = gh.x; l.y = gh.y; l.rot += (0 - l.rot) * Math.min(1, dt * 6); j.arm.holding = true; j.arm.curlTo = 0.62; }
       return focus;
     }
 
@@ -127,12 +136,12 @@
     function stepWork(dt) {
       var w = work, a0 = rb.arms[0], a1 = rb.arms[1], focus = { x: rb.x, y: deskY }, kb = deskY - U * 0.07; w.t += dt;
       function next() { w.i = (w.i + 1) % 4; w.t = 0; w.k++; }
-      a0.tx = rb.x - U * 0.5; a1.tx = rb.x + U * 0.5; a0.ty = a1.ty = kb; a0.curlTo = a1.curlTo = 0.35; a0.speed = a1.speed = 5;
-      if (w.i === 0) { a0.ty = kb - Math.max(0, Math.sin(clock * 11)) * U * 0.05; a1.ty = kb - Math.max(0, Math.sin(clock * 11 + 2)) * U * 0.05; focus = { x: monX, y: deskY - U * 0.9 }; if (w.t > 3) next(); }
+      a0.tx = rb.x - U * 0.78; a1.tx = rb.x + U * 0.78; a0.ty = a1.ty = kb; a0.curlTo = a1.curlTo = 0.35; a0.speed = a1.speed = 5;
+      if (w.i === 0) { a0.typing = a1.typing = true; a0.ty = kb - Math.max(0, Math.sin(clock * 11)) * U * 0.05; a1.ty = kb - Math.max(0, Math.sin(clock * 11 + 2)) * U * 0.05; focus = { x: monX, y: deskY - U * 0.9 }; if (w.t > 3) next(); }
       else if (w.i === 1) { focus = { x: S.W * 0.22, y: 140 }; if (w.t > 1.6) next(); }
       else if (w.i === 2) {
         var t = tiles[w.k % tiles.length]; focus = { x: t.x, y: t.y };
-        if (w.t < 1) { a0.tx = t.x; a0.ty = t.y - U * 0.04; a0.curlTo = 0; } else if (w.t < 2.4) { a0.curlTo = 1; a0.tx = trayX + (w.k % 3) * U * 0.2 - U * 0.2; a0.ty = deskY - U * 0.24; t.x = a0.x; t.y = a0.y + U * 0.12; t.rot *= 0.9; }
+        if (w.t < 1) { aim(a0, t.x, t.y); a0.flatTo = 0.3; a0.curlTo = 0; } else if (w.t < 2.4) { a0.curlTo = 0.8; a0.flatTo = 0.3; a0.tx = trayX + (w.k % 3) * U * 0.2 - U * 0.2; a0.ty = deskY - U * 0.24; var gt = grip(a0); t.x = gt.x; t.y = gt.y; t.rot *= 0.9; }
         else { t.y = deskY - U * 0.1; t.ox = t.x; t.oy = t.y; if (w.t > 2.8) next(); }
       } else { a0.tx = papers[0].x - U * 0.2; a1.tx = papers[0].x + U * 0.22; a0.ty = a1.ty = deskY - U * 0.1 - Math.abs(Math.sin(w.t * 5)) * 3; focus = { x: papers[0].x, y: deskY }; if (w.t > 1.8) next(); }
       return focus;
@@ -220,7 +229,7 @@
       if (t >= 1.98 && t < 2.55) { a0.tx = rb.x + U * 0.35; a0.ty = sy - U * 0.15; a0.speed = 7; a0.curlTo = 1; var tg = label(["research", "projects", "join", "sail"]); if (tg) focus = { x: tg.x, y: tg.y }; }
       if (t >= 2.55 && t < 3.0) { a0.tx = rb.x - U * 1.25; a0.ty = sy - U * 1.6; a0.speed = 26; a0.curlTo = t < 2.68 ? 1 : 0; }
       if (once("throw", 2.68)) { seq.t1 = label(["research", "projects", "join", "sail"]); var p = seq.t1 || { x: S.W * 0.6, y: 36 }; fly(R, function () { return { x: p.x, y: p.y }; }, 0.5, 1.7, 14, U * 0.5); }
-      if (R.state === "inhand") { R.x = a0.x + a0.dx * 22 * Z; R.y = a0.y + a0.dy * 22 * Z; R.rot += (0.3 - R.rot) * Math.min(1, dt * 8); R.sc = 1.7; }
+      if (R.state === "inhand") { var gr = grip(a0); a0.holding = true; R.x = gr.x; R.y = gr.y; R.rot += (0.3 - R.rot) * Math.min(1, dt * 8); R.sc = 1.7; }
       if (once("hit1", 3.19)) { slowT = 0.4; impact(seq.t1, true); R.big = 1; loose(R, rnd(-260, -80), -320, 0.8); }
       if (t > 3.2 && t < 3.9 && seq.t1) focus = { x: seq.t1.x, y: seq.t1.y };
       // second beat: a metal divider dragged across the desk throws sparks and sends two letters into the bar
@@ -281,7 +290,7 @@
 
     function stepRobot(dt) {
       var focus; rb.moving = false;
-      rb.arms.forEach(function (a) { var up = rb.stand > 0.5; a.tx = rb.x + a.side * (up ? 118 * Z + Math.sin(rb.walk + (a.side > 0 ? Math.PI : 0)) * 26 * Z : U * 0.7); a.ty = up ? shoulderY() + 352 * Z : deskY - 5 * Z; a.speed = up ? 5 : 6; });   // relaxed unless something below asks for more
+      rb.arms.forEach(function (a) { var up = rb.stand > 0.5; a.tx = up ? rb.x + a.side * 114 * Z - rb.vx * 0.05 : rb.x + a.side * U * 0.85; a.ty = up ? shoulderY() + 350 * Z - Math.abs(Math.sin(rb.walk)) * 5 * Z * rb.gait : deskY - 5 * Z; a.speed = up ? 5 : 6; a.curlTo = up ? 0.42 : 0.12; a.flatTo = null; a.holding = false; a.typing = false; });   // relaxed unless something below asks for more
       if (seq) focus = stepSeq(dt);
       else {
         if (!job && !wrecked && !restoring) job = nextJob();
@@ -290,8 +299,10 @@
         else if (Math.abs(rb.x - homeX) > 8) { rb.standTo = 1; rb.leanTo = 0; moveTo(homeX, 1, dt); rb.arms.forEach(function (a) { a.tx = rb.x + a.side * U * 0.62; a.ty = shoulderY() + U * 1.2; a.curlTo = 0.5; a.speed = 5; }); focus = { x: homeX, y: deskY }; }
         else { rb.standTo = 0; rb.leanTo = 0; if (rb.stand < 0.15) focus = stepWork(dt); else { focus = { x: monX, y: deskY - U }; rb.arms.forEach(function (a) { a.tx = rb.x + a.side * U * 0.5; a.ty = deskY - U * 0.06; a.speed = 5; }); } }
       }
-      if (!rb.moving) rb.vx *= Math.pow(0.0005, dt);
-      rb.x = clamp(rb.x + rb.vx * dt, U * 0.7, S.W - U * 0.7); rb.walk += Math.abs(rb.vx) / (U * 0.9) * dt * 3.2;
+      if (!rb.moving) rb.vx *= Math.pow(0.002, dt);
+      var speed = Math.abs(rb.vx), surge = 0.7 + 0.3 * Math.abs(Math.sin(rb.walk));             // it travels during the step and slows as the foot plants
+      rb.walk += speed * dt / (82 * Z) * Math.PI; rb.gait += ((speed > 24 ? 1 : 0) - rb.gait) * Math.min(1, dt * 5);
+      rb.x = clamp(rb.x + rb.vx * surge * dt, U * 0.7, S.W - U * 0.7);
       rb.stand += (rb.standTo - rb.stand) * Math.min(1, dt * (seq ? 5.5 : 3.4)); rb.lean += (rb.leanTo - rb.lean) * Math.min(1, dt * 5);
       var wantYaw = clamp((focus.x - rb.x) / (U * 3.2), -1, 1), wantPitch = clamp((focus.y - headY()) / (U * 3), -1, 1); rb.yaw += (wantYaw - rb.yaw) * Math.min(1, dt * 5); rb.pitch += (wantPitch - rb.pitch) * Math.min(1, dt * 5);
       rb.arms.forEach(function (a) {
@@ -299,34 +310,62 @@
         for (var s = 0; s < n; s++) { a.vx = (a.vx || 0) + ((a.tx - a.x) * K - (a.vx || 0) * C) * h; a.vy = (a.vy || 0) + ((a.ty - a.y) * K - (a.vy || 0) * C) * h; a.x += a.vx * h; a.y += a.vy * h; }
         var dx = a.x - sh.x, dy = a.y - sh.y, d = Math.hypot(dx, dy) || 1, max = L1 + L2 - 2, min = Math.abs(L1 - L2) + 6;
         if (d > max) { a.x = sh.x + dx / d * max; a.y = sh.y + dy / d * max; dx = a.x - sh.x; dy = a.y - sh.y; d = max; } else if (d < min) { a.x = sh.x + dx / d * min; a.y = sh.y + dy / d * min; dx = a.x - sh.x; dy = a.y - sh.y; d = min; }
-        var b = Math.atan2(dy, dx), cs = clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1), bend = Math.acos(cs);
+        // seen from the front, an arm reaching toward the viewer looks shorter. Shortening the links a little keeps the elbows from swinging wide
+        var fs = clamp(d / ((L1 + L2) * 0.88), 0.56, 1); a.f = (a.f || 1) + (fs - (a.f || 1)) * Math.min(1, dt * 10); var l1 = L1 * a.f, l2 = L2 * a.f;
+        var b = Math.atan2(dy, dx), cs = clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1), bend = Math.acos(cs);
         var o1 = Math.cos(b + bend) * a.side + Math.sin(b + bend) * 0.3, o2 = Math.cos(b - bend) * a.side + Math.sin(b - bend) * 0.3; if (!a.sign) a.sign = o1 > o2 ? 1 : -1; if (a.sign > 0 ? o2 > o1 + 0.25 : o1 > o2 + 0.25) a.sign = -a.sign;      // elbows out and down, and sticky so they never flicker
-        var want = b + bend * a.sign, exT = sh.x + Math.cos(want) * L1, eyT = sh.y + Math.sin(want) * L1; if (a.ex === undefined || isNaN(a.ex)) { a.ex = exT; a.ey = eyT; }
-        a.ex += (exT - a.ex) * Math.min(1, dt * 18); a.ey += (eyT - a.ey) * Math.min(1, dt * 18); var el = Math.hypot(a.ex - sh.x, a.ey - sh.y) || 1; a.ex = sh.x + (a.ex - sh.x) / el * L1; a.ey = sh.y + (a.ey - sh.y) / el * L1;
+        var want = b + bend * a.sign, exT = sh.x + Math.cos(want) * l1, eyT = sh.y + Math.sin(want) * l1; if (a.ex === undefined || isNaN(a.ex)) { a.ex = exT; a.ey = eyT; }
+        a.ex += (exT - a.ex) * Math.min(1, dt * 18); a.ey += (eyT - a.ey) * Math.min(1, dt * 18); var el = Math.hypot(a.ex - sh.x, a.ey - sh.y) || 1; a.ex = sh.x + (a.ex - sh.x) / el * l1; a.ey = sh.y + (a.ey - sh.y) / el * l1;
         var fl = Math.hypot(a.x - a.ex, a.y - a.ey) || 1; a.dx = (a.x - a.ex) / fl; a.dy = (a.y - a.ey) / fl;
+        // the wrist turns the hand flat when it rests on the desk; otherwise the hand follows the forearm
+        var fa = Math.atan2(a.dy, a.dx), flat = a.flatTo !== null && a.flatTo !== undefined ? a.flatTo : (a.ty > deskY - 16 * Z && a.ty < deskY + 8 * Z ? 1 : 0), want = (a.side > 0 ? Math.PI : 0) - fa;
+        while (want > Math.PI) want -= 6.2832; while (want < -Math.PI) want += 6.2832;
+        a.wrist = (a.wrist || 0) + (clamp(want, -1.5, 1.5) * flat - (a.wrist || 0)) * Math.min(1, dt * 8); a.turn = (a.turn || 0) + (flat - (a.turn || 0)) * Math.min(1, dt * 7);      // turn: the forearm rolls the palm down as the hand goes flat a.curl = (a.curl || 0) + ((a.curlTo || 0) - (a.curl || 0)) * Math.min(1, dt * 11);
       });
     }
 
     /* ---- drawing ---- */
     function metal(ctx, x0, y0, x1, y1, dark) { var g = ctx.createLinearGradient(x0, y0, x1, y1); if (dark) { g.addColorStop(0, "#3a3f48"); g.addColorStop(0.5, "#23272e"); g.addColorStop(1, "#111418"); } else { g.addColorStop(0, "#dfe3e9"); g.addColorStop(0.45, "#9aa2ae"); g.addColorStop(1, "#555c68"); } return g; }
     function piece(ctx, name, sx, sy, rot) { var r = RIG[name], im = IMG[name]; if (!im.complete || !im.naturalWidth) return; ctx.save(); ctx.translate(sx, sy); ctx.rotate(rot); ctx.drawImage(im, (r.x - r.px) * Z, (r.y - r.py) * Z, r.w * Z, r.h * Z); ctx.restore(); }
+    function limb(ctx, name, sx, sy, ang, natural, f) { var r = RIG[name], im = IMG[name]; if (!im.complete || !im.naturalWidth) return; ctx.save(); ctx.translate(sx, sy); ctx.rotate(ang); ctx.scale(f, 1); ctx.rotate(-natural); ctx.drawImage(im, (r.x - r.px) * Z, (r.y - r.py) * Z, r.w * Z, r.h * Z); ctx.restore(); }
     function drawBody(ctx) {
-      var sway = Math.sin(rb.walk) * 0.018 * rb.stand, drop = bodyDrop(), hipY = deskY + (470 - deskLine()) * Z + drop, hx = rb.x + Math.sin(rb.walk) * 4 * Z;
+      var h = hip(), sway = roll(), hipY = h.y, hx = h.x;
       // a little haze behind the robot so its dark head and shoulders read against the room
       var hz = ctx.createRadialGradient(hx, shoulderY() - 30 * Z, 10, hx, shoulderY(), 330 * Z); hz.addColorStop(0, "rgba(" + lightRgb() + ",.16)"); hz.addColorStop(1, "rgba(" + lightRgb() + ",0)"); ctx.fillStyle = hz; ctx.fillRect(hx - 340 * Z, shoulderY() - 340 * Z, 680 * Z, 680 * Z);
       ctx.save(); ctx.translate(hx, hipY); ctx.rotate(sway); ctx.translate(-hx, -hipY);
       piece(ctx, "body", hx, hipY, 0);
-      piece(ctx, "head", hx + (610 - 611) * Z + rb.yaw * 5 * Z, hipY + (160 - 470) * Z + Math.max(0, rb.pitch) * 5 * Z, rb.yaw * 0.13 + Math.sin(clock * 0.7) * 0.008);
+      piece(ctx, "head", hx + (610 - 611) * Z + rb.yaw * 5 * Z, hipY + (160 - 470) * Z + Math.max(0, rb.pitch) * 5 * Z, rb.yaw * 0.13 - sway * 0.6 + Math.sin(clock * 0.7) * 0.008);      // the head stays level while the body rolls
+      ctx.restore();
+    }
+    function bone(ctx, x0, y0, x1, y1, w) { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineWidth = w + 2.6; ctx.strokeStyle = "#05070a"; ctx.stroke(); ctx.lineWidth = w; ctx.strokeStyle = "#8f98a5"; ctx.stroke(); ctx.lineWidth = w * 0.4; ctx.strokeStyle = "#f1f4f7"; ctx.stroke(); }
+    function knuckle(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = "#12161c"; ctx.fill(); ctx.lineWidth = 0.8; ctx.strokeStyle = "rgba(200,208,220,.6)"; ctx.stroke(); }
+    // A jointed hand in source-image units. It is mirrored for the left arm, so +y is always the side the fingers close toward and the thumb sits on.
+    function hand(ctx, a, part) {
+      var c = a.curl || 0, fa = Math.atan2(a.dy, a.dx), i;
+      ctx.save(); ctx.translate(a.ex + a.dx * 146 * Z * (a.f || 1), a.ey + a.dy * 146 * Z * (a.f || 1)); ctx.rotate(fa + (a.wrist || 0)); var roll2 = 1 - 2 * (a.turn || 0); ctx.scale(Z, Z * a.side * (Math.abs(roll2) < 0.12 ? (roll2 < 0 ? -0.12 : 0.12) : roll2)); ctx.lineCap = "round"; ctx.lineJoin = "round";
+      if (part !== "front") {
+        var t0 = 1.0 - c * 0.85, tx1 = 12 + Math.cos(t0) * 25, ty1 = 17 + Math.sin(t0) * 25, t1 = t0 - 0.2 - c * 0.75; bone(ctx, 12, 17, tx1, ty1, 10); bone(ctx, tx1, ty1, tx1 + Math.cos(t1) * 19, ty1 + Math.sin(t1) * 19, 8.2); knuckle(ctx, tx1, ty1, 3.2);
+        ctx.beginPath(); ctx.moveTo(-2, -18); ctx.lineTo(46, -22); ctx.quadraticCurveTo(54, -1, 50, 20); ctx.lineTo(-2, 17); ctx.closePath(); var pg = ctx.createLinearGradient(0, -22, 0, 20); pg.addColorStop(0, "#4a505b"); pg.addColorStop(0.5, "#23272e"); pg.addColorStop(1, "#0e1116"); ctx.fillStyle = pg; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = "#05070a"; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(8, -12); ctx.lineTo(40, -15); ctx.lineTo(42, 12); ctx.lineTo(8, 10); ctx.closePath(); ctx.fillStyle = "rgba(190,198,210,.16)"; ctx.fill();
+        var cg = ctx.createLinearGradient(0, -20, 0, 19); cg.addColorStop(0, "#eef1f5"); cg.addColorStop(0.5, "#9aa2ae"); cg.addColorStop(1, "#4c535e"); ctx.fillStyle = cg; ctx.fillRect(-9, -20, 13, 39); ctx.lineWidth = 1.4; ctx.strokeStyle = "#05070a"; ctx.strokeRect(-9, -20, 13, 39);
+      }
+      if (part !== "back") for (i = 3; i >= 0; i--) {
+        var by = -16.5 + i * 11, k = i === 0 ? 0.92 : i === 3 ? 0.8 : i === 1 ? 1.05 : 1, cc = clamp(c + (a.typing ? Math.max(0, Math.sin(clock * 11 + i * 1.9 + a.side)) * 0.22 : 0), 0, 1.1);
+        var ang = 0.05 * (i - 1.5) * (1 - cc) + cc * 1.0, x1 = 49 + Math.cos(ang) * 24 * k, y1 = by + Math.sin(ang) * 24 * k; bone(ctx, 49, by, x1, y1, 9.6);
+        ang += cc * 1.25; var x2 = x1 + Math.cos(ang) * 19 * k, y2 = y1 + Math.sin(ang) * 19 * k; bone(ctx, x1, y1, x2, y2, 8.2);
+        ang += cc * 0.95; bone(ctx, x2, y2, x2 + Math.cos(ang) * 15 * k, y2 + Math.sin(ang) * 15 * k, 7); knuckle(ctx, 49, by, 3.4); knuckle(ctx, x1, y1, 3); knuckle(ctx, x2, y2, 2.6);
+      }
       ctx.restore();
     }
     function drawArms(ctx, behind) {
       rb.arms.forEach(function (a) {
         if ((a.y > deskY + 8 * Z) !== behind) return;
-        var sh = shoulder(a.side), n = NAT[a.side], up = a.side < 0 ? "armL1" : "armR1", lo = a.side < 0 ? "armL2" : "armR2";
-        if (a.y > deskY - U * 0.45) { ctx.fillStyle = "rgba(0,0,0,.4)"; ctx.beginPath(); ctx.ellipse(a.x, deskY + 2, 46 * Z, 6 * Z, 0, 0, 6.2832); ctx.fill(); }
-        piece(ctx, up, sh.x, sh.y, Math.atan2(a.ey - sh.y, a.ex - sh.x) - n.u);
-        piece(ctx, lo, a.ex, a.ey, Math.atan2(a.y - a.ey, a.x - a.ex) - n.f);
-        if (divider && a.side === 1) { ctx.save(); ctx.translate(a.x, a.y); ctx.fillStyle = metal(ctx, -4, 0, 4, 0, false); ctx.fillRect(-4, -U * 0.75, 8, U * 0.8); ctx.strokeStyle = "#05070a"; ctx.lineWidth = 1; ctx.strokeRect(-4, -U * 0.75, 8, U * 0.8); ctx.restore(); }
+        var sh = shoulder(a.side), n = NAT[a.side], up = a.side < 0 ? "armL1" : "armR1", lo = a.side < 0 ? "armL2" : "armR2", g = grip(a);
+        if (!behind && g.y > deskY - U * 0.45) { ctx.fillStyle = "rgba(0,0,0,.4)"; ctx.beginPath(); ctx.ellipse(g.x, deskY + 2, 46 * Z, 6 * Z, 0, 0, 6.2832); ctx.fill(); }
+        limb(ctx, up, sh.x, sh.y, Math.atan2(a.ey - sh.y, a.ex - sh.x), n.u, a.f || 1);
+        limb(ctx, lo, a.ex, a.ey, Math.atan2(a.y - a.ey, a.x - a.ex), n.f, a.f || 1);
+        if (divider && a.side === 1) { ctx.save(); ctx.translate(g.x, g.y); ctx.fillStyle = metal(ctx, -4, 0, 4, 0, false); ctx.fillRect(-4, -U * 0.75, 8, U * 0.8); ctx.strokeStyle = "#05070a"; ctx.lineWidth = 1; ctx.strokeRect(-4, -U * 0.75, 8, U * 0.8); ctx.restore(); }
+        hand(ctx, a, behind ? "all" : a.holding ? "front" : "all");      // when it holds a letter the palm and thumb are drawn behind the letter, see draw()
       });
     }
     function lightRgb() { return [Math.round(255 - cool * 60), Math.round(238 - heat * 125 - cool * 8), Math.round(216 - heat * 140 + cool * 39)].join(","); }
@@ -389,6 +428,7 @@
         drawLight(ctx);
         var room = ctx; ctx = mctx; ctx.clearRect(0, 0, S.W, S.H);
         ctx.save(); ctx.beginPath(); ctx.rect(0, 0, S.W, deskY + 1); ctx.clip(); drawBody(ctx); drawArms(ctx, true); ctx.restore(); drawDesk(ctx);
+        rb.arms.forEach(function (a) { if (a.holding && a.y <= deskY + 8 * Z) hand(ctx, a, "back"); });
         letters.forEach(function (l) { if (l.state === "home" || l.hidden) return; var hgt = Math.max(0, deskY - l.y), a = clamp(0.5 - hgt / 500, 0, 0.5); if (a > 0.02) { ctx.fillStyle = "rgba(0,0,0," + a.toFixed(3) + ")"; ctx.beginPath(); ctx.ellipse(l.x, deskY + 3, l.w * (0.55 + hgt / 600) * l.sc, 3.5, 0, 0, 6.2832); ctx.fill(); } });
         fx.forEach(function (f) { if (f.kind === "shock") { var k = f.t / f.life; ctx.beginPath(); ctx.ellipse(f.x, f.y + 2, S.W * 0.7 * k, U * 0.16 * k + 3, 0, 0, 6.2832); ctx.lineWidth = 3 * (1 - k) + 0.5; ctx.strokeStyle = "rgba(255,235,220," + (0.8 * (1 - k)).toFixed(3) + ")"; ctx.stroke(); } else if (f.kind === "tap") { ctx.fillStyle = "rgba(255,255,255," + (0.35 * (1 - f.t / f.life)).toFixed(3) + ")"; ctx.fillRect(f.x - 14, f.y - 1, 28, 2); } });
 
