@@ -270,7 +270,7 @@
           var t = data.tracks[n], age = f - t.s, left = t.s + t.b.length - 1 - f;
           if (age < 0 || left < 0) continue;
           var i = Math.floor(age), b = at(t, i, age - i), rgb = COLORS[t.c] || TEAL;
-          var lock = Math.min(1, age / 4), a = Math.min(lock, left / 3 + 0.001, 1), grow = 1 + (1 - lock) * (1 - lock) * 0.4;
+          var ramp = Math.min(4, t.b.length / 4), lock = Math.min(1, age / ramp), a = Math.min(lock, left / ramp + 0.001, 1), grow = 1 + (1 - lock) * (1 - lock) * 0.4;
           var w = b[2] * sc * grow, h = b[3] * sc * grow, x = ox + (b[0] + b[2] / 2) * sc - w / 2, y = oy + (b[1] + b[3] / 2) * sc - h / 2;
 
           // where it has been: the last second of the track, from the point where it meets the ground
