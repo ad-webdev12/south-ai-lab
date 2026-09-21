@@ -1,7 +1,7 @@
 /* South Artificial Intelligence Laboratory
    1. navigation
    2. join form (builds an email, preselects a group from the URL)
-   3. resources planner (progress saved in this browser)
+   3. learning path progress (saved in this browser)
    4. hero flow field */
 
 (function () {
@@ -73,6 +73,7 @@
   function joinForm() {
     var form = document.querySelector("[data-apply]");
     if (!form) return;
+    var status = form.querySelector(".fstatus");
 
     function pickGroup() {
       var m = /^#join-([a-z-]+)$/.exec(window.location.hash);
@@ -83,88 +84,84 @@
     pickGroup();
     window.addEventListener("hashchange", pickGroup);
 
-    // a project idea is only required for the Applied Research Division
+    // the project idea only matters for the Applied Research Division, so it only shows then
     var trackSel = form.querySelector('select[name="track"]');
+    var ideaWrap = form.querySelector("[data-idea]");
     var idea = form.querySelector('textarea[name="statement"]');
     function syncIdea() {
-      var chosen = trackSel.options[trackSel.selectedIndex];
-      idea.required = chosen.getAttribute("data-key") === "division";
+      var on = trackSel.options[trackSel.selectedIndex].getAttribute("data-key") === "division";
+      ideaWrap.hidden = !on;
+      idea.required = on;
     }
     trackSel.addEventListener("change", syncIdea);
     syncIdea();
 
-    form.addEventListener("submit", function (ev) {
-      ev.preventDefault();
-      if (!form.reportValidity()) return;
+    function message() {
       var d = new FormData(form);
       var v = function (k) { return (d.get(k) || "").toString().trim(); };
-      var body = [
+      var lines = [
         "Name: " + v("name"),
         "School email: " + v("email"),
         "Grade: " + v("grade"),
         "Track: " + v("track"),
-        "Group I'm interested in: " + v("group"),
-        "Experience: " + (v("experience") || "none yet"),
-        "",
-        "What I'd like to work on:",
-        v("statement") || "(left blank)"
-      ].join("\n");
-      var href = "mailto:" + LAB_EMAIL +
-        "?subject=" + encodeURIComponent("Joining SAIL: " + v("name")) +
-        "&body=" + encodeURIComponent(body);
-      var status = form.querySelector(".fstatus");
-      if (status) {
-        status.classList.add("show");
-        status.innerHTML = "Your email app should now be open with a message ready to go. <strong>Press send there to finish.</strong> " +
-          "If nothing opened, email the same details to <strong>" + LAB_EMAIL + "</strong>.";
-      }
-      window.location.href = href;
+        "Research group: " + v("group"),
+        "Experience: " + (v("experience") || "none yet")
+      ];
+      if (!ideaWrap.hidden) lines.push("", "Project idea:", v("statement"));
+      return { subject: "Joining SAIL: " + v("name"), body: lines.join("\n") };
+    }
+    function show(html) { status.classList.add("show"); status.innerHTML = html; }
+
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      if (!form.reportValidity()) return;
+      var m = message();
+      show("Your email app should now be open with the message written. <strong>Press send there to finish.</strong> " +
+           "If nothing opened, use Copy the message and email it to <strong>" + LAB_EMAIL + "</strong>.");
+      window.location.href = "mailto:" + LAB_EMAIL + "?subject=" + encodeURIComponent(m.subject) + "&body=" + encodeURIComponent(m.body);
     });
+
+    var copy = form.querySelector("[data-copy]");
+    if (copy) {
+      copy.addEventListener("click", function () {
+        if (!form.reportValidity()) return;
+        var m = message(), text = "To: " + LAB_EMAIL + "\nSubject: " + m.subject + "\n\n" + m.body;
+        var done = function () { show("Copied. Paste it into an email to <strong>" + LAB_EMAIL + "</strong>."); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { show("<pre style=\"white-space:pre-wrap;margin:0\">" + text.replace(/</g, "&lt;") + "</pre>"); });
+        else show("<pre style=\"white-space:pre-wrap;margin:0\">" + text.replace(/</g, "&lt;") + "</pre>");
+      });
+    }
   }
 
-  /* ---------------- 3. planner ---------------- */
+  /* ---------------- 3. learning path ----------------
+     Progress is one checkbox per stage (its task), not one per resource, because
+     most resources are alternatives or references. Saved in this browser only. */
   function planner() {
-    var boxes = document.querySelectorAll("input[data-res]");
+    var boxes = document.querySelectorAll("input[data-task]");
     if (!boxes.length) return;
-    var KEY = "sail-planner-v2";
-    var done = {};
+    var KEY = "sail-path-v1", done = {};
     try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { done = {}; }
-
     function save() { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} }
-
     function refresh() {
-      var total = 0, finished = 0;
-      document.querySelectorAll("[data-stage]").forEach(function (stage) {
-        var inputs = stage.querySelectorAll("input[data-res]");
-        var n = 0;
-        inputs.forEach(function (i) { if (i.checked) n++; });
-        total += inputs.length; finished += n;
-        var out = stage.querySelector("[data-stage-count]");
-        if (out) out.textContent = n + " of " + inputs.length + " done";
+      var n = 0;
+      boxes.forEach(function (b) {
+        if (b.checked) n++;
+        var title = b.closest(".stage").querySelector(".st-title");
+        if (title) title.classList.toggle("done", b.checked);
       });
-      var bar = document.querySelector("[data-progress]");
       var label = document.querySelector("[data-progress-label]");
-      if (bar) { bar.max = total; bar.value = finished; }
-      if (label) label.textContent = finished + " of " + total + " resources finished";
+      if (label) label.textContent = n + " of " + boxes.length + " stages done";
     }
-
-    boxes.forEach(function (box) {
-      var id = box.getAttribute("data-res");
-      box.checked = !!done[id];
-      box.closest("li").classList.toggle("done", box.checked);
-      box.addEventListener("change", function () {
-        if (box.checked) done[id] = 1; else delete done[id];
-        box.closest("li").classList.toggle("done", box.checked);
-        save(); refresh();
-      });
+    boxes.forEach(function (b) {
+      var id = b.getAttribute("data-task");
+      b.checked = !!done[id];
+      b.addEventListener("change", function () { if (b.checked) done[id] = 1; else delete done[id]; save(); refresh(); });
     });
-
     var reset = document.querySelector("[data-reset]");
     if (reset) {
       reset.addEventListener("click", function () {
-        done = {}; save();
-        boxes.forEach(function (b) { b.checked = false; b.closest("li").classList.remove("done"); });
-        refresh();
+        if (!Object.keys(done).length || !window.confirm("Clear your progress on all stages?")) return;
+        done = {}; save(); boxes.forEach(function (b) { b.checked = false; }); refresh();
       });
     }
     refresh();
@@ -186,7 +183,7 @@
 
     var TONES = ["152,188,234", "104,148,210", "222,134,96"];
     var WIDTHS = [1.1, 1.0, 1.5];
-    var BANDS = [0.07, 0.16, 0.30, 0.52];      // opacity from tail to head
+    var BANDS = [0.04, 0.09, 0.17, 0.30];      // opacity from tail to head
     var HIST = 40, SAMPLE = 0.085;             // 40 samples, one every 85 ms: about 3.4 s of trail
     var W = 0, H = 0, dpr = 1, t = 0, sinceSample = 0;
     var parts = [], pulses = [];
@@ -216,7 +213,7 @@
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.lineCap = "round"; ctx.lineJoin = "round";
-      var n = Math.round(Math.min(420, Math.max(160, (W * H) / 3000)));
+      var n = Math.round(Math.min(360, Math.max(70, (W * H) / 3600)));
       parts = [];
       for (var i = 0; i < n; i++) {
         var r = Math.random();

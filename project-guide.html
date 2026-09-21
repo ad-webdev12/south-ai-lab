@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>News | SAIL</title>
-<meta name="description" content="Announcements from SAIL.">
-<meta property="og:title" content="News | SAIL">
-<meta property="og:description" content="Announcements from SAIL.">
+<title>Project guide | SAIL</title>
+<meta name="description" content="Ideas, datasets, templates, and tools for a SAIL project.">
+<meta property="og:title" content="Project guide | SAIL">
+<meta property="og:description" content="Ideas, datasets, templates, and tools for a SAIL project.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,8 +24,8 @@
       <div class="navgroup" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
-      <a href="resources.html">Resources</a>
-      <a aria-current="page" href="news.html">News</a>
+      <a aria-current="page" href="resources.html">Resources</a>
+      <a href="news.html">News</a>
     </nav>
     <a class="btn btn--sm mast-join" href="join.html">Join</a>
     <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
@@ -47,24 +47,34 @@
 <main id="main">
 <section class="pagetop">
   <div class="wrap">
-    <p class="crumb"><a href="index.html">Home</a> / News</p>
-    <h1>News</h1>
-    <p class="lede">Week-to-week reminders go out on Google Classroom.</p>
+    <p class="crumb"><a href="index.html">Home</a> / <a href="resources.html">Resources</a></p>
+    <h1>Project guide</h1>
+    
   </div>
 </section>
 <section class="section">
   <div class="narrow">
-    <ul class="ann">
-      <li id="signups-2026"><time datetime="2026-09-21">September 21, 2026</time>
-        <div><h2>Sign-ups are open for 2026-27</h2><p>Sign up on the Join page, or join our Google Classroom with code selpcao. The first meeting date for 2026-27 hasn't been set yet. It will be posted here and on Classroom. After that, meetings are every other Tuesday.</p><p class="act"><a class="more" href="join.html">Sign up</a></p></div></li><li id="officers-2026"><time datetime="2026-06-02">June 2, 2026</time>
-        <div><h2>Officers announced for 2026-27</h2><p>Aarav Dey, Henna Patel, and Maushmi Miraj are co-presidents. Maahi Mehta and Shriyan Kumar are co-vice presidents, Ishan Sarda is secretary, and Jia Arora is junior officer.</p><p class="act"><a class="more" href="people.html">Meet the officers</a></p></div></li><li id="vision-workshop"><time datetime="2026-03-03">March 3, 2026</time>
-        <div><h2>Computer vision workshop</h2><p>Members trained image classifiers in the browser with Teachable Machine, then took home a challenge to find its most creative use.</p><p class="act"><a class="more" href="projects.html#teachable-machine">Teachable Machine project</a></p></div></li><li id="titanic"><time datetime="2025-11-04">November 4, 2025</time>
-        <div><h2>Teams enter the Titanic competition on Kaggle</h2><p>Members formed teams and submitted survival predictions to the public leaderboard, with prizes for the top scores.</p><p class="act"><a class="more" href="projects.html#titanic">Titanic project</a></p></div></li><li id="ai-hub"><time datetime="2025-04-08">April 8, 2025</time>
-        <div><h2>AI Hub launches</h2><p>A member-built website that collects the club's resources in one place.</p><p class="act"><a class="more" href="projects.html#ai-hub">AI Hub project</a></p></div></li><li id="mit-ll"><time datetime="2023-10-17">October 17, 2023</time>
-        <div><h2>Researchers from MIT Lincoln Laboratory visit</h2><p>Rob Seater and Kimberlee Chang spoke with members about AI research and ethics.</p></div></li><li id="cmu"><time datetime="2023-03-07">March 7, 2023</time>
-        <div><h2>Guest lecture from Carnegie Mellon</h2><p>Prof. Xhakaj of Carnegie Mellon University presented recent research and answered member questions.</p></div></li><li id="first-meeting"><time datetime="2022-09-27">September 27, 2022</time>
-        <div><h2>First meeting</h2><p>The club held its first interest meeting in Room 700B and started with Python basics.</p></div></li>
-    </ul>
+    <h2>Ideas to start from</h2>
+    <ul><li>Predict something about your own life from data you collect: sleep, screen time, or running times.</li><li>A classifier that sorts photos from your phone into categories you choose.</li><li>A model that guesses the genre of a song from its lyrics.</li><li>A study assistant that answers questions about your own class notes.</li><li>A game-playing agent for a simple game you know well.</li><li>A fairness check of a model someone else in the club built.</li></ul>
+    <h2>Find data</h2>
+      <ul class="res">
+        <li><a class="t" href="https://www.kaggle.com/datasets" rel="noopener">Kaggle Datasets</a><span class="m">Tool</span><p>The largest collection, with notebooks showing how other people used each dataset.</p></li>
+          <li><a class="t" href="https://huggingface.co/datasets" rel="noopener">Hugging Face Datasets</a><span class="m">Tool</span><p>Text, image, and audio datasets that load in one line of Python.</p></li>
+          <li><a class="t" href="https://archive.ics.uci.edu/" rel="noopener">UCI Machine Learning Repository</a><span class="m">Tool</span><p>Small, clean, classic datasets. Good for a first project.</p></li>
+          <li><a class="t" href="https://keras.io/api/datasets/" rel="noopener">Keras datasets</a><span class="m">Tool</span><p>MNIST, Fashion-MNIST, CIFAR-10, and a few more, built into Keras.</p></li>
+      </ul><h2>Share what you made</h2>
+      <ul class="res">
+        <li><a class="t" href="assets/docs/project-template.md">Project README template</a><span class="m">Template</span><p>Our one-page template: the question, the data, how to run it, results, and limits.</p></li>
+          <li><a class="t" href="https://docs.github.com/en/get-started/start-your-journey/hello-world" rel="noopener">GitHub: Hello World</a><span class="m">Article, about 30 minutes</span><p>Make your first repository.</p></li>
+          <li><a class="t" href="https://www.gradio.app/" rel="noopener">Gradio</a><span class="m">Tool</span><p>Turn a Python function into a web demo with a few lines of code.</p></li>
+          <li><a class="t" href="https://streamlit.io/" rel="noopener">Streamlit</a><span class="m">Tool</span><p>Build a small data app in Python.</p></li>
+          <li><a class="t" href="https://huggingface.co/spaces" rel="noopener">Hugging Face Spaces</a><span class="m">Tool</span><p>Free hosting for Gradio and Streamlit demos.</p></li>
+      </ul><h2>Check your model</h2>
+      <p>Before you present, find out who your model works badly for, and write it down.</p><ul class="res">
+        <li><a class="t" href="https://www.kaggle.com/code/var0101/model-cards" rel="noopener">Model Cards</a><span class="m">Tutorial, about 20 minutes</span><p>A Kaggle tutorial on what a model card is and what goes in one.</p></li>
+          <li><a class="t" href="https://www.kaggle.com/learn/intro-to-ai-ethics" rel="noopener">Kaggle Learn: Intro to AI Ethics</a><span class="m">Course, about 4 hours</span><p>Lessons with exercises on spotting bias and measuring fairness.</p></li>
+          <li><a class="t" href="https://pair.withgoogle.com/explorables/" rel="noopener">AI Explorables</a><span class="m">Interactive, about 1 hour</span><p>Interactive essays from Google on fairness, bias in datasets, and how models fail.</p></li>
+      </ul>
   </div>
 </section>
 </main>

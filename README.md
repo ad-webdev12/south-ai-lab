@@ -4,7 +4,7 @@ Website for the AI and machine learning club at High School South.
 Live at https://ad-webdev12.github.io/south-ai-lab/ once GitHub Pages is switched on
 (Settings, Pages, deploy from branch `main`, folder `/ (root)`).
 
-Thirteen static pages, no framework, no dependencies, no build step on the server.
+Eighteen static pages, no framework, no dependencies, no build step on the server.
 
 ```
 build.py             page copy, templates, and the build checks
@@ -12,7 +12,7 @@ resources_data.py    everything on the Resources page: plan, learning planner, r
 *.html               generated output (committed, so GitHub Pages serves it directly)
 assets/css/site.css  styles
 assets/js/site.js    navigation, join form, planner progress, home hero animation
-assets/js/heroes.js  one live animation per research group page
+assets/js/demos.js   one teaching demo per research group page
 assets/img/          figures and project photos
 assets/docs/         the project README template that Resources links to
 ```
@@ -71,8 +71,8 @@ check each one:
 
 1. **Contact email** in `assets/js/site.js` is a placeholder.
 2. **School name** in `SITE["school"]`.
-3. **Meeting rhythm.** The site says every Tuesday, 3:00 to 4:00 PM, Room 700F. "Every Tuesday" and the
-   room come from the August 2026 officers post on Instagram. The time comes from last year's announcements.
+3. **Meeting rhythm.** The site says every other Tuesday, 3:00 to 4:00 PM, Room 700F. Note that the
+   August 2026 officers post on Instagram says "every Tuesday", so one of the two needs correcting.
 4. **First meeting date.** The top news item says it will be posted. Put the real date in.
 5. **Group timing.** The site says Applied Research teams work with their group from October and
    Foundations members join group activities in the second semester. That is a policy decision,
@@ -94,25 +94,29 @@ paused for visitors who ask for reduced motion, and rebuilds itself when the her
 Tuning lives at the top of `hero()` in `site.js`: particle count in `build()`, trail length in
 `HIST` and `SAMPLE`, pointer strength in `advance()`.
 
-## Research group heroes
+## Research group demos
 
-Each group page opens with an animation that runs the method the group studies. They live in
-`assets/js/heroes.js` and share one harness for sizing, the pointer, pausing, and reduced motion.
+Each group page has one demo in its own block below the page title, in `assets/js/demos.js`.
+Every demo has a visible instruction, real buttons or a slider (so it works with a keyboard or a
+finger), Reset and Pause, a legend, and a text readout under the plot, because the canvas itself
+is hidden from screen readers. The copy for each demo is in `DEMOS` in `build.py`.
 
 | Group | What runs |
 | --- | --- |
-| Applied Data Science | A kernel classifier (RBF) refit every frame. The pointer is an extra training point, so the boundary bends around it. Click to leave a point. |
-| Computer Vision | A 3 by 3 convolution sliding over three real MNIST digits. |
-| Natural Language Processing | Attention weights between the words of a sentence, drawn as arcs. The weights are illustrative, and the page says so. |
-| Neural Networks | Gradient descent with momentum on a loss surface. Click to restart from a point. |
-| Agents and RL | Tabular Q-learning in a gridworld. Click a square to move the goal. |
-| AI, Ethics and Society | One approval threshold applied to two groups with different score distributions. |
+| Applied Data Science | A support vector classifier (RBF kernel), refit whenever a point is added. |
+| Computer Vision | A 3 by 3 convolution over three real MNIST digits, with a filter picker and a step button. |
+| Natural Language Processing | Attention arcs. The weights are illustrative and the block says so in its title. |
+| Neural Networks | Gradient descent with momentum on a loss surface, with a loss history chart. |
+| Agents and RL | Tabular Q-learning in a gridworld. |
+| AI, Ethics and Society | One approval threshold on two simulated groups, with a slider and a note on what the gap does and does not show. |
 
-## Officer photos
+## People page
 
-The portraits in `assets/img/people/` are cropped from the club's own officers post on Instagram
-(August 24, 2026), and the favorite food, hobbies, and favorite LLM lines come from the same post.
-To replace one, drop a square JPG with the same file name.
+Portraits in `assets/img/people/` are cropped from the club's own officers post on Instagram.
+The one-line descriptions in `TEAM` come from the club's record (past roles, things built for the
+club). They were deliberately not researched from LinkedIn or the wider web: the officers are
+students, and what is said about each of them publicly should be their call. Ask each officer for
+a sentence in their own words and replace the line in `TEAM`.
 
 ## Where the learning resources came from
 

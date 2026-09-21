@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading group | SAIL</title>
+<meta name="description" content="A seven-session reading plan on fairness, safety, and AI policy.">
+<meta property="og:title" content="Reading group | SAIL">
+<meta property="og:description" content="A seven-session reading plan on fairness, safety, and AI policy.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <div class="wrap masthead-in">
+    <a class="brand" href="index.html" aria-label="South Artificial Intelligence Laboratory, home"><svg viewBox="0 0 34 30" fill="none" aria-hidden="true"><path d="M18.2 0c6.9 5.4 10.8 12.1 11.4 20.2H18.2V0z" fill="#fff"/><path d="M15.4 4.9v15.3H4.7C6.7 14 10.3 8.9 15.4 4.9z" fill="#8fb4ff"/><path d="M2 23.2h30c-1.1 3.5-4.2 5.3-8.4 5.3H10.4c-4.2 0-7.3-1.8-8.4-5.3z" fill="#fff"/></svg><span class="brand-text"><b>SAIL</b><span>South AI Lab</span></span></a>
+    <nav class="mainnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <div class="navgroup" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
+      <a href="projects.html">Projects</a>
+      <a href="people.html">People</a>
+      <a aria-current="page" href="resources.html">Resources</a>
+      <a href="news.html">News</a>
+    </nav>
+    <a class="btn btn--sm mast-join" href="join.html">Join</a>
+    <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+  <nav class="drawer" data-drawer aria-label="Mobile">
+    <div class="wrap">
+      <a href="index.html">Home</a>
+      <details><summary>Research</summary><a href="research.html">Compare all groups</a><a href="data-science.html">Applied Data Science</a><a href="vision.html">Computer Vision</a><a href="nlp.html">Natural Language Processing</a><a href="neural-networks.html">Neural Networks</a><a href="agents.html">Agents and Reinforcement Learning</a><a href="society.html">AI, Ethics and Society</a></details>
+      <a href="projects.html">Projects</a>
+      <a href="people.html">People</a>
+      <a href="resources.html">Resources</a>
+      <a href="news.html">News</a>
+      <a href="join.html">Join</a>
+    </div>
+  </nav>
+</header>
+<main id="main">
+<section class="pagetop">
+  <div class="wrap">
+    <p class="crumb"><a href="index.html">Home</a> / <a href="resources.html">Resources</a></p>
+    <h1>Reading group</h1>
+    <p class="lede">A seven-session plan for the AI, Ethics and Society group.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="narrow">
+    <p>Adapted from a university AI Safety Fundamentals (AISF) reading-group syllabus, shortened for a high school group. Maintained by the SAIL officers. Last reviewed September 2026. This field moves quickly, so check dates on anything you cite.</p>
+    <p>Required material takes about half an hour per session. In discussion, try to separate three things: what was measured, how someone interpreted it, and what they predict will happen next.</p>
+    <section class="session">
+        <h2>Session 1: Fairness and bias in systems that exist now</h2>
+        <p><strong>By the end you can:</strong> explain two ways a model can treat groups differently, and why fixing one can break another.</p>
+        <h3>Required</h3>
+        <ul class="res"><li><a class="t" href="https://pair.withgoogle.com/explorables/measuring-fairness/" rel="noopener">AI Explorables: Measuring Fairness</a><span class="m">Interactive, about 20 minutes</span><p>An interactive walk through why different fairness measures disagree.</p></li>
+          <li><a class="t" href="https://www.kaggle.com/learn/intro-to-ai-ethics" rel="noopener">Kaggle Learn: Identifying Bias in AI</a><span class="m">Course, lesson 3</span><p>Six kinds of bias, with an exercise on a comment-moderation model.</p></li></ul>
+        
+        <p><strong>Discuss:</strong> Pick one example from the reading. What was measured, and what was inferred from it?</p>
+      </section><section class="session">
+        <h2>Session 2: Where AI is headed</h2>
+        <p><strong>By the end you can:</strong> describe what is driving current progress, and separate measured trends from forecasts.</p>
+        <h3>Required</h3>
+        <ul class="res"><li><a class="t" href="https://metr.org/time-horizons/" rel="noopener">Task-Completion Time Horizons</a><span class="m">Article, about 10 minutes</span><p>METR measures how long a task AI systems can finish on their own, and how that number has changed.</p></li>
+          <li><a class="t" href="https://epoch.ai/blog/can-ai-scaling-continue-through-2030" rel="noopener">Can AI scaling continue through 2030?</a><span class="m">Article, about 10 minutes</span><p>Read the summary: what could limit progress, from power to chips to data.</p></li></ul>
+        <h3>Optional</h3><ul class="res"><li><a class="t" href="https://epoch.ai/trends" rel="noopener">Trends in Artificial Intelligence</a><span class="m">Interactive, about 15 minutes</span><p>Epoch AI's charts of the computing power, data, and money going into AI.</p></li></ul>
+        <p><strong>Discuss:</strong> Which claims in these readings are measurements, and which are predictions?</p>
+      </section><section class="session">
+        <h2>Session 3: When a system does what you said, not what you meant</h2>
+        <p><strong>By the end you can:</strong> explain the gap between a goal and the measurable stand-in used to train for it.</p>
+        <h3>Required</h3>
+        <ul class="res"><li><a class="t" href="https://deepmind.google/blog/specification-gaming-the-flip-side-of-ai-ingenuity/" rel="noopener">Specification gaming</a><span class="m">Article, about 15 minutes</span><p>Google DeepMind's collection of AI systems that found loopholes in their instructions.</p></li>
+          <li><a class="t" href="https://openai.com/blog/instruction-following/" rel="noopener">Aligning language models to follow instructions</a><span class="m">Article, about 15 minutes</span><p>How OpenAI used human feedback to make GPT-3 follow instructions.</p></li></ul>
+        <h3>Optional</h3><ul class="res"><li><a class="t" href="https://www.planned-obsolescence.org/the-training-game/" rel="noopener">Playing the training game</a><span class="m">Article, about 20 minutes</span><p>An argument that training on human approval can reward looking good over being good.</p></li></ul>
+        <p><strong>Discuss:</strong> Find an example from school or sports where people optimized the measurement. How is the AI case similar?</p>
+      </section><section class="session">
+        <h2>Session 4: When a model learns the wrong goal</h2>
+        <p><strong>By the end you can:</strong> describe how a model can pass its tests and still behave differently later.</p>
+        <h3>Required</h3>
+        <ul class="res"><li><a class="t" href="https://www.youtube.com/watch?v=bJLcIBixGj8" rel="noopener">The other AI alignment problem: mesa-optimizers</a><span class="m">Video, about 23 minutes</span><p>Robert Miles explains how a trained model can end up with a goal that differs from the one it was trained on.</p></li>
+          <li><a class="t" href="https://www.anthropic.com/research/alignment-faking" rel="noopener">Alignment faking in large language models</a><span class="m">Article, about 15 minutes</span><p>An Anthropic experiment where a model behaved differently when it believed it was being trained.</p></li></ul>
+        
+        <p><strong>Discuss:</strong> What did the alignment faking experiment show, and what does it not show about models in ordinary use?</p>
+      </section><section class="session">
+        <h2>Session 5: How worried should we be?</h2>
+        <p><strong>By the end you can:</strong> state the strongest version of the concern and of the skeptical reply.</p>
+        <h3>Required</h3>
+        <ul class="res"><li><a class="t" href="https://www.youtube.com/watch?v=ZeecOKBus3Q" rel="noopener">Why would AI want to do bad things? Instrumental convergence</a><span class="m">Video, about 10 minutes</span><p>Robert Miles on why many different goals lead a capable system to seek resources and avoid being shut off.</p></li>
+          <li><a class="t" href="https://www.normaltech.ai/p/a-guide-to-understanding-ai-as-normal" rel="noopener">A guide to understanding AI as normal technology</a><span class="m">Article, about 10 minutes</span><p>Two Princeton researchers argue that AI will spread slowly, the way earlier technologies did. Read the section called A restatement of our thesis.</p></li></ul>
+        <h3>Optional</h3><ul class="res"><li><a class="t" href="https://safe.ai/work/statement-on-ai-risk" rel="noopener">Statement on AI Risk</a><span class="m">Article, about 2 minutes</span><p>A one-sentence statement from the Center for AI Safety. Read the claim and ask what evidence would support it.</p></li></ul>
+        <p><strong>Discuss:</strong> Where do the two readings disagree about evidence, and where do they disagree about predictions?</p>
+      </section><section class="session">
+        <h2>Session 6: Looking inside models</h2>
+        <p><strong>By the end you can:</strong> describe one finding from interpretability research and what it lets researchers check.</p>
+        <h3>Required</h3>
+        <ul class="res"><li><a class="t" href="https://www.anthropic.com/research/tracing-thoughts-language-model" rel="noopener">Tracing the thoughts of a large language model</a><span class="m">Article, about 15 minutes</span><p>Anthropic researchers look inside a model as it plans a rhyme, does arithmetic, and makes something up.</p></li></ul>
+        <h3>Optional</h3><ul class="res"><li><a class="t" href="https://www.youtube.com/watch?v=0pgEMWy70Qk" rel="noopener">Using dangerous AI, but safely?</a><span class="m">Video, about 30 minutes</span><p>Robert Miles explains AI control: getting useful work out of a model you don't fully trust.</p></li></ul>
+        <p><strong>Discuss:</strong> What would you want to be able to see inside a model before trusting it with a decision about you?</p>
+      </section><section class="session">
+        <h2>Session 7: Rules and laws</h2>
+        <p><strong>By the end you can:</strong> name three things a government can do about AI and one drawback of each.</p>
+        <h3>Required</h3>
+        <ul class="res"><li><a class="t" href="https://adamjones.me/blog/ai-regulator-toolbox/" rel="noopener">The AI regulator's toolbox</a><span class="m">Article, about 20 minutes</span><p>A list of the things governments can do about AI. Pick three tools and read the pros and cons of each.</p></li></ul>
+        <h3>Optional</h3><ul class="res"><li><a class="t" href="https://www.governance.ai/analysis/computing-power-and-the-governance-of-ai" rel="noopener">Computing power and the governance of AI</a><span class="m">Article, about 15 minutes</span><p>Why the chips used to train AI are one of the few things regulators can track.</p></li></ul>
+        <p><strong>Discuss:</strong> Which of these tools would have mattered for a project built in this club?</p>
+      </section>
+  </div>
+</section>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="index.html" aria-label="South Artificial Intelligence Laboratory, home"><svg viewBox="0 0 34 30" fill="none" aria-hidden="true"><path d="M18.2 0c6.9 5.4 10.8 12.1 11.4 20.2H18.2V0z" fill="#fff"/><path d="M15.4 4.9v15.3H4.7C6.7 14 10.3 8.9 15.4 4.9z" fill="#8fb4ff"/><path d="M2 23.2h30c-1.1 3.5-4.2 5.3-8.4 5.3H10.4c-4.2 0-7.3-1.8-8.4-5.3z" fill="#fff"/></svg><span class="brand-text"><b>SAIL</b><span>South AI Lab</span></span></a>
+        <p>South Artificial Intelligence Laboratory, the AI and machine learning club at High School South.</p>
+      </div>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="research.html">Research groups</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="people.html">People</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="join.html">Join SAIL</a></li>
+          <li><a href="#" data-email>Email us</a></li>
+          <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
+          <li>Google Classroom: selpcao</li>
+        </ul>
+      </div>
+    </div>
+    <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
+  </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
