@@ -3,156 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Research | SAIL</title>
-<meta name="description" content="Six research groups covering language, vision, neural network foundations, agents, applied data science, and ethics.">
-<meta property="og:title" content="Research | South Artificial Intelligence Laboratory">
-<meta property="og:description" content="Six research groups covering language, vision, neural network foundations, agents, applied data science, and ethics.">
+<title>Research groups | SAIL</title>
+<meta name="description" content="Compare SAIL's six research groups and find the one that fits you.">
+<meta property="og:title" content="Research groups | SAIL">
+<meta property="og:description" content="Compare SAIL's six research groups and find the one that fits you.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.6"/><path d="M6 16.5c3.4 0 4.2-9 7-9 2.2 0 2.6 5 5 5" stroke="#b4532a" stroke-width="1.7"/></svg><b>SAIL</b><span>High School South</span></a>
-    <nav class="mainnav">
-      <a href="index.html">Home</a>
-      <div class="navgroup on"><button aria-haspopup="true">Research <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul><li><a href="research.html">Overview of all groups</a></li><li><a href="nlp.html">G-01 &nbsp; Natural Language Processing</a></li><li><a href="vision.html">G-02 &nbsp; Computer Vision</a></li><li><a href="neural-systems.html">G-03 &nbsp; Neural Systems</a></li><li><a href="agents.html">G-04 &nbsp; Agents and RL</a></li><li><a href="data-science.html">G-05 &nbsp; Applied Data Science</a></li><li><a href="society.html">G-06 &nbsp; AI, Ethics and Society</a></li></ul></div>
+    <a class="brand" href="index.html"><b>SAIL</b><span>High School South</span></a>
+    <nav class="mainnav" aria-label="Main">
+      <div class="navgroup on" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
     </nav>
-    <button class="navtoggle" data-navtoggle aria-label="Menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <a class="btn btn--light btn--sm mast-join" href="join.html">Join</a>
+    <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
-  <div class="drawer" data-drawer>
+  <nav class="drawer" data-drawer aria-label="Mobile">
     <div class="wrap">
       <a href="index.html">Home</a>
-      <a href="research.html">Research overview</a>
-      <p class="lbl">Groups</p>
-      <a class="sub" href="nlp.html">G-01 &nbsp; Natural Language Processing</a>
-      <a class="sub" href="vision.html">G-02 &nbsp; Computer Vision</a>
-      <a class="sub" href="neural-systems.html">G-03 &nbsp; Neural Systems</a>
-      <a class="sub" href="agents.html">G-04 &nbsp; Agents and RL</a>
-      <a class="sub" href="data-science.html">G-05 &nbsp; Applied Data Science</a>
-      <a class="sub" href="society.html">G-06 &nbsp; AI, Ethics and Society</a>
-      <p class="lbl">More</p>
+      <details><summary>Research</summary><a href="research.html">Compare all groups</a><a href="data-science.html">Applied Data Science</a><a href="vision.html">Computer Vision</a><a href="nlp.html">Natural Language Processing</a><a href="neural-networks.html">Neural Networks</a><a href="agents.html">Agents and Reinforcement Learning</a><a href="society.html">AI, Ethics and Society</a></details>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
+      <a href="join.html">Join SAIL</a>
     </div>
-  </div>
+  </nav>
 </header>
-<main>
+<main id="main">
 <section class="pagetop">
   <div class="wrap">
-    <p class="crumb"><a href="index.html">SAIL</a> / Research</p>
-    <h1>Six research groups</h1>
-    <p class="lede">Each group owns a subject area, a reading list, and its own projects. Members join a group after their first term and can move between groups at the start of a semester.</p>
+    <p class="crumb"><a href="index.html">Home</a> / Research</p>
+    <h1>Research groups</h1>
+    <p class="lede">Each group focuses on one area of AI. Use this page to compare them, then open a group to see what its members make.</p>
   </div>
 </section>
 <section class="section">
   <div class="wrap">
-    <div class="h-rule"><h2>Groups</h2></div>
-    <div class="arealist">
-    <div class="arearow">
-      <div class="code">G-01</div>
-      <div>
-        <h3><a href="nlp.html">Natural Language Processing</a></h3>
-        <p>How text is represented numerically, what sequence models learn from it, and how to judge output that has no single right answer.</p>
-      </div>
-      <div class="topics">Tokenization and text cleaning; Bag of words, TF-IDF, and what they throw away; Word and sentence embeddings</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-02</div>
-      <div>
-        <h3><a href="vision.html">Computer Vision</a></h3>
-        <p>Convolutional models on image data, from a first classifier trained in a browser to controlled experiments on standard datasets.</p>
-      </div>
-      <div class="topics">Image preprocessing, normalization, and augmentation; Convolution, pooling, and network depth; Transfer learning on small datasets</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-03</div>
-      <div>
-        <h3><a href="neural-systems.html">Neural Systems</a></h3>
-        <p>What a network is doing underneath the framework call: gradients, optimizers, and the mathematics each of them needs.</p>
-      </div>
-      <div class="topics">The perceptron and the forward pass; Loss functions and gradient descent; Backpropagation worked through by hand</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-04</div>
-      <div>
-        <h3><a href="agents.html">Agents and Reinforcement Learning</a></h3>
-        <p>Systems that take actions rather than return one prediction. New for the 2026 to 2027 year.</p>
-      </div>
-      <div class="topics">States, actions, rewards, and discounting; Q-learning in gridworlds; Exploration against exploitation</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-05</div>
-      <div>
-        <h3><a href="data-science.html">Applied Data Science</a></h3>
-        <p>Tabular data, feature engineering, and competition work. The usual starting point for new members.</p>
-      </div>
-      <div class="topics">Loading and cleaning data with pandas; Missing values, encoding, and scaling; Train and test splits, and cross-validation</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-06</div>
-      <div>
-        <h3><a href="society.html">AI, Ethics and Society</a></h3>
-        <p>Fairness, documentation, and the arguments about deployment, run as work with written output rather than open discussion.</p>
-      </div>
-      <div class="topics">Error rates compared across groups within a dataset; What a dataset does not contain, and who that affects; Short model documentation for released work</div>
-    </div>
-    </div>
+    <table class="compare">
+      <thead><tr><th scope="col">Group</th><th scope="col">What members make</th><th scope="col">Experience needed</th></tr></thead>
+      <tbody>
+        <tr>
+          <th scope="row"><a href="data-science.html">Applied Data Science</a> <span class="badge">Start here</span></th>
+          <td data-l="What members make">Charts, prediction models, Kaggle entries</td>
+          <td data-l="Experience needed">None</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="vision.html">Computer Vision</a></th>
+          <td data-l="What members make">Image classifiers, webcam demos</td>
+          <td data-l="Experience needed">A little Python</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="nlp.html">Natural Language Processing</a></th>
+          <td data-l="What members make">Text classifiers, similarity search, small chatbots</td>
+          <td data-l="Experience needed">Some Python</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="neural-networks.html">Neural Networks</a></th>
+          <td data-l="What members make">A network from scratch, training experiments</td>
+          <td data-l="Experience needed">Algebra II</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="agents.html">Agents and Reinforcement Learning</a></th>
+          <td data-l="What members make">Game-playing agents, tool-using assistants</td>
+          <td data-l="Experience needed">Confident Python</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="society.html">AI, Ethics and Society</a></th>
+          <td data-l="What members make">Fairness checks, model cards, discussions</td>
+          <td data-l="Experience needed">None</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
 <section class="section section--soft">
   <div class="wrap split">
     <div class="prose">
-      <div class="h-rule"><h2>How a project runs</h2></div>
-      <p>Projects in the Applied Research Division follow the same four steps.</p>
-      <dl class="deflist">
-        <dt>1. Proposal</dt>
-        <dd>One page: the question, the data, what will be measured, and what result would count as a failure. A director signs off before the work starts.</dd>
-        <dt>2. Build</dt>
-        <dd>Four to six weeks in a shared repository, with a short progress check at each meeting so that problems come up early.</dd>
-        <dt>3. Review</dt>
-        <dd>A presentation to the lab, followed by questions. Reviewers usually ask whether another member could rerun the work and whether the measurement answers the original question.</dd>
-        <dt>4. Record</dt>
-        <dd>A short writeup kept with the code, including what did not work. Projects that do not reach a result are written up as well.</dd>
-      </dl>
+      <h2>How groups work</h2>
+      <p>The groups are new for 2026-27. Past sessions listed on a group page were whole-club meetings on that topic.</p>
+      <p>You can name a group when you sign up, and you can switch whenever you like. Applied Research teams work with their group from October. Foundations members join their group's activities in the second semester, once the fall sessions have covered the basics.</p>
+      <h2>Project requirements</h2>
+      <p>Every Applied Research project finishes with the same four things.</p>
+      <ul class="checks">
+        <li>Share your code with setup instructions.</li>
+        <li>Choose how you will evaluate the project before running experiments.</li>
+        <li>Summarize your results and limitations in a one-page report.</li>
+        <li>Present your work in ten minutes and answer questions.</li>
+      </ul>
+      <p><a class="more" href="resources.html#build">Project template and tools</a></p>
     </div>
-    <aside>
-      <div class="factbox">
-        <h4>What a finished project has</h4>
-        <dl>
-          <dt>Code</dt><dd>In a repository, with instructions</dd>
-          <dt>A measurement</dt><dd>Chosen before results are seen</dd>
-          <dt>A writeup</dt><dd>One page, including limitations</dd>
-          <dt>A presentation</dt><dd>Ten minutes, plus questions</dd>
-        </dl>
-        <div class="act"><a class="btn btn--wide" href="projects.html">See past projects</a></div>
-      </div>
+    <aside class="side">
+      <h2>Not sure which group?</h2>
+      <p class="small" style="color:var(--ink-2)">Start with Applied Data Science. It covers the skills every other group builds on, and you can move later.</p>
+      <a class="btn btn--sm" href="data-science.html">See Applied Data Science</a>
     </aside>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <div class="h-rule"><h2>Visitors</h2><span class="right">Invited talks</span></div>
-    <p class="lede" style="margin-bottom:22px">Researchers from outside the school have spoken to the lab and taken questions from members.</p>
-    <ul class="itemlist">
-      <li><span class="when">October 2023</span><div><h4>Rob Seater and Kimberlee Chang, MIT Lincoln Laboratory</h4><p>A session on applied research at Lincoln Laboratory and on the ethics of automated systems. Members submitted questions in advance and the session was built around them.</p></div></li>
-      <li><span class="when">March 2023</span><div><h4>Prof. F. Xhakaj, Carnegie Mellon University</h4><p>A talk on university research in intelligent learning systems, followed by questions collected from members through a form beforehand.</p></div></li>
+    <div class="section-head"><h2>Guest speakers</h2></div>
+    <ul class="dated">
+      <li><span class="when">Oct 17, 2023</span><div><h3>Rob Seater and Kimberlee Chang, MIT Lincoln Laboratory</h3><p>Talked about AI research at Lincoln Laboratory and answered member questions about AI ethics.</p></div></li>
+      <li><span class="when">Mar 7, 2023</span><div><h3>Prof. Xhakaj, Carnegie Mellon University</h3><p>Presented recent research projects and took questions that members sent in ahead of time.</p></div></li>
     </ul>
   </div>
 </section>
@@ -161,37 +129,30 @@
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <h5>SAIL</h5>
-        <p class="foot-about">South Artificial Intelligence Laboratory, the machine learning laboratory at High School South, running since 2022. Meetings are Tuesdays, 3:00 to 4:00 PM in Room 700F.</p>
+        <p class="foot-name">South Artificial Intelligence Laboratory</p>
+        <p>The AI and machine learning club at High School South. Every other Tuesday, 3 to 4 PM, Room 700F.</p>
       </div>
-      <div class="foot-col">
-        <h5>Research</h5>
-        <a href="nlp.html">Natural Language Processing</a>
-        <a href="vision.html">Computer Vision</a>
-        <a href="neural-systems.html">Neural Systems</a>
-        <a href="agents.html">Agents and RL</a>
-        <a href="data-science.html">Applied Data Science</a>
-        <a href="society.html">AI, Ethics and Society</a>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="research.html">Research groups</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="people.html">People</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
       </div>
-      <div class="foot-col">
-        <h5>Lab</h5>
-        <a href="projects.html">Projects</a>
-        <a href="people.html">People</a>
-        <a href="resources.html">Resources</a>
-        <a href="news.html">News</a>
-      </div>
-      <div class="foot-col">
-        <h5>Contact</h5>
-        <a href="join.html">Join the lab</a>
-        <a href="#" data-email>contact</a>
-        <a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a>
+      <div>
+        <h2>Get in touch</h2>
+        <ul>
+          <li><a href="join.html">Join SAIL</a></li>
+          <li><a href="#" data-email>Email us</a></li>
+          <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
+          <li>Google Classroom: selpcao</li>
+        </ul>
       </div>
     </div>
-    <div class="foot-bot">
-      <span>&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory</span>
-      <span>Google Classroom code: selpcao</span>
-      <span>Room 700F &middot; Tuesdays, 3:00 to 4:00 PM</span>
-    </div>
+    <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
   </div>
 </footer>
 <script src="assets/js/site.js"></script>

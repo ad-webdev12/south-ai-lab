@@ -4,96 +4,95 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agents and Reinforcement Learning | SAIL</title>
-<meta name="description" content="Systems that take actions rather than return one prediction. New for the 2026 to 2027 year.">
-<meta property="og:title" content="Agents and Reinforcement Learning | South Artificial Intelligence Laboratory">
-<meta property="og:description" content="Systems that take actions rather than return one prediction. New for the 2026 to 2027 year.">
+<meta name="description" content="Make programs that learn by trial and error, and AI assistants that can use tools.">
+<meta property="og:title" content="Agents and Reinforcement Learning | SAIL">
+<meta property="og:description" content="Make programs that learn by trial and error, and AI assistants that can use tools.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.6"/><path d="M6 16.5c3.4 0 4.2-9 7-9 2.2 0 2.6 5 5 5" stroke="#b4532a" stroke-width="1.7"/></svg><b>SAIL</b><span>High School South</span></a>
-    <nav class="mainnav">
-      <a href="index.html">Home</a>
-      <div class="navgroup on"><button aria-haspopup="true">Research <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul><li><a href="research.html">Overview of all groups</a></li><li><a href="nlp.html">G-01 &nbsp; Natural Language Processing</a></li><li><a href="vision.html">G-02 &nbsp; Computer Vision</a></li><li><a href="neural-systems.html">G-03 &nbsp; Neural Systems</a></li><li><a href="agents.html">G-04 &nbsp; Agents and RL</a></li><li><a href="data-science.html">G-05 &nbsp; Applied Data Science</a></li><li><a href="society.html">G-06 &nbsp; AI, Ethics and Society</a></li></ul></div>
+    <a class="brand" href="index.html"><b>SAIL</b><span>High School South</span></a>
+    <nav class="mainnav" aria-label="Main">
+      <div class="navgroup on" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
     </nav>
-    <button class="navtoggle" data-navtoggle aria-label="Menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <a class="btn btn--light btn--sm mast-join" href="join.html">Join</a>
+    <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
-  <div class="drawer" data-drawer>
+  <nav class="drawer" data-drawer aria-label="Mobile">
     <div class="wrap">
       <a href="index.html">Home</a>
-      <a href="research.html">Research overview</a>
-      <p class="lbl">Groups</p>
-      <a class="sub" href="nlp.html">G-01 &nbsp; Natural Language Processing</a>
-      <a class="sub" href="vision.html">G-02 &nbsp; Computer Vision</a>
-      <a class="sub" href="neural-systems.html">G-03 &nbsp; Neural Systems</a>
-      <a class="sub" href="agents.html">G-04 &nbsp; Agents and RL</a>
-      <a class="sub" href="data-science.html">G-05 &nbsp; Applied Data Science</a>
-      <a class="sub" href="society.html">G-06 &nbsp; AI, Ethics and Society</a>
-      <p class="lbl">More</p>
+      <details><summary>Research</summary><a href="research.html">Compare all groups</a><a href="data-science.html">Applied Data Science</a><a href="vision.html">Computer Vision</a><a href="nlp.html">Natural Language Processing</a><a href="neural-networks.html">Neural Networks</a><a href="agents.html">Agents and Reinforcement Learning</a><a href="society.html">AI, Ethics and Society</a></details>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
+      <a href="join.html">Join SAIL</a>
     </div>
-  </div>
+  </nav>
 </header>
-<main>
+<main id="main">
 <section class="pagetop">
   <div class="wrap">
-    <p class="crumb"><a href="index.html">SAIL</a> / <a href="research.html">Research</a> / G-04</p>
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>Agents and Reinforcement Learning</h1>
-    <p class="lede">Systems that take actions rather than return one prediction. New for the 2026 to 2027 year.</p>
+    <p class="sub">Trial-and-error learning, and assistants that use tools</p><p class="lede">This group covers two related topics. Reinforcement learning is how a program learns by trial and error, the way game-playing AIs do. Agents are language models that can take actions, such as searching the web or running code, to finish a task.</p>
   </div>
 </section>
 <section class="section">
   <div class="wrap split">
     <div class="prose">
-      <p>This is a new group. It was added because the questions members asked during the language model sessions were mostly about systems that do things: models that call tools, take several steps, and are judged on whether the task got finished.</p><p>The reinforcement learning side starts in environments small enough that the right answer can be worked out by hand, so that a learned policy can be checked against it. The applied side builds small tool-using programs around a language model and keeps a log of where the multi-step plans break.</p>
+      
+      <h2>What you'll learn and build</h2>
+      <ul class="checks"><li>A program that learns to solve a maze through trial and error</li><li>A game-playing agent trained in Gymnasium</li><li>An AI assistant that uses tools such as search or a calculator</li><li>A set of test tasks that checks if an agent really finishes the job</li></ul>
 
-      <h3>What the group covers</h3>
-      <ul><li>States, actions, rewards, and discounting</li><li>Q-learning in gridworlds</li><li>Exploration against exploitation</li><li>Language models calling tools</li><li>Breaking a task into steps, and keeping track of them</li><li>Writing a repeatable task set so changes can be compared</li></ul>
+      <h2>Experience needed</h2>
+      <p>You should be comfortable writing and debugging Python on your own.</p>
 
-      <h3>Sessions and work so far</h3>
-      <ul class="itemlist">
-      <li><span class="when">March 2026</span><div><p>Members reviewed current industry work on agent systems and brought questions to the following session.</p></div></li>
-      <li><span class="when">2026</span><div><p>Group proposed and approved for the 2026 to 2027 year.</p></div></li>
+      <h2>This year</h2>
+      <div class="planned">
+        <span class="tag">Planned for 2026-27</span>
+        <ul><li>A gridworld Q-learning lab</li><li>A small assistant that uses tools, with a log of where it gets stuck</li><li>A fixed set of tasks for comparing two agent designs</li></ul>
+      </div>
+
+      <h2>Past sessions and work</h2>
+      <ul class="dated">
+        <li><span class="when">Mar 17, 2026</span><div><p>An officer shared the agentic AI sections of NVIDIA's GTC 2026 keynote on Classroom as optional viewing.</p><p class="linkrow"><span><a href="https://www.youtube.com/watch?v=jw_o0xr8MWU" rel="noopener">Keynote video</a></span></p></div></li>
       </ul>
 
-      <h3>Planned for this year</h3>
-      <ul><li>A gridworld Q-learning lab that members implement themselves.</li><li>A small tool-using assistant with a written log of its failures.</li><li>A fixed set of tasks used to compare two agent designs.</li></ul>
-
-      <h3>Reading</h3>
-      <ol class="refs"><li>Sutton and Barto, <i>Reinforcement Learning: An Introduction</i>, chapters 3 through 6 (free online).</li><li>Yao et al., <i>ReAct: Synergizing Reasoning and Acting in Language Models</i> (2022).</li></ol>
+      <h2>Learning resources</h2>
+      <ul class="res res--plain">
+        <li><div><a class="t" href="https://huggingface.co/learn/deep-rl-course/unit0/introduction" rel="noopener">Hugging Face Deep RL Course</a><span class="m">Course, units 1 and 2</span><p>You train a lunar lander in the first unit. Units 1 and 2 are enough to start a project.</p></div></li>
+        <li><div><a class="t" href="https://gymnasium.farama.org/" rel="noopener">Gymnasium</a><span class="m">Tool</span><p>The standard library of game environments for reinforcement learning, with tutorials.</p></div></li>
+        <li><div><a class="t" href="https://huggingface.co/learn/agents-course" rel="noopener">Hugging Face Agents Course</a><span class="m">Course, unit 1</span><p>What an AI agent is, how tool use works, and how to build a simple one.</p></div></li>
+        <li><div><a class="t" href="http://incompleteideas.net/book/the-book-2nd.html" rel="noopener">Reinforcement Learning: An Introduction</a><span class="m">Book, reference</span><p>Sutton and Barto's textbook, free online. Chapter 1 is a readable overview. Look up the rest if you want the theory.</p></div></li>
+      </ul>
+      <p><a class="more" href="resources.html#planner">Full learning plan on Resources</a></p>
     </div>
-    <aside>
-      <div class="factbox">
-        <h4>G-04</h4>
-        <dl>
-          <dt>Open to</dt><dd>Both tracks</dd>
-          <dt>Group lead</dt><dd>Appointed each fall from the Applied Research Division</dd>
-          <dt>Starting point</dt><dd>One term of Python, or a completed project in another group. This group assumes you can debug your own code.</dd>
-          <dt>Meets</dt><dd>Tuesdays, 3:00 to 4:00 PM, Room 700F</dd>
-        </dl>
-        <div class="act">
-          <p class="tags" style="margin:0 0 12px"><span>Python</span><span>NumPy</span><span>Gymnasium</span><span>Google Colab</span></p>
-          <a class="btn btn--wide" href="join.html#apply">Apply and name this group</a>
-        </div>
-      </div>
-      <p class="small muted" style="margin-top:18px">Other groups: <a href="nlp.html">Natural Language Processing</a>, <a href="vision.html">Computer Vision</a>, <a href="neural-systems.html">Neural Systems</a>, <a href="data-science.html">Applied Data Science</a>, <a href="society.html">AI, Ethics and Society</a>.</p>
+    <aside class="side">
+      <h2>Join this group</h2>
+      <p class="small" style="color:var(--ink-2)">Tell us you're interested when you sign up. You can change groups at any time.</p>
+      <a class="btn" href="join.html#join-agents">Express interest</a>
+      <hr>
+      <dl>
+        <dt>Meetings</dt><dd>Every other Tuesday, 3 to 4 PM, Room 700F</dd>
+        <dt>Group lead</dt><dd>To be named in October</dd>
+      </dl>
+      <hr>
+      <h2>Related groups</h2>
+      <ul><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul>
     </aside>
   </div>
 </section>
@@ -102,37 +101,30 @@
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <h5>SAIL</h5>
-        <p class="foot-about">South Artificial Intelligence Laboratory, the machine learning laboratory at High School South, running since 2022. Meetings are Tuesdays, 3:00 to 4:00 PM in Room 700F.</p>
+        <p class="foot-name">South Artificial Intelligence Laboratory</p>
+        <p>The AI and machine learning club at High School South. Every other Tuesday, 3 to 4 PM, Room 700F.</p>
       </div>
-      <div class="foot-col">
-        <h5>Research</h5>
-        <a href="nlp.html">Natural Language Processing</a>
-        <a href="vision.html">Computer Vision</a>
-        <a href="neural-systems.html">Neural Systems</a>
-        <a href="agents.html">Agents and RL</a>
-        <a href="data-science.html">Applied Data Science</a>
-        <a href="society.html">AI, Ethics and Society</a>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="research.html">Research groups</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="people.html">People</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
       </div>
-      <div class="foot-col">
-        <h5>Lab</h5>
-        <a href="projects.html">Projects</a>
-        <a href="people.html">People</a>
-        <a href="resources.html">Resources</a>
-        <a href="news.html">News</a>
-      </div>
-      <div class="foot-col">
-        <h5>Contact</h5>
-        <a href="join.html">Join the lab</a>
-        <a href="#" data-email>contact</a>
-        <a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a>
+      <div>
+        <h2>Get in touch</h2>
+        <ul>
+          <li><a href="join.html">Join SAIL</a></li>
+          <li><a href="#" data-email>Email us</a></li>
+          <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
+          <li>Google Classroom: selpcao</li>
+        </ul>
       </div>
     </div>
-    <div class="foot-bot">
-      <span>&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory</span>
-      <span>Google Classroom code: selpcao</span>
-      <span>Room 700F &middot; Tuesdays, 3:00 to 4:00 PM</span>
-    </div>
+    <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
   </div>
 </footer>
 <script src="assets/js/site.js"></script>

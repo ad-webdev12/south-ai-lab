@@ -1,9 +1,8 @@
 /* South Artificial Intelligence Laboratory
-   1. mobile navigation
-   2. application form handoff
-   3. hero visual: gradient descent with momentum on a real 2D loss surface.
-      Contours are computed with marching squares, the optimizer runs the
-      actual update rule, and the numbers in the corner are the live values. */
+   1. navigation
+   2. join form (builds an email, preselects a group from the URL)
+   3. resources planner (progress saved in this browser)
+   4. hero flow field */
 
 (function () {
   "use strict";
@@ -14,387 +13,368 @@
   function nav() {
     var toggle = document.querySelector("[data-navtoggle]");
     var drawer = document.querySelector("[data-drawer]");
-    if (!toggle || !drawer) return;
-    toggle.addEventListener("click", function () {
-      var open = drawer.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", String(open));
+    if (toggle && drawer) {
+      toggle.addEventListener("click", function () {
+        var open = drawer.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+    }
+
+    var group = document.querySelector("[data-navgroup]");
+    if (group) {
+      var gbtn = group.querySelector("button");
+      var setOpen = function (open) {
+        group.classList.toggle("open", open);
+        gbtn.setAttribute("aria-expanded", String(open));
+      };
+      gbtn.addEventListener("click", function () { setOpen(!group.classList.contains("open")); });
+      group.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape" && group.classList.contains("open")) { setOpen(false); gbtn.focus(); }
+      });
+      group.addEventListener("focusout", function (ev) {
+        if (!group.contains(ev.relatedTarget)) setOpen(false);
+      });
+      document.addEventListener("click", function (ev) {
+        if (!group.contains(ev.target)) setOpen(false);
+      });
+    }
+
+    // highlight the current section in a page's side navigation
+    var links = document.querySelectorAll("[data-subnav] a");
+    if (!links.length || !("IntersectionObserver" in window)) return;
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) { a.classList.remove("on"); });
+        var hit = byId[en.target.id];
+        if (hit) hit.classList.add("on");
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    Object.keys(byId).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) io.observe(el);
     });
   }
 
-  /* ---------------- 2. application form ---------------- */
-  function applyForm() {
+  /* ---------------- 2. join form ---------------- */
+  function joinForm() {
     var form = document.querySelector("[data-apply]");
     if (!form) return;
+
+    function pickGroup() {
+      var m = /^#join-([a-z-]+)$/.exec(window.location.hash);
+      if (!m) return;
+      var opt = form.querySelector('select[name="group"] option[data-key="' + m[1] + '"]');
+      if (opt) opt.selected = true;
+    }
+    pickGroup();
+    window.addEventListener("hashchange", pickGroup);
+
+    // a project idea is only required for the Applied Research Division
+    var trackSel = form.querySelector('select[name="track"]');
+    var idea = form.querySelector('textarea[name="statement"]');
+    function syncIdea() {
+      var chosen = trackSel.options[trackSel.selectedIndex];
+      idea.required = chosen.getAttribute("data-key") === "division";
+    }
+    trackSel.addEventListener("change", syncIdea);
+    syncIdea();
+
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
+      if (!form.reportValidity()) return;
       var d = new FormData(form);
       var v = function (k) { return (d.get(k) || "").toString().trim(); };
       var body = [
         "Name: " + v("name"),
         "School email: " + v("email"),
-        "Graduating class: " + v("grade"),
+        "Grade: " + v("grade"),
         "Track: " + v("track"),
-        "Research group: " + v("group"),
-        "Prior experience: " + v("experience"),
+        "Group I'm interested in: " + v("group"),
+        "Experience: " + (v("experience") || "none yet"),
         "",
-        "Interest:",
-        v("statement"),
-        "",
-        "Can attend meetings: " + (d.get("commit") ? "yes" : "not stated")
+        "What I'd like to work on:",
+        v("statement") || "(left blank)"
       ].join("\n");
       var href = "mailto:" + LAB_EMAIL +
-        "?subject=" + encodeURIComponent("SAIL application: " + v("name")) +
+        "?subject=" + encodeURIComponent("Joining SAIL: " + v("name")) +
         "&body=" + encodeURIComponent(body);
       var status = form.querySelector(".fstatus");
       if (status) {
         status.classList.add("show");
-        status.innerHTML = "Your mail program should have opened with the application filled in. " +
-          "If it did not, send the same information to <strong>" + LAB_EMAIL + "</strong>.";
+        status.innerHTML = "Your email app should now be open with a message ready to go. <strong>Press send there to finish.</strong> " +
+          "If nothing opened, email the same details to <strong>" + LAB_EMAIL + "</strong>.";
       }
       window.location.href = href;
     });
   }
 
-  /* ---------------- 3. hero: gradient descent ---------------- */
+  /* ---------------- 3. planner ---------------- */
+  function planner() {
+    var boxes = document.querySelectorAll("input[data-res]");
+    if (!boxes.length) return;
+    var KEY = "sail-planner-v2";
+    var done = {};
+    try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { done = {}; }
 
-  // f(x,y) = 0.16(x^2+y^2) - sum_i A_i exp(-((x-cx)^2+(y-cy)^2)/(2 s^2))
-  var WELLS = [
-    { x: -1.55, y: 0.72, a: 2.40, s: 0.86 },
-    { x: 1.72, y: -0.62, a: 3.10, s: 0.98 },
-    { x: 0.30, y: 1.42, a: 1.70, s: 0.66 },
-    { x: -2.15, y: -1.25, a: 2.05, s: 0.80 },
-    { x: 2.35, y: 1.38, a: 1.55, s: 0.72 },
-    { x: -0.25, y: -1.55, a: 1.35, s: 0.60 }
-  ];
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} }
 
-  function loss(x, y) {
-    var f = 0.065 * (x * x + y * y);
-    for (var i = 0; i < WELLS.length; i++) {
-      var w = WELLS[i], dx = x - w.x, dy = y - w.y;
-      f -= w.a * Math.exp(-(dx * dx + dy * dy) / (2 * w.s * w.s));
+    function refresh() {
+      var total = 0, finished = 0;
+      document.querySelectorAll("[data-stage]").forEach(function (stage) {
+        var inputs = stage.querySelectorAll("input[data-res]");
+        var n = 0;
+        inputs.forEach(function (i) { if (i.checked) n++; });
+        total += inputs.length; finished += n;
+        var out = stage.querySelector("[data-stage-count]");
+        if (out) out.textContent = n + " of " + inputs.length + " done";
+      });
+      var bar = document.querySelector("[data-progress]");
+      var label = document.querySelector("[data-progress-label]");
+      if (bar) { bar.max = total; bar.value = finished; }
+      if (label) label.textContent = finished + " of " + total + " resources finished";
     }
-    return f;
+
+    boxes.forEach(function (box) {
+      var id = box.getAttribute("data-res");
+      box.checked = !!done[id];
+      box.closest("li").classList.toggle("done", box.checked);
+      box.addEventListener("change", function () {
+        if (box.checked) done[id] = 1; else delete done[id];
+        box.closest("li").classList.toggle("done", box.checked);
+        save(); refresh();
+      });
+    });
+
+    var reset = document.querySelector("[data-reset]");
+    if (reset) {
+      reset.addEventListener("click", function () {
+        done = {}; save();
+        boxes.forEach(function (b) { b.checked = false; b.closest("li").classList.remove("done"); });
+        refresh();
+      });
+    }
+    refresh();
   }
 
-  function grad(x, y) {
-    var gx = 0.13 * x, gy = 0.13 * y;
-    for (var i = 0; i < WELLS.length; i++) {
-      var w = WELLS[i], dx = x - w.x, dy = y - w.y;
-      var e = w.a * Math.exp(-(dx * dx + dy * dy) / (2 * w.s * w.s)) / (w.s * w.s);
-      gx += e * dx;
-      gy += e * dy;
-    }
-    return [gx, gy];
-  }
-
-  // marching squares on a sampled grid, one level at a time
-  function contour(level, grid, cols, rows, x0, y0, dx, dy) {
-    var segs = [];
-    function ip(a, b, va, vb) {
-      var t = (level - va) / (vb - va);
-      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-    }
-    for (var r = 0; r < rows - 1; r++) {
-      for (var c = 0; c < cols - 1; c++) {
-        var v0 = grid[r * cols + c];
-        var v1 = grid[r * cols + c + 1];
-        var v2 = grid[(r + 1) * cols + c + 1];
-        var v3 = grid[(r + 1) * cols + c];
-        var p0 = [x0 + c * dx, y0 + r * dy];
-        var p1 = [x0 + (c + 1) * dx, y0 + r * dy];
-        var p2 = [x0 + (c + 1) * dx, y0 + (r + 1) * dy];
-        var p3 = [x0 + c * dx, y0 + (r + 1) * dy];
-        var idx = (v0 > level ? 1 : 0) | (v1 > level ? 2 : 0) | (v2 > level ? 4 : 0) | (v3 > level ? 8 : 0);
-        if (idx === 0 || idx === 15) continue;
-        var top = ip(p0, p1, v0, v1);
-        var right = ip(p1, p2, v1, v2);
-        var bottom = ip(p3, p2, v3, v2);
-        var left = ip(p0, p3, v0, v3);
-        switch (idx) {
-          case 1: case 14: segs.push([left, top]); break;
-          case 2: case 13: segs.push([top, right]); break;
-          case 3: case 12: segs.push([left, right]); break;
-          case 4: case 11: segs.push([right, bottom]); break;
-          case 6: case 9: segs.push([top, bottom]); break;
-          case 7: case 8: segs.push([left, bottom]); break;
-          case 5: segs.push([left, top]); segs.push([right, bottom]); break;
-          case 10: segs.push([top, right]); segs.push([left, bottom]); break;
-        }
-      }
-    }
-    return segs;
-  }
-
+  /* ---------------- 4. hero flow field ----------------
+     Particles are carried through a slowly changing vector field. Each one
+     remembers where it has been for the last few seconds, and that history is
+     drawn as a tapered line, so the streamlines of the field become visible.
+     The pointer adds a local swirl; when it leaves, the flow settles back.
+     A click sends out a ring that pushes particles outward as it passes. */
   function hero() {
-    var canvas = document.querySelector("[data-surface]");
-    if (!canvas || !canvas.getContext) return;
+    var host = document.querySelector("[data-hero]");
+    var canvas = document.querySelector("[data-field]");
+    if (!host || !canvas || !canvas.getContext) return;
     var ctx = canvas.getContext("2d");
-    var spark = document.querySelector("[data-spark]");
-    var sctx = spark && spark.getContext ? spark.getContext("2d") : null;
-    var out = {
-      step: document.querySelector("[data-out-step]"),
-      loss: document.querySelector("[data-out-loss]"),
-      lr: document.querySelector("[data-out-lr]"),
-      mu: document.querySelector("[data-out-mu]")
-    };
+    var pauseBtn = document.querySelector("[data-pause]");
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    var LR = 0.042, MU = 0.88, MAX_STEPS = 260;
-    var W = 0, H = 0, dpr = 1;
-    var back = document.createElement("canvas");
-    var bctx = back.getContext("2d");
-    var view = { xmin: -3.9, xmax: 3.9, ymin: -2.4, ymax: 2.4 };
-    var p, v, step, history, paused = false, raf = null;
+    var TONES = ["152,188,234", "104,148,210", "222,134,96"];
+    var WIDTHS = [1.1, 1.0, 1.5];
+    var BANDS = [0.07, 0.16, 0.30, 0.52];      // opacity from tail to head
+    var HIST = 40, SAMPLE = 0.085;             // 40 samples, one every 85 ms: about 3.4 s of trail
+    var W = 0, H = 0, dpr = 1, t = 0, sinceSample = 0;
+    var parts = [], pulses = [];
+    var mouse = { x: 0, y: 0, tx: 0, ty: 0, on: false, k: 0 };
+    var running = !reduced, offscreen = false, last = 0, slow = 0;
 
-    function toPx(x, y) {
-      return [
-        ((x - view.xmin) / (view.xmax - view.xmin)) * W,
-        ((view.ymax - y) / (view.ymax - view.ymin)) * H
-      ];
-    }
-    function toWorld(px, py) {
-      return [
-        view.xmin + (px / W) * (view.xmax - view.xmin),
-        view.ymax - (py / H) * (view.ymax - view.ymin)
-      ];
+    function angle(x, y) {
+      return 0.62 * Math.sin(x * 0.0042 + t * 0.13) * Math.cos(y * 0.0057 - t * 0.09) +
+             0.36 * Math.sin((x + y) * 0.0026 + t * 0.07);
     }
 
-    function drawSurface() {
-      var cols = 150, rows = Math.max(40, Math.round(cols * (H / W)));
-      var dx = (view.xmax - view.xmin) / (cols - 1);
-      var dy = (view.ymax - view.ymin) / (rows - 1);
-      var grid = new Float64Array(cols * rows);
-      var min = Infinity, max = -Infinity;
-      for (var r = 0; r < rows; r++) {
-        for (var c = 0; c < cols; c++) {
-          var val = loss(view.xmin + c * dx, view.ymax - r * dy);
-          grid[r * cols + c] = val;
-          if (val < min) min = val;
-          if (val > max) max = val;
-        }
-      }
-      bctx.setTransform(1, 0, 0, 1, 0, 0);
-      bctx.clearRect(0, 0, back.width, back.height);
-      bctx.scale(dpr, dpr);
-      bctx.fillStyle = "#091728";
-      bctx.fillRect(0, 0, W, H);
-      var pxw = W / (cols - 1), pxh = H / (rows - 1);
-      var levels = 26;
-      for (var i = 1; i < levels; i++) {
-        var lv = min + (max - min) * (i / levels);
-        var segs = contour(lv, grid, cols, rows, 0, 0, pxw, pxh);
-        var deep = i / levels < 0.32;
-        bctx.strokeStyle = deep ? "rgba(126,170,224,0.30)" : "rgba(100,137,186,0.14)";
-        bctx.lineWidth = deep ? 1.1 : 0.9;
-        bctx.beginPath();
-        for (var s = 0; s < segs.length; s++) {
-          bctx.moveTo(segs[s][0][0], segs[s][0][1]);
-          bctx.lineTo(segs[s][1][0], segs[s][1][1]);
-        }
-        bctx.stroke();
-      }
+    function spawn(p, anywhere) {
+      p.x = anywhere ? Math.random() * W : -8;
+      p.y = Math.random() * H;
+      p.n = 0; p.head = 0;                     // empty history, so no line is drawn across the jump
+      p.dying = false;
+      p.life = 7 + Math.random() * 10;
+      return p;
     }
 
-    function resize() {
-      var rect = canvas.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+    function build() {
+      var rect = host.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return false;   // not laid out yet; the observer will call again
+      dpr = Math.min(window.devicePixelRatio || 1, rect.width > 900 ? 1.25 : 2);
       W = rect.width; H = rect.height;
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
-      back.width = canvas.width;
-      back.height = canvas.height;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      var aspect = W / H;
-      var yr = 2.55;
-      view.ymin = -yr; view.ymax = yr;
-      view.xmin = -yr * aspect; view.xmax = yr * aspect;
-      drawSurface();
-      render();
-    }
-
-    function restart(at) {
-      if (!at) {
-        // start on a ring, so the path has to cross the field to reach a minimum
-        var ang = Math.random() * 6.2832;
-        var rad = 2.2 + Math.random() * 0.9;
-        at = [Math.cos(ang) * rad * 1.25, Math.sin(ang) * rad * 0.78];
-      }
-      p = at;
-      v = [0, 0];
-      step = 0;
-      history = [p.slice()];
-    }
-
-    function update() {
-      var g = grad(p[0], p[1]);
-      v[0] = MU * v[0] - LR * g[0];
-      v[1] = MU * v[1] - LR * g[1];
-      p[0] += v[0];
-      p[1] += v[1];
-      p[0] = Math.max(view.xmin, Math.min(view.xmax, p[0]));
-      p[1] = Math.max(view.ymin, Math.min(view.ymax, p[1]));
-      step++;
-      history.push(p.slice());
-      if (history.length > 320) history.shift();
-    }
-
-    function render() {
-      if (!W) return;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.drawImage(back, 0, 0);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      // path
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = "rgba(196,219,247,0.55)";
-      ctx.beginPath();
-      for (var i = 0; i < history.length; i++) {
-        var pt = toPx(history[i][0], history[i][1]);
-        if (i === 0) ctx.moveTo(pt[0], pt[1]); else ctx.lineTo(pt[0], pt[1]);
-      }
-      ctx.stroke();
-
-      // every tenth iterate
-      ctx.fillStyle = "rgba(160,196,236,0.55)";
-      for (var j = 0; j < history.length; j += 10) {
-        var q = toPx(history[j][0], history[j][1]);
-        ctx.beginPath();
-        ctx.arc(q[0], q[1], 1.7, 0, 6.2832);
-        ctx.fill();
-      }
-
-      // current iterate
-      var c = toPx(p[0], p[1]);
-      ctx.beginPath();
-      ctx.arc(c[0], c[1], 5.2, 0, 6.2832);
-      ctx.fillStyle = "#e3edfa";
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(c[0], c[1], 10.5, 0, 6.2832);
-      ctx.strokeStyle = "rgba(227,237,250,0.4)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // start marker
-      if (history.length) {
-        var s0 = toPx(history[0][0], history[0][1]);
-        ctx.strokeStyle = "rgba(180,83,42,0.85)";
-        ctx.lineWidth = 1.3;
-        ctx.beginPath();
-        ctx.moveTo(s0[0] - 4, s0[1]); ctx.lineTo(s0[0] + 4, s0[1]);
-        ctx.moveTo(s0[0], s0[1] - 4); ctx.lineTo(s0[0], s0[1] + 4);
-        ctx.stroke();
-      }
-
-      readout();
-      sparkline();
-    }
-
-    function readout() {
-      if (out.step) out.step.textContent = String(step).padStart(3, "0");
-      if (out.loss) out.loss.textContent = loss(p[0], p[1]).toFixed(4);
-      if (out.lr) out.lr.textContent = LR.toFixed(3);
-      if (out.mu) out.mu.textContent = MU.toFixed(2);
-    }
-
-    function sparkline() {
-      if (!sctx) return;
-      var rect = spark.getBoundingClientRect();
-      if (!rect.width) return;
-      if (spark.width !== Math.round(rect.width * dpr)) {
-        spark.width = Math.round(rect.width * dpr);
-        spark.height = Math.round(rect.height * dpr);
-      }
-      sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      sctx.clearRect(0, 0, rect.width, rect.height);
-      var n = history.length;
-      if (n < 2) return;
-      var lo = Infinity, hi = -Infinity, vals = [];
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      var n = Math.round(Math.min(420, Math.max(160, (W * H) / 3000)));
+      parts = [];
       for (var i = 0; i < n; i++) {
-        var L = loss(history[i][0], history[i][1]);
-        vals.push(L);
-        if (L < lo) lo = L;
-        if (L > hi) hi = L;
+        var r = Math.random();
+        parts.push(spawn({
+          hx: new Float32Array(HIST), hy: new Float32Array(HIST),
+          speed: 46 + Math.random() * 44, tone: r < 0.07 ? 2 : (r < 0.52 ? 1 : 0)
+        }, true));
       }
-      if (hi - lo < 1e-6) hi = lo + 1;
-      sctx.strokeStyle = "rgba(143,176,216,0.85)";
-      sctx.lineWidth = 1.1;
-      sctx.beginPath();
-      for (var k = 0; k < n; k++) {
-        var x = (k / (n - 1)) * rect.width;
-        var y = rect.height - ((vals[k] - lo) / (hi - lo)) * (rect.height - 3) - 1.5;
-        if (k === 0) sctx.moveTo(x, y); else sctx.lineTo(x, y);
-      }
-      sctx.stroke();
+      for (var s = 0; s < 260; s++) advance(1 / 60);   // fill the trails before the first frame
+      draw();
+      return true;
     }
 
-    // steps advance on elapsed time, so the animation runs at the same speed
-    // whether the browser gives us 60 frames a second or 5
-    var STEPS_PER_SEC = 24, last = 0, carry = 0;
+    function advance(dt) {
+      t += dt;
+      if (mouse.on) {
+        mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 9);
+        mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 9);
+      }
+      mouse.k += ((mouse.on ? 1 : 0) - mouse.k) * Math.min(1, dt * (mouse.on ? 6 : 1.5));
+      for (var q = pulses.length - 1; q >= 0; q--) {
+        pulses[q].age += dt;
+        if (pulses[q].age > 1.2) pulses.splice(q, 1);
+      }
+      sinceSample += dt;
+      var record = sinceSample >= SAMPLE;
+      if (record) sinceSample = 0;
 
-    function tick(ts) {
-      if (!last) last = ts;
-      var dt = Math.min((ts - last) / 1000, 0.3);
-      last = ts;
-      if (!paused) {
-        carry += dt * STEPS_PER_SEC;
-        var n = Math.min(Math.floor(carry), 12);
-        carry -= Math.floor(carry);
-        for (var i = 0; i < n; i++) {
-          update();
-          var g = grad(p[0], p[1]);
-          var settled = Math.hypot(g[0], g[1]) < 0.004 && Math.hypot(v[0], v[1]) < 0.004;
-          if (step > MAX_STEPS || (settled && step > 45)) { restart(); break; }
+      var R = 210;
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        if (p.dying) {                           // let the tail shrink away before the particle comes back
+          if (record && --p.n < 2) spawn(p, Math.random() < 0.3);
+          continue;
         }
-        if (n) render();
-      } else {
-        last = 0;
+        var a = angle(p.x, p.y);
+        var vx = Math.cos(a) * p.speed, vy = Math.sin(a) * p.speed;
+
+        if (mouse.k > 0.01) {
+          var dx = p.x - mouse.x, dy = p.y - mouse.y;
+          var d = Math.sqrt(dx * dx + dy * dy) || 1;
+          if (d < R) {
+            var f = 1 - d / R; f = f * f * mouse.k;
+            vx += (-dy / d) * 190 * f + (dx / d) * 85 * f;
+            vy += (dx / d) * 190 * f + (dy / d) * 85 * f;
+          }
+        }
+        for (var k = 0; k < pulses.length; k++) {
+          var pu = pulses[k];
+          var ex = p.x - pu.x, ey = p.y - pu.y;
+          var ed = Math.sqrt(ex * ex + ey * ey) || 1;
+          var off = Math.abs(ed - pu.age * 430);
+          if (off < 85) {
+            var g = (1 - off / 85) * (1 - pu.age / 1.2) * 320;
+            vx += (ex / ed) * g; vy += (ey / ed) * g;
+          }
+        }
+
+        p.x += vx * dt; p.y += vy * dt;
+        p.life -= dt;
+        if (record) {
+          p.hx[p.head] = p.x; p.hy[p.head] = p.y;
+          p.head = (p.head + 1) % HIST;
+          if (p.n < HIST) p.n++;
+        }
+        if (p.life <= 0 || p.x > W + 60 || p.x < -60 || p.y < -60 || p.y > H + 60) {
+          p.dying = true;
+        }
       }
-      raf = window.requestAnimationFrame(tick);
     }
 
-    restart();
-    resize();
-    window.addEventListener("resize", function () {
-      window.clearTimeout(resize._t);
-      resize._t = window.setTimeout(resize, 180);
-    });
-
-    canvas.addEventListener("click", function (ev) {
-      var rect = canvas.getBoundingClientRect();
-      restart(toWorld(ev.clientX - rect.left, ev.clientY - rect.top));
-      if (reduced) { for (var i = 0; i < 160; i++) update(); render(); }
-    });
-
-    var replay = document.querySelector("[data-replay]");
-    if (replay) {
-      replay.addEventListener("click", function () {
-        restart();
-        if (reduced) { for (var i = 0; i < 160; i++) update(); render(); }
-      });
+    // Trails are drawn in four opacity bands, oldest to newest. Sample index 0 is
+    // the oldest point a particle still remembers; a young particle has fewer
+    // samples, and they are treated as the newest ones.
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      var per = HIST / BANDS.length;
+      for (var tone = 0; tone < 3; tone++) {
+        ctx.lineWidth = WIDTHS[tone];
+        for (var b = 0; b < BANDS.length; b++) {
+          var lastBand = b === BANDS.length - 1;
+          ctx.strokeStyle = "rgba(" + TONES[tone] + "," + BANDS[b] + ")";
+          ctx.beginPath();
+          for (var i = 0; i < parts.length; i++) {
+            var p = parts[i];
+            if (p.tone !== tone || p.n < 2) continue;
+            var missing = HIST - p.n;
+            var from = Math.max(0, Math.floor(b * per) - missing);
+            var to = Math.min(p.n - 1, Math.floor((b + 1) * per) - missing);
+            if (to < 0 || (to <= from && !lastBand)) continue;
+            var base = (p.head - p.n + HIST) % HIST;
+            var j0 = (base + from) % HIST;
+            ctx.moveTo(p.hx[j0], p.hy[j0]);
+            for (var s = from + 1; s <= to; s++) {
+              var j = (base + s) % HIST;
+              ctx.lineTo(p.hx[j], p.hy[j]);
+            }
+            if (lastBand) ctx.lineTo(p.x, p.y);
+          }
+          ctx.stroke();
+        }
+      }
     }
 
-    if (reduced) {
-      for (var i = 0; i < 160; i++) update();
-      render();
-      return;
+    function frame(ts) {
+      if (!running || offscreen) { last = 0; return; }
+      if (!last) last = ts;
+      var dt = Math.min((ts - last) / 1000, 0.05);
+      last = ts;
+      // on a machine that can't keep up, carry fewer particles
+      slow = dt > 0.04 ? slow + 1 : Math.max(0, slow - 2);
+      if (slow > 40 && parts.length > 120) { parts.length = Math.round(parts.length * 0.7); slow = 0; }
+      if (dt > 0) { advance(dt); draw(); }
+      window.requestAnimationFrame(frame);
     }
 
-    document.addEventListener("visibilitychange", function () {
-      paused = document.hidden;
+    function setRunning(on) {
+      running = on;
+      if (pauseBtn) {
+        pauseBtn.textContent = on ? "Pause animation" : "Play animation";
+      }
+      if (on) { last = 0; window.requestAnimationFrame(frame); }
+    }
+
+    host.addEventListener("pointermove", function (ev) {
+      if (ev.pointerType === "touch") return;
+      var rect = host.getBoundingClientRect();
+      mouse.tx = ev.clientX - rect.left; mouse.ty = ev.clientY - rect.top;
+      if (!mouse.on) { mouse.x = mouse.tx; mouse.y = mouse.ty; }
+      mouse.on = true;
     });
+    host.addEventListener("pointerleave", function () { mouse.on = false; });
+    host.addEventListener("pointerdown", function (ev) {
+      if (ev.target.closest("a,button,summary")) return;
+      var rect = host.getBoundingClientRect();
+      pulses.push({ x: ev.clientX - rect.left, y: ev.clientY - rect.top, age: 0 });
+      if (pulses.length > 4) pulses.shift();
+    });
+
+    if (pauseBtn) pauseBtn.addEventListener("click", function () { setRunning(!running); });
+
+    // Rebuild whenever the hero itself changes size: window resizes, a late
+    // layout, or the web font arriving and changing the height of the heading.
+    var timer;
+    function fit() {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(function () {
+        var rect = host.getBoundingClientRect();
+        if (Math.abs(rect.width - W) > 1 || Math.abs(rect.height - H) > 1) build();
+      }, 160);
+    }
+    if ("ResizeObserver" in window) new ResizeObserver(fit).observe(host);
+    else window.addEventListener("resize", fit);
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (entries) {
-        paused = !entries[0].isIntersecting || document.hidden;
-      }, { threshold: 0 }).observe(canvas);
+        var was = offscreen;
+        offscreen = !entries[0].isIntersecting;
+        if (was && !offscreen && running) { last = 0; window.requestAnimationFrame(frame); }
+      }).observe(host);
     }
-    raf = window.requestAnimationFrame(tick);
+
+    build();
+    setRunning(running);
   }
 
   document.addEventListener("DOMContentLoaded", function () {
     nav();
-    applyForm();
+    joinForm();
+    planner();
     hero();
     document.querySelectorAll("[data-email]").forEach(function (el) {
       el.textContent = LAB_EMAIL;

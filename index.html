@@ -3,187 +3,160 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Home | SAIL</title>
-<meta name="description" content="Student machine learning laboratory at High School South. Six research groups, two membership tracks, open to every grade.">
-<meta property="og:title" content="Home | South Artificial Intelligence Laboratory">
-<meta property="og:description" content="Student machine learning laboratory at High School South. Six research groups, two membership tracks, open to every grade.">
+<title>South Artificial Intelligence Laboratory</title>
+<meta name="description" content="The AI and machine learning club at High School South. Learn how AI works and build your own projects. No experience needed.">
+<meta property="og:title" content="South Artificial Intelligence Laboratory">
+<meta property="og:description" content="The AI and machine learning club at High School South. Learn how AI works and build your own projects. No experience needed.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.6"/><path d="M6 16.5c3.4 0 4.2-9 7-9 2.2 0 2.6 5 5 5" stroke="#b4532a" stroke-width="1.7"/></svg><b>SAIL</b><span>High School South</span></a>
-    <nav class="mainnav">
-      <a class="on" href="index.html">Home</a>
-      <div class="navgroup"><button aria-haspopup="true">Research <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul><li><a href="research.html">Overview of all groups</a></li><li><a href="nlp.html">G-01 &nbsp; Natural Language Processing</a></li><li><a href="vision.html">G-02 &nbsp; Computer Vision</a></li><li><a href="neural-systems.html">G-03 &nbsp; Neural Systems</a></li><li><a href="agents.html">G-04 &nbsp; Agents and RL</a></li><li><a href="data-science.html">G-05 &nbsp; Applied Data Science</a></li><li><a href="society.html">G-06 &nbsp; AI, Ethics and Society</a></li></ul></div>
+    <a class="brand" href="index.html"><b>SAIL</b><span>High School South</span></a>
+    <nav class="mainnav" aria-label="Main">
+      <div class="navgroup" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
     </nav>
-    <button class="navtoggle" data-navtoggle aria-label="Menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <a class="btn btn--light btn--sm mast-join" href="join.html">Join</a>
+    <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
-  <div class="drawer" data-drawer>
+  <nav class="drawer" data-drawer aria-label="Mobile">
     <div class="wrap">
       <a href="index.html">Home</a>
-      <a href="research.html">Research overview</a>
-      <p class="lbl">Groups</p>
-      <a class="sub" href="nlp.html">G-01 &nbsp; Natural Language Processing</a>
-      <a class="sub" href="vision.html">G-02 &nbsp; Computer Vision</a>
-      <a class="sub" href="neural-systems.html">G-03 &nbsp; Neural Systems</a>
-      <a class="sub" href="agents.html">G-04 &nbsp; Agents and RL</a>
-      <a class="sub" href="data-science.html">G-05 &nbsp; Applied Data Science</a>
-      <a class="sub" href="society.html">G-06 &nbsp; AI, Ethics and Society</a>
-      <p class="lbl">More</p>
+      <details><summary>Research</summary><a href="research.html">Compare all groups</a><a href="data-science.html">Applied Data Science</a><a href="vision.html">Computer Vision</a><a href="nlp.html">Natural Language Processing</a><a href="neural-networks.html">Neural Networks</a><a href="agents.html">Agents and Reinforcement Learning</a><a href="society.html">AI, Ethics and Society</a></details>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
+      <a href="join.html">Join SAIL</a>
     </div>
-  </div>
+  </nav>
 </header>
-<main>
-<section class="hero">
-  <canvas data-surface aria-hidden="true"></canvas>
+<main id="main">
+<section class="hero" data-hero>
+  <canvas data-field aria-hidden="true"></canvas>
   <div class="wrap hero-in">
-    <p class="kicker">High School South &middot; Established 2022</p>
-    <h1>A student laboratory for machine learning</h1>
-    <p>Six research groups covering language, vision, neural network foundations, agents, applied modeling, and the ethics of deployed systems. Open to every grade, with no prior programming required to start.</p>
-    <div class="hero-links">
-      <a class="solid" href="join.html">Join the lab</a>
-      <a href="research.html">Research groups</a>
+    <h1>South Artificial Intelligence Laboratory</h1>
+    <p class="hero-sub">We're students at High School South who learn how AI works and build our own projects with it.</p>
+    <div class="hero-actions">
+      <a class="btn btn--light" href="join.html">Join SAIL</a>
+      <a class="textlink" href="projects.html">Explore our work</a>
     </div>
-    <p class="hero-note">Background: gradient descent with momentum on a two-dimensional loss surface, contours drawn with marching squares. Click the surface to start from a different point, or <button data-replay type="button">reinitialize</button>.</p>
-    <div class="readout">
-      step <b data-out-step>000</b><br>
-      loss <b data-out-loss>0.0000</b><br>
-      lr <b data-out-lr>0.042</b> &middot; momentum <b data-out-mu>0.88</b>
-      <canvas data-spark aria-hidden="true"></canvas>
-    </div>
+    <p class="hero-when">Every other Tuesday, 3:00 to 4:00 PM &middot; Room 700F</p>
+  </div>
+  <div class="wrap hero-tools">
+    <details class="hero-about">
+      <summary>About this animation</summary>
+      <p>A few hundred particles drift through a vector field that changes slowly over time, and their trails trace out its streamlines. Move your pointer to bend the field and watch it settle back. Click to send a ripple through it.</p>
+    </details>
+    <button type="button" data-pause>Pause animation</button>
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap cols3">
-    <div>
-      <h2>About the lab</h2>
-      <p>SAIL has met at High School South since 2022. Sessions are taught by members, and the subjects follow a sequence: Python and data handling in the fall, classical models and a competition entry before winter, neural networks and vision after that, and a project in the spring.</p>
-      <p>Everything the lab uses is free and runs in a browser. Members have gone on to summer research programs including MIT Beaver Works, and past sessions have included visits from researchers at MIT Lincoln Laboratory and Carnegie Mellon.</p>
-    </div>
-    <div>
-      <h2>How it is organized</h2>
-      <p>Members join one of two tracks. The Foundations Program is the taught track, for ninth graders and for sophomores in their first year with the lab. The Applied Research Division is for juniors and seniors working in small project teams, and is open to anyone else who applies with prior work.</p>
-      <p>Both tracks attach to one of six research groups. Group assignments happen after the first term, so that the choice is made with some idea of what each group does.</p>
-    </div>
-    <div>
-      <h2>Recent news</h2>
-      <ul class="news">
-      <li><span class="d">September 2026</span><p>Recruitment is open for the 2026 to 2027 year</p></li>
-      <li><span class="d">June 2026</span><p>Officers named for 2026 to 2027</p></li>
-      <li><span class="d">June 2026</span><p>Last meeting of the year</p></li>
-      <li><span class="d">May 2026</span><p>Officership applications extended</p></li>
-      </ul>
-      <p class="small" style="margin:16px 0 0"><a href="news.html">All updates &rarr;</a></p>
-    </div>
+<section class="section center">
+  <div class="narrow about">
+    <h2>About SAIL</h2>
+    <p>SAIL is High School South's AI and machine learning club. We started in 2022 with after-school Python lessons. Now members teach each other Python and machine learning, and then build projects of their own.</p>
+    <p>You don't need any experience to join. Everything we use is free and runs in a browser, and the slides and notebooks from every meeting are posted for anyone who misses one.</p>
   </div>
-</section>
-
-<section class="section section--soft">
   <div class="wrap">
-    <div class="h-rule"><h2>Research groups</h2><span class="right">Six groups, 2026 to 2027</span></div>
-    <div class="arealist">
-    <div class="arearow">
-      <div class="code">G-01</div>
-      <div>
-        <h3><a href="nlp.html">Natural Language Processing</a></h3>
-        <p>How text is represented numerically, what sequence models learn from it, and how to judge output that has no single right answer.</p>
-      </div>
-      <div class="topics">Tokenization and text cleaning; Bag of words, TF-IDF, and what they throw away; Word and sentence embeddings</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-02</div>
-      <div>
-        <h3><a href="vision.html">Computer Vision</a></h3>
-        <p>Convolutional models on image data, from a first classifier trained in a browser to controlled experiments on standard datasets.</p>
-      </div>
-      <div class="topics">Image preprocessing, normalization, and augmentation; Convolution, pooling, and network depth; Transfer learning on small datasets</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-03</div>
-      <div>
-        <h3><a href="neural-systems.html">Neural Systems</a></h3>
-        <p>What a network is doing underneath the framework call: gradients, optimizers, and the mathematics each of them needs.</p>
-      </div>
-      <div class="topics">The perceptron and the forward pass; Loss functions and gradient descent; Backpropagation worked through by hand</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-04</div>
-      <div>
-        <h3><a href="agents.html">Agents and Reinforcement Learning</a></h3>
-        <p>Systems that take actions rather than return one prediction. New for the 2026 to 2027 year.</p>
-      </div>
-      <div class="topics">States, actions, rewards, and discounting; Q-learning in gridworlds; Exploration against exploitation</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-05</div>
-      <div>
-        <h3><a href="data-science.html">Applied Data Science</a></h3>
-        <p>Tabular data, feature engineering, and competition work. The usual starting point for new members.</p>
-      </div>
-      <div class="topics">Loading and cleaning data with pandas; Missing values, encoding, and scaling; Train and test splits, and cross-validation</div>
-    </div>
-    <div class="arearow">
-      <div class="code">G-06</div>
-      <div>
-        <h3><a href="society.html">AI, Ethics and Society</a></h3>
-        <p>Fairness, documentation, and the arguments about deployment, run as work with written output rather than open discussion.</p>
-      </div>
-      <div class="topics">Error rates compared across groups within a dataset; What a dataset does not contain, and who that affects; Short model documentation for released work</div>
-    </div>
-    </div>
+    <dl class="facts">
+      <div><dt>When</dt><dd>Every other Tuesday, 3 to 4 PM</dd></div>
+      <div><dt>Where</dt><dd>Room 700F</dd></div>
+      <div><dt>Cost</dt><dd>Free</dd></div>
+      <div><dt>Google Classroom</dt><dd>selpcao</dd></div>
+    </dl>
   </div>
 </section>
 
-<section class="section">
+<section class="section section--soft center">
   <div class="wrap">
-    <div class="h-rule"><h2>Two ways to join</h2></div>
+    <div class="section-head">
+      <h2>Two ways to join</h2>
+      <p>Pick the one that fits where you are now. You can move from the first to the second whenever you're ready.</p>
+    </div>
     <div class="tracks">
       <div class="track">
-        <div class="inner">
-          <h3>Foundations Program</h3>
-          <p class="who">Ninth graders, and sophomores joining the lab for the first time</p>
-          <p class="small">Taught sessions with guided exercises. Members write Python in the first session and train a working model before winter. No prior experience is assumed and no course is required beforehand.</p>
-          <ul>
-            <li>Weekly instruction following the published sequence</li>
-            <li>Team entry to a public competition</li>
-            <li>A project presented at the end of the year</li>
-          </ul>
-          <p class="foot"><a href="join.html#foundations">Program details</a></p>
-        </div>
+        <h3>Foundations Program</h3>
+        <p class="who">For anyone new to AI or coding</p>
+        <p>Learn Python, work with real data, enter a Kaggle competition with a team, and train your first neural network by December. In the spring you build a project of your own.</p>
+        <p>Most ninth and tenth graders start here. So do juniors and seniors who haven't programmed before.</p>
+        <a class="more" href="join.html#tracks">How Foundations works</a>
       </div>
-      <div class="track track--two">
-        <div class="inner">
-          <h3>Applied Research Division</h3>
-          <p class="who">Juniors and seniors, or anyone who applies with prior work</p>
-          <p class="small">Project teams of two to four members attached to a research group. Teams choose a question, agree on what they will produce, and present the result to the lab at the end of the term.</p>
-          <ul>
-            <li>A short proposal agreed before the work starts</li>
-            <li>Code in a repository another member can run</li>
-            <li>A presentation and a written record at the end of term</li>
-          </ul>
-          <p class="foot"><a href="join.html#division">Division details</a></p>
-        </div>
+      <div class="track">
+        <h3>Applied Research Division</h3>
+        <p class="who">For members ready to run their own project</p>
+        <p>Work in a team of two to four on a project you choose, with one of our six research groups behind you. Teams present what they built at the end of each semester.</p>
+        <p>Mostly juniors and seniors, plus anyone who has finished Foundations or built something before.</p>
+        <a class="more" href="join.html#tracks">How the division works</a>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="section center">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Research groups</h2>
+      <p>Six groups, each focused on one area of AI. <a href="research.html">Compare them side by side.</a></p>
+    </div>
+    <ul class="groups">
+      <li><h3><a href="data-science.html">Applied Data Science</a> <span class="badge">Start here</span></h3><p>Find patterns in real datasets and compete on Kaggle.</p></li>
+      <li><h3><a href="vision.html">Computer Vision</a></h3><p>Train models that recognize what's in a photo or a video.</p></li>
+      <li><h3><a href="nlp.html">Natural Language Processing</a></h3><p>Build programs that read, sort, and write text, from spam filters to chatbots.</p></li>
+      <li><h3><a href="neural-networks.html">Neural Networks</a></h3><p>Open up a neural network, build one from scratch, and learn the math that makes it work.</p></li>
+      <li><h3><a href="agents.html">Agents and Reinforcement Learning</a></h3><p>Make programs that learn by trial and error, and AI assistants that can use tools.</p></li>
+      <li><h3><a href="society.html">AI, Ethics and Society</a></h3><p>Test models for fairness, study privacy and safety, and debate how AI should be used.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section section--soft center">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>What members have built</h2>
+    </div>
+    <div class="features">
+      <article class="feature">
+        <figure><div class="pad"><div class="chart-legend"><span><i style="background:#1f5fae"></i>Women</span><span><i style="background:#b4532a"></i>Men</span></div><svg class="chart" viewBox="0 0 540 201" role="img" aria-label="Bar chart of Titanic survival rates by sex and ticket class. Women: 96.8 percent in first class, 92.1 in second, 50 in third. Men: 36.9 percent in first class, 15.7 in second, 13.5 in third."><line class="grid" x1="104.0" y1="6" x2="104.0" y2="175"/><text x="104.0" y="193" text-anchor="middle">0%</text><line class="grid" x1="196.5" y1="6" x2="196.5" y2="175"/><text x="196.5" y="193" text-anchor="middle">25%</text><line class="grid" x1="289.0" y1="6" x2="289.0" y2="175"/><text x="289.0" y="193" text-anchor="middle">50%</text><line class="grid" x1="381.5" y1="6" x2="381.5" y2="175"/><text x="381.5" y="193" text-anchor="middle">75%</text><line class="grid" x1="474.0" y1="6" x2="474.0" y2="175"/><text x="474.0" y="193" text-anchor="middle">100%</text><text class="grp" x="92" y="33" text-anchor="end">First class</text><g class="b"><title>Women, first class: 96.8% survived</title><path class="bar" d="M104,10 h354.2 a4,4 0 0 1 4,4 v9 a4,4 0 0 1 -4,4 h-354.2 z" fill="#1f5fae"/><text class="val" x="469.2" y="23">96.8%</text></g><g class="b"><title>Men, first class: 36.9% survived</title><path class="bar" d="M104,30 h132.5 a4,4 0 0 1 4,4 v9 a4,4 0 0 1 -4,4 h-132.5 z" fill="#b4532a"/><text class="val" x="247.5" y="43">36.9%</text></g><text class="grp" x="92" y="92" text-anchor="end">Second class</text><g class="b"><title>Women, second class: 92.1% survived</title><path class="bar" d="M104,69 h336.8 a4,4 0 0 1 4,4 v9 a4,4 0 0 1 -4,4 h-336.8 z" fill="#1f5fae"/><text class="val" x="451.8" y="82">92.1%</text></g><g class="b"><title>Men, second class: 15.7% survived</title><path class="bar" d="M104,89 h54.1 a4,4 0 0 1 4,4 v9 a4,4 0 0 1 -4,4 h-54.1 z" fill="#b4532a"/><text class="val" x="169.1" y="102">15.7%</text></g><text class="grp" x="92" y="151" text-anchor="end">Third class</text><g class="b"><title>Women, third class: 50.0% survived</title><path class="bar" d="M104,128 h181.0 a4,4 0 0 1 4,4 v9 a4,4 0 0 1 -4,4 h-181.0 z" fill="#1f5fae"/><text class="val" x="296.0" y="141">50%</text></g><g class="b"><title>Men, third class: 13.5% survived</title><path class="bar" d="M104,148 h46.0 a4,4 0 0 1 4,4 v9 a4,4 0 0 1 -4,4 h-46.0 z" fill="#b4532a"/><text class="val" x="160.9" y="161">13.5%</text></g></svg></div><figcaption>Survival rates in the 891-passenger training set that teams worked with.</figcaption></figure>
+        <h3>Titanic survival prediction</h3>
+        <p>Teams cleaned the passenger data, chose which details to feed the model, trained classifiers with scikit-learn, and submitted predictions to Kaggle's public leaderboard.</p>
+        <a class="more" href="projects.html#titanic" aria-label="Read more about Titanic survival prediction">Read more</a>
+      </article>
+      <article class="feature">
+        <figure><img src="assets/img/mnist-fashion-samples.png" alt="Sample images: two rows of handwritten digits zero through nine from MNIST, and two rows of clothing items from Fashion-MNIST." loading="lazy" width="912" height="374"><figcaption>Samples from MNIST (top) and Fashion-MNIST (bottom), two of the datasets members trained on.</figcaption></figure>
+        <h3>Image classifiers, from digits to clothes to photos</h3>
+        <p>Members built a convolutional neural network in Keras that reads handwritten digits from MNIST.</p>
+        <a class="more" href="projects.html#image-classifiers" aria-label="Read more about Image classifiers, from digits to clothes to photos">Read more</a>
+      </article>
+    </div>
+    <p style="margin:34px 0 0"><a class="btn btn--ghost" href="projects.html">See all projects</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="narrow">
+    <div class="section-head center">
+      <h2>Latest</h2>
+    </div>
+    <ul class="ann">
+      <li><time datetime="2026-09-21">September 21, 2026</time>
+        <div><h3><a href="news.html#signups-2026">Sign-ups are open for 2026-27</a></h3><p>New members can join at any meeting. Send the form on the Join page, or join our Google Classroom with code selpcao. The date of the first meeting will be posted here and on Classroom.</p></div></li>
+      <li><time datetime="2026-06-02">June 2, 2026</time>
+        <div><h3><a href="news.html#officers-2026">Officers announced for 2026-27</a></h3><p>Aarav Dey, Henna Patel, and Maushmi Miraj are co-presidents. Maahi Mehta and Shriyan Kumar are co-vice presidents, Ishan Sarda is secretary, and Jia Arora is junior officer.</p></div></li>
+    </ul>
+    <p class="center" style="margin:26px 0 0"><a class="more" href="news.html">All news</a></p>
   </div>
 </section>
 </main>
@@ -191,37 +164,30 @@
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <h5>SAIL</h5>
-        <p class="foot-about">South Artificial Intelligence Laboratory, the machine learning laboratory at High School South, running since 2022. Meetings are Tuesdays, 3:00 to 4:00 PM in Room 700F.</p>
+        <p class="foot-name">South Artificial Intelligence Laboratory</p>
+        <p>The AI and machine learning club at High School South. Every other Tuesday, 3 to 4 PM, Room 700F.</p>
       </div>
-      <div class="foot-col">
-        <h5>Research</h5>
-        <a href="nlp.html">Natural Language Processing</a>
-        <a href="vision.html">Computer Vision</a>
-        <a href="neural-systems.html">Neural Systems</a>
-        <a href="agents.html">Agents and RL</a>
-        <a href="data-science.html">Applied Data Science</a>
-        <a href="society.html">AI, Ethics and Society</a>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="research.html">Research groups</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="people.html">People</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
       </div>
-      <div class="foot-col">
-        <h5>Lab</h5>
-        <a href="projects.html">Projects</a>
-        <a href="people.html">People</a>
-        <a href="resources.html">Resources</a>
-        <a href="news.html">News</a>
-      </div>
-      <div class="foot-col">
-        <h5>Contact</h5>
-        <a href="join.html">Join the lab</a>
-        <a href="#" data-email>contact</a>
-        <a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a>
+      <div>
+        <h2>Get in touch</h2>
+        <ul>
+          <li><a href="join.html">Join SAIL</a></li>
+          <li><a href="#" data-email>Email us</a></li>
+          <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
+          <li>Google Classroom: selpcao</li>
+        </ul>
       </div>
     </div>
-    <div class="foot-bot">
-      <span>&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory</span>
-      <span>Google Classroom code: selpcao</span>
-      <span>Room 700F &middot; Tuesdays, 3:00 to 4:00 PM</span>
-    </div>
+    <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
   </div>
 </footer>
 <script src="assets/js/site.js"></script>

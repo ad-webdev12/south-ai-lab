@@ -4,79 +4,66 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>News | SAIL</title>
-<meta name="description" content="Announcements and session notes from the laboratory.">
-<meta property="og:title" content="News | South Artificial Intelligence Laboratory">
-<meta property="og:description" content="Announcements and session notes from the laboratory.">
+<meta name="description" content="Announcements from SAIL.">
+<meta property="og:title" content="News | SAIL">
+<meta property="og:description" content="Announcements from SAIL.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.6"/><path d="M6 16.5c3.4 0 4.2-9 7-9 2.2 0 2.6 5 5 5" stroke="#b4532a" stroke-width="1.7"/></svg><b>SAIL</b><span>High School South</span></a>
-    <nav class="mainnav">
-      <a href="index.html">Home</a>
-      <div class="navgroup"><button aria-haspopup="true">Research <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul><li><a href="research.html">Overview of all groups</a></li><li><a href="nlp.html">G-01 &nbsp; Natural Language Processing</a></li><li><a href="vision.html">G-02 &nbsp; Computer Vision</a></li><li><a href="neural-systems.html">G-03 &nbsp; Neural Systems</a></li><li><a href="agents.html">G-04 &nbsp; Agents and RL</a></li><li><a href="data-science.html">G-05 &nbsp; Applied Data Science</a></li><li><a href="society.html">G-06 &nbsp; AI, Ethics and Society</a></li></ul></div>
+    <a class="brand" href="index.html"><b>SAIL</b><span>High School South</span></a>
+    <nav class="mainnav" aria-label="Main">
+      <div class="navgroup" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
-      <a class="on" href="news.html">News</a>
-      <a href="join.html">Join</a>
+      <a aria-current="page" href="news.html">News</a>
     </nav>
-    <button class="navtoggle" data-navtoggle aria-label="Menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <a class="btn btn--light btn--sm mast-join" href="join.html">Join</a>
+    <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
-  <div class="drawer" data-drawer>
+  <nav class="drawer" data-drawer aria-label="Mobile">
     <div class="wrap">
       <a href="index.html">Home</a>
-      <a href="research.html">Research overview</a>
-      <p class="lbl">Groups</p>
-      <a class="sub" href="nlp.html">G-01 &nbsp; Natural Language Processing</a>
-      <a class="sub" href="vision.html">G-02 &nbsp; Computer Vision</a>
-      <a class="sub" href="neural-systems.html">G-03 &nbsp; Neural Systems</a>
-      <a class="sub" href="agents.html">G-04 &nbsp; Agents and RL</a>
-      <a class="sub" href="data-science.html">G-05 &nbsp; Applied Data Science</a>
-      <a class="sub" href="society.html">G-06 &nbsp; AI, Ethics and Society</a>
-      <p class="lbl">More</p>
+      <details><summary>Research</summary><a href="research.html">Compare all groups</a><a href="data-science.html">Applied Data Science</a><a href="vision.html">Computer Vision</a><a href="nlp.html">Natural Language Processing</a><a href="neural-networks.html">Neural Networks</a><a href="agents.html">Agents and Reinforcement Learning</a><a href="society.html">AI, Ethics and Society</a></details>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
+      <a href="join.html">Join SAIL</a>
     </div>
-  </div>
+  </nav>
 </header>
-<main>
+<main id="main">
 <section class="pagetop">
   <div class="wrap">
-    <p class="crumb"><a href="index.html">SAIL</a> / News</p>
-    <h1>News and announcements</h1>
-    <p class="lede">Session notes and announcements. Members get the same information through Google Classroom using code selpcao.</p>
+    <p class="crumb"><a href="index.html">Home</a> / News</p>
+    <h1>News</h1>
+    <p class="lede">Major club announcements are posted here. Week-to-week reminders go out on Google Classroom.</p>
   </div>
 </section>
 <section class="section">
-  <div class="wrap">
-    <div style="margin-bottom:34px">
-      <div class="h-rule"><h2>2026</h2><span class="right">8 entries</span></div>
-      <ul class="newspage"><li><span class="d">September 2026</span><div><h3>Recruitment is open for the 2026 to 2027 year</h3><p>Both tracks are accepting members. The date of the first interest session will be posted here and on Google Classroom. Anyone may attend a meeting before applying.</p></div></li><li><span class="d">June 2026</span><div><h3>Officers named for 2026 to 2027</h3><p>Henna Patel, Aarav Dey, and Maushmi Miraj were selected as co-presidents, with Maahi Mehta and Shriyan Kumar as co-vice presidents, Ishan Sarda as secretary, and Jia Arora as junior officer. Applicants who were not selected remain eligible for group leads and project roles.</p></div></li><li><span class="d">June 2026</span><div><h3>Last meeting of the year</h3><p>The final session covered a review of the year and plans for the next one, including a longer project cycle and a written record for each project.</p></div></li><li><span class="d">May 2026</span><div><h3>Officership applications extended</h3><p>The deadline for the officership interest form was moved to May 26. Meetings paused during AP examinations.</p></div></li><li><span class="d">April 2026</span><div><h3>Introduction to natural language processing</h3><p>A session on how text is represented and what sequence models do with it, followed by an assignment where members submitted their own example code.</p></div></li><li><span class="d">March 2026</span><div><h3>Computer vision session</h3><p>An interactive session where everyone present trained a working image classifier, then looked for inputs that broke it. Attendance was the highest of the year.</p></div></li><li><span class="d">March 2026</span><div><h3>Kaggle progress and Python sessions</h3><p>Members continued their Kaggle coursework and worked through a Python session covering the background the later units assume.</p></div></li><li><span class="d">January 2026</span><div><h3>Large language models and the model analysis project</h3><p>A session on how large language models work, which introduced the semester project comparing two models on one task.</p></div></li></ul>
-    </div>
-<div style="margin-bottom:34px">
-      <div class="h-rule"><h2>2025</h2><span class="right">4 entries</span></div>
-      <ul class="newspage"><li><span class="d">December 2025</span><div><h3>Deep learning, neural networks, and convolutional networks</h3><p>Members built a digit classifier from a shared notebook and then extended it to harder datasets. The notebook is still used as the starting point for the vision group.</p></div></li><li><span class="d">November 2025</span><div><h3>Titanic competition and the modeling pipeline</h3><p>Teams entered a public Kaggle competition and submitted scores through a shared form. Sessions in the same month covered seaborn, data cleaning, scikit-learn, and evaluation.</p></div></li><li><span class="d">October 2025</span><div><h3>First meeting of the year</h3><p>An introductory session on what the lab does, the projects planned for the year, and how the two tracks work.</p></div></li><li><span class="d">April 2025</span><div><h3>AI Hub published</h3><p>A website collecting club materials and resources was built by a member and added to the meeting workflow.</p></div></li></ul>
-    </div>
-<div style="margin-bottom:34px">
-      <div class="h-rule"><h2>2023</h2><span class="right">2 entries</span></div>
-      <ul class="newspage"><li><span class="d">October 2023</span><div><h3>Researchers from MIT Lincoln Laboratory visit</h3><p>Rob Seater and Kimberlee Chang answered questions on applied AI research and on ethics, with questions collected from members in advance.</p></div></li><li><span class="d">March 2023</span><div><h3>Guest lecture from Carnegie Mellon</h3><p>Prof. F. Xhakaj spoke about university research in intelligent learning systems and answered questions submitted by members beforehand.</p></div></li></ul>
-    </div>
-<div style="margin-bottom:34px">
-      <div class="h-rule"><h2>2022</h2><span class="right">1 entries</span></div>
-      <ul class="newspage"><li><span class="d">September 2022</span><div><h3>The lab holds its first meeting</h3><p>The first interest session was held in Room 700B, beginning with Python foundations and an introduction to what machine learning is.</p></div></li></ul>
-    </div>
+  <div class="narrow">
+    <ul class="ann">
+      <li id="signups-2026"><time datetime="2026-09-21">September 21, 2026</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">Sign-ups are open for 2026-27</h2><p>New members can join at any meeting. Send the form on the Join page, or join our Google Classroom with code selpcao. The date of the first meeting will be posted here and on Classroom.</p><p class="act"><a class="more" href="join.html">Join SAIL</a></p></div></li><li id="officers-2026"><time datetime="2026-06-02">June 2, 2026</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">Officers announced for 2026-27</h2><p>Aarav Dey, Henna Patel, and Maushmi Miraj are co-presidents. Maahi Mehta and Shriyan Kumar are co-vice presidents, Ishan Sarda is secretary, and Jia Arora is junior officer.</p><p class="act"><a class="more" href="people.html">Meet the team</a></p></div></li><li id="vision-workshop"><time datetime="2026-03-03">March 3, 2026</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">Computer vision workshop</h2><p>Members trained image classifiers in the browser with Teachable Machine, then took home a challenge to find its most creative use.</p><p class="act"><a class="more" href="projects.html#teachable-machine">See the Teachable Machine project</a></p></div></li><li id="titanic"><time datetime="2025-11-04">November 4, 2025</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">Teams enter the Titanic competition on Kaggle</h2><p>Members formed teams and submitted survival predictions to the public leaderboard, with prizes for the top scores.</p><p class="act"><a class="more" href="projects.html#titanic">See the Titanic project</a></p></div></li><li id="ai-hub"><time datetime="2025-04-08">April 8, 2025</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">AI Hub launches</h2><p>A member-built website that collects the club's resources in one place.</p><p class="act"><a class="more" href="projects.html#ai-hub">See the AI Hub project</a></p></div></li><li id="mit-ll"><time datetime="2023-10-17">October 17, 2023</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">Researchers from MIT Lincoln Laboratory visit</h2><p>Rob Seater and Kimberlee Chang spoke with members about AI research and ethics.</p></div></li><li id="cmu"><time datetime="2023-03-07">March 7, 2023</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">Guest lecture from Carnegie Mellon</h2><p>Prof. Xhakaj of Carnegie Mellon University presented recent research and answered member questions.</p></div></li><li id="first-meeting"><time datetime="2022-09-27">September 27, 2022</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">First meeting</h2><p>The club held its first interest meeting in Room 700B and started with Python basics.</p></div></li>
+    </ul>
   </div>
 </section>
 </main>
@@ -84,37 +71,30 @@
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <h5>SAIL</h5>
-        <p class="foot-about">South Artificial Intelligence Laboratory, the machine learning laboratory at High School South, running since 2022. Meetings are Tuesdays, 3:00 to 4:00 PM in Room 700F.</p>
+        <p class="foot-name">South Artificial Intelligence Laboratory</p>
+        <p>The AI and machine learning club at High School South. Every other Tuesday, 3 to 4 PM, Room 700F.</p>
       </div>
-      <div class="foot-col">
-        <h5>Research</h5>
-        <a href="nlp.html">Natural Language Processing</a>
-        <a href="vision.html">Computer Vision</a>
-        <a href="neural-systems.html">Neural Systems</a>
-        <a href="agents.html">Agents and RL</a>
-        <a href="data-science.html">Applied Data Science</a>
-        <a href="society.html">AI, Ethics and Society</a>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="research.html">Research groups</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="people.html">People</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
       </div>
-      <div class="foot-col">
-        <h5>Lab</h5>
-        <a href="projects.html">Projects</a>
-        <a href="people.html">People</a>
-        <a href="resources.html">Resources</a>
-        <a href="news.html">News</a>
-      </div>
-      <div class="foot-col">
-        <h5>Contact</h5>
-        <a href="join.html">Join the lab</a>
-        <a href="#" data-email>contact</a>
-        <a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a>
+      <div>
+        <h2>Get in touch</h2>
+        <ul>
+          <li><a href="join.html">Join SAIL</a></li>
+          <li><a href="#" data-email>Email us</a></li>
+          <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
+          <li>Google Classroom: selpcao</li>
+        </ul>
       </div>
     </div>
-    <div class="foot-bot">
-      <span>&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory</span>
-      <span>Google Classroom code: selpcao</span>
-      <span>Room 700F &middot; Tuesdays, 3:00 to 4:00 PM</span>
-    </div>
+    <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
   </div>
 </footer>
 <script src="assets/js/site.js"></script>

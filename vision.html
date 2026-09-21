@@ -4,97 +4,98 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Computer Vision | SAIL</title>
-<meta name="description" content="Convolutional models on image data, from a first classifier trained in a browser to controlled experiments on standard datasets.">
-<meta property="og:title" content="Computer Vision | South Artificial Intelligence Laboratory">
-<meta property="og:description" content="Convolutional models on image data, from a first classifier trained in a browser to controlled experiments on standard datasets.">
+<meta name="description" content="Train models that recognize what's in a photo or a video.">
+<meta property="og:title" content="Computer Vision | SAIL">
+<meta property="og:description" content="Train models that recognize what's in a photo or a video.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.6"/><path d="M6 16.5c3.4 0 4.2-9 7-9 2.2 0 2.6 5 5 5" stroke="#b4532a" stroke-width="1.7"/></svg><b>SAIL</b><span>High School South</span></a>
-    <nav class="mainnav">
-      <a href="index.html">Home</a>
-      <div class="navgroup on"><button aria-haspopup="true">Research <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul><li><a href="research.html">Overview of all groups</a></li><li><a href="nlp.html">G-01 &nbsp; Natural Language Processing</a></li><li><a href="vision.html">G-02 &nbsp; Computer Vision</a></li><li><a href="neural-systems.html">G-03 &nbsp; Neural Systems</a></li><li><a href="agents.html">G-04 &nbsp; Agents and RL</a></li><li><a href="data-science.html">G-05 &nbsp; Applied Data Science</a></li><li><a href="society.html">G-06 &nbsp; AI, Ethics and Society</a></li></ul></div>
+    <a class="brand" href="index.html"><b>SAIL</b><span>High School South</span></a>
+    <nav class="mainnav" aria-label="Main">
+      <div class="navgroup on" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
     </nav>
-    <button class="navtoggle" data-navtoggle aria-label="Menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <a class="btn btn--light btn--sm mast-join" href="join.html">Join</a>
+    <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
-  <div class="drawer" data-drawer>
+  <nav class="drawer" data-drawer aria-label="Mobile">
     <div class="wrap">
       <a href="index.html">Home</a>
-      <a href="research.html">Research overview</a>
-      <p class="lbl">Groups</p>
-      <a class="sub" href="nlp.html">G-01 &nbsp; Natural Language Processing</a>
-      <a class="sub" href="vision.html">G-02 &nbsp; Computer Vision</a>
-      <a class="sub" href="neural-systems.html">G-03 &nbsp; Neural Systems</a>
-      <a class="sub" href="agents.html">G-04 &nbsp; Agents and RL</a>
-      <a class="sub" href="data-science.html">G-05 &nbsp; Applied Data Science</a>
-      <a class="sub" href="society.html">G-06 &nbsp; AI, Ethics and Society</a>
-      <p class="lbl">More</p>
+      <details><summary>Research</summary><a href="research.html">Compare all groups</a><a href="data-science.html">Applied Data Science</a><a href="vision.html">Computer Vision</a><a href="nlp.html">Natural Language Processing</a><a href="neural-networks.html">Neural Networks</a><a href="agents.html">Agents and Reinforcement Learning</a><a href="society.html">AI, Ethics and Society</a></details>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
+      <a href="join.html">Join SAIL</a>
     </div>
-  </div>
+  </nav>
 </header>
-<main>
+<main id="main">
 <section class="pagetop">
   <div class="wrap">
-    <p class="crumb"><a href="index.html">SAIL</a> / <a href="research.html">Research</a> / G-02</p>
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>Computer Vision</h1>
-    <p class="lede">Convolutional models on image data, from a first classifier trained in a browser to controlled experiments on standard datasets.</p>
+    <p class="lede">Computer vision is about getting a program to understand pictures. Members train models that tell digits, clothes, or hand gestures apart, then test them on photos the model has never seen to find where it breaks.</p>
   </div>
 </section>
 <section class="section">
   <div class="wrap split">
     <div class="prose">
-      <p>The vision group works with image data. In March 2026 we ran a session where every person present trained and tested a working image classifier inside the hour using Teachable Machine, then spent the rest of the session finding inputs that broke it. Most sessions follow that order: get something working, then test it against inputs it was not trained on.</p><p>From there the work moves to Keras. In December 2025 members built a convolutional network on MNIST from a shared notebook, then extended it to Fashion-MNIST and CIFAR-10, which are harder and produce lower accuracy. The same architecture scores very differently on the three datasets, which is a useful thing to see early.</p>
+      
+      <h2>What you'll learn and build</h2>
+      <ul class="checks"><li>An image classifier trained in your browser in one meeting</li><li>A convolutional neural network in Keras that reads handwritten digits</li><li>A model trained on photos you take and label yourself</li><li>A webcam demo that runs your model live</li></ul>
 
-      <h3>What the group covers</h3>
-      <ul><li>Image preprocessing, normalization, and augmentation</li><li>Convolution, pooling, and network depth</li><li>Transfer learning on small datasets</li><li>Collecting and labeling original image data</li><li>Running a model in the browser</li><li>Confusion matrices and per-class error analysis</li></ul>
+      <h2>Experience needed</h2>
+      <p>A little Python. If you've used a notebook in the fall sessions, you're ready.</p>
 
-      <h3>Sessions and work so far</h3>
-      <ul class="itemlist">
-      <li><span class="when">March 2026</span><div><p>Computer vision session using Teachable Machine, covering vision, pose, and audio models.</p></div></li>
-      <li><span class="when">December 2025</span><div><p>Convolutional network on MNIST built from a shared notebook, then extended to Fashion-MNIST and CIFAR-10.</p></div></li>
-      <li><span class="when">December 2025</span><div><p>Architecture exercise: change one component of the network at a time and record what happens to accuracy.</p></div></li>
+      <h2>This year</h2>
+      <div class="planned">
+        <span class="tag">Planned for 2026-27</span>
+        <ul><li>A group project on photos that members take and label</li><li>Transfer learning: reusing a large pretrained model on a small dataset</li><li>A short report on where our best model fails, and why</li></ul>
+      </div>
+
+      <h2>Past sessions and work</h2>
+      <ul class="dated">
+        <li><span class="when">Mar 3, 2026</span><div><p>Computer vision workshop. Members trained image classifiers with Teachable Machine. The take-home challenge added pose and sound models.</p><p class="linkrow"><span><a href="https://docs.google.com/presentation/d/17pi6w3cpUJ148eE2kXSlHaxQWI9_JwpTajGQzl5cl04/edit">Slides</a></span><span><a href="projects.html#teachable-machine">Project page</a></span></p></div></li>
+        <li><span class="when">Dec 2, 2025</span><div><p>Built a convolutional network for MNIST in Keras, then tried the same idea on Fashion-MNIST and CIFAR-10.</p><p class="linkrow"><span><a href="projects.html#image-classifiers">Project page</a></span><span><a href="https://github.com/helenc3/demo_notebooks/blob/main/mnistdemo.ipynb" rel="noopener">Notebook</a></span></p></div></li>
       </ul>
 
-      <h3>Planned for this year</h3>
-      <ul><li>A class project on images members photograph and label themselves.</li><li>Transfer learning compared against training from scratch on the same small dataset.</li><li>A short writeup on where our best model fails and why.</li></ul>
-
-      <h3>Reading</h3>
-      <ol class="refs"><li>Keras dataset documentation, used directly in sessions.</li><li>Goodfellow, Bengio and Courville, <i>Deep Learning</i>, chapter 9.</li><li>Stanford CS231n course notes on convolutional networks.</li></ol>
+      <h2>Learning resources</h2>
+      <ul class="res res--plain">
+        <li><div><a class="t" href="https://teachablemachine.withgoogle.com/" rel="noopener">Teachable Machine</a><span class="m">Interactive, 30 minutes</span><p>Train an image, pose, or sound classifier from your webcam. No code.</p></div></li>
+        <li><div><a class="t" href="https://poloclub.github.io/cnn-explainer/" rel="noopener">CNN Explainer</a><span class="m">Interactive, 30 minutes</span><p>See what each layer of a convolutional network does to an image.</p></div></li>
+        <li><div><a class="t" href="https://www.kaggle.com/learn/computer-vision" rel="noopener">Kaggle Learn: Computer Vision</a><span class="m">Course, 4 hours</span><p>Convolutions, pooling, data augmentation, and transfer learning in Keras.</p></div></li>
+        <li><div><a class="t" href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" rel="noopener">3Blue1Brown: Neural Networks</a><span class="m">Video, 1 hour</span><p>Watch the first four videos: what a neural network is, how it learns, and backpropagation. Start here.</p></div></li>
+        <li><div><a class="t" href="https://playground.tensorflow.org/" rel="noopener">TensorFlow Playground</a><span class="m">Interactive, 30 minutes</span><p>Train a tiny network in your browser and watch what each neuron learns.</p></div></li>
+        <li><div><a class="t" href="https://www.kaggle.com/learn/intro-to-deep-learning" rel="noopener">Kaggle Learn: Intro to Deep Learning</a><span class="m">Course, 4 hours</span><p>Build and train networks in Keras, including dropout and batch normalization.</p></div></li>
+      </ul>
+      <p><a class="more" href="resources.html#planner">Full learning plan on Resources</a></p>
     </div>
-    <aside>
-      <div class="factbox">
-        <h4>G-02</h4>
-        <dl>
-          <dt>Open to</dt><dd>Both tracks</dd>
-          <dt>Group lead</dt><dd>Appointed each fall from the Applied Research Division</dd>
-          <dt>Starting point</dt><dd>Open to first-year members. The Keras work assumes you have used a notebook before, which the fall sessions cover.</dd>
-          <dt>Meets</dt><dd>Tuesdays, 3:00 to 4:00 PM, Room 700F</dd>
-        </dl>
-        <div class="act">
-          <p class="tags" style="margin:0 0 12px"><span>Keras</span><span>TensorFlow</span><span>Teachable Machine</span><span>OpenCV</span><span>Google Colab</span></p>
-          <a class="btn btn--wide" href="join.html#apply">Apply and name this group</a>
-        </div>
-      </div>
-      <p class="small muted" style="margin-top:18px">Other groups: <a href="nlp.html">Natural Language Processing</a>, <a href="neural-systems.html">Neural Systems</a>, <a href="agents.html">Agents and RL</a>, <a href="data-science.html">Applied Data Science</a>, <a href="society.html">AI, Ethics and Society</a>.</p>
+    <aside class="side">
+      <h2>Join this group</h2>
+      <p class="small" style="color:var(--ink-2)">Tell us you're interested when you sign up. You can change groups at any time.</p>
+      <a class="btn" href="join.html#join-vision">Express interest</a>
+      <hr>
+      <dl>
+        <dt>Meetings</dt><dd>Every other Tuesday, 3 to 4 PM, Room 700F</dd>
+        <dt>Group lead</dt><dd>To be named in October</dd>
+      </dl>
+      <hr>
+      <h2>Related groups</h2>
+      <ul><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="nlp.html">Natural Language Processing</a></li></ul>
     </aside>
   </div>
 </section>
@@ -103,37 +104,30 @@
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <h5>SAIL</h5>
-        <p class="foot-about">South Artificial Intelligence Laboratory, the machine learning laboratory at High School South, running since 2022. Meetings are Tuesdays, 3:00 to 4:00 PM in Room 700F.</p>
+        <p class="foot-name">South Artificial Intelligence Laboratory</p>
+        <p>The AI and machine learning club at High School South. Every other Tuesday, 3 to 4 PM, Room 700F.</p>
       </div>
-      <div class="foot-col">
-        <h5>Research</h5>
-        <a href="nlp.html">Natural Language Processing</a>
-        <a href="vision.html">Computer Vision</a>
-        <a href="neural-systems.html">Neural Systems</a>
-        <a href="agents.html">Agents and RL</a>
-        <a href="data-science.html">Applied Data Science</a>
-        <a href="society.html">AI, Ethics and Society</a>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="research.html">Research groups</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="people.html">People</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
       </div>
-      <div class="foot-col">
-        <h5>Lab</h5>
-        <a href="projects.html">Projects</a>
-        <a href="people.html">People</a>
-        <a href="resources.html">Resources</a>
-        <a href="news.html">News</a>
-      </div>
-      <div class="foot-col">
-        <h5>Contact</h5>
-        <a href="join.html">Join the lab</a>
-        <a href="#" data-email>contact</a>
-        <a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a>
+      <div>
+        <h2>Get in touch</h2>
+        <ul>
+          <li><a href="join.html">Join SAIL</a></li>
+          <li><a href="#" data-email>Email us</a></li>
+          <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
+          <li>Google Classroom: selpcao</li>
+        </ul>
       </div>
     </div>
-    <div class="foot-bot">
-      <span>&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory</span>
-      <span>Google Classroom code: selpcao</span>
-      <span>Room 700F &middot; Tuesdays, 3:00 to 4:00 PM</span>
-    </div>
+    <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
   </div>
 </footer>
 <script src="assets/js/site.js"></script>

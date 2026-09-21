@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Natural Language Processing | SAIL</title>
-<meta name="description" content="Build programs that read, sort, and write text, from spam filters to chatbots.">
-<meta property="og:title" content="Natural Language Processing | SAIL">
-<meta property="og:description" content="Build programs that read, sort, and write text, from spam filters to chatbots.">
+<title>Neural Networks | SAIL</title>
+<meta name="description" content="Open up a neural network, build one from scratch, and learn the math that makes it work.">
+<meta property="og:title" content="Neural Networks | SAIL">
+<meta property="og:description" content="Open up a neural network, build one from scratch, and learn the math that makes it work.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,8 +47,8 @@
 <section class="pagetop">
   <div class="wrap">
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
-    <h1>Natural Language Processing</h1>
-    <p class="lede">This group works with language: programs that read a review and decide if it's positive, find the topic of an article, or answer questions. We start with simple word-counting methods you can check by hand, then move up to the transformer models behind today's chatbots.</p>
+    <h1>Neural Networks</h1>
+    <p class="sub">How they learn, and the math behind them</p><p class="lede">This group looks at how neural networks work on the inside. You'll build a small network from scratch, watch it learn, and pick up the algebra and calculus that explain why it works. The subject is artificial neural networks, not neuroscience.</p>
   </div>
 </section>
 <section class="section">
@@ -56,38 +56,37 @@
     <div class="prose">
       
       <h2>What you'll learn and build</h2>
-      <ul class="checks"><li>A spam or sentiment classifier trained on text you collect</li><li>A tool that turns sentences into vectors and finds the most similar ones</li><li>A small chatbot or question-answering app built on an open model</li><li>A fair test for comparing two language models on the same task</li></ul>
+      <ul class="checks"><li>A neural network written from scratch in NumPy</li><li>A plot of a network's loss going down as it trains</li><li>An experiment comparing optimizers such as SGD and Adam</li><li>Short notes that explain backpropagation to next year's members</li></ul>
 
       <h2>Experience needed</h2>
-      <p>Basic Python: functions, lists, and dictionaries. The fall Foundations sessions cover all of it.</p>
+      <p>Algebra II. We teach the calculus as it comes up.</p>
 
       <h2>This year</h2>
       <div class="planned">
         <span class="tag">Planned for 2026-27</span>
-        <ul><li>A text classifier trained on a dataset the group collects</li><li>Reading the original transformer paper together over two meetings</li><li>Comparing open language models on one shared task</li></ul>
+        <ul><li>A two-layer network in NumPy, with every gradient checked by hand</li><li>An optimizer comparison on a single dataset</li><li>A member-written set of math notes</li></ul>
       </div>
 
       <h2>Past sessions and work</h2>
       <ul class="dated">
-        <li><span class="when">Apr 21, 2026</span><div><p>Intro to NLP workshop. The follow-up assignment was to write and upload a short NLP program.</p><p class="linkrow"><span><a href="https://docs.google.com/presentation/d/1VUgiyXBDiHxhG9FNz5aco_8p5V36rizWplrHiq9wcpY/edit">Slides</a></span></p></div></li>
-        <li><span class="when">Jan 6, 2026</span><div><p>Large language models session, which kicked off the Analyzing AI Models project.</p><p class="linkrow"><span><a href="https://docs.google.com/presentation/d/1Ppeo3R7W836nlh6s8xNREOOieh3VH0NeGBWoyY9HdWI/edit">Slides</a></span></p></div></li>
-        <li><span class="when">Feb 18, 2025</span><div><p>Presentation on how large language models work.</p><p class="linkrow"><span><a href="https://docs.google.com/presentation/d/1_ws9sbxlk37RvVBoQyLy4C7CJ7bG2RseZZJAv4aleTI/edit">Slides</a> <span class="meta">(school account)</span></span></p></div></li>
+        <li><span class="when">Dec 2, 2025</span><div><p>Introduction to deep learning, neural networks, and convolutional networks.</p><p class="linkrow"><span><a href="https://github.com/helenc3/demo_notebooks/blob/main/mnistdemo.ipynb" rel="noopener">Notebook</a></span></p></div></li>
+        <li><span class="when">2023 and 2024</span><div><p>Neural network lessons, introduced with Google's Quick, Draw! game.</p><p class="linkrow"><span><a href="https://quickdraw.withgoogle.com/" rel="noopener">Quick, Draw!</a></span></p></div></li>
       </ul>
 
       <h2>Learning resources</h2>
       <ul class="res res--plain">
-        <li><div><a class="t" href="https://www.youtube.com/watch?v=zjkBMFhNj_g" rel="noopener">Intro to Large Language Models</a><span class="m">Video, 1 hour</span><p>Andrej Karpathy's general-audience talk on what LLMs are and how they're trained.</p></div></li>
-        <li><div><a class="t" href="https://poloclub.github.io/transformer-explainer/" rel="noopener">Transformer Explainer</a><span class="m">Interactive, 30 minutes</span><p>Type a sentence and watch a real GPT-2 model predict the next word, step by step.</p></div></li>
-        <li><div><a class="t" href="https://jalammar.github.io/illustrated-transformer/" rel="noopener">The Illustrated Transformer</a><span class="m">Article, 1 hour</span><p>The standard visual walkthrough of attention and the transformer architecture.</p></div></li>
-        <li><div><a class="t" href="https://huggingface.co/learn/nlp-course/chapter1/1" rel="noopener">Hugging Face LLM Course</a><span class="m">Course, chapters 1 to 3</span><p>Use pretrained models for classification, summarizing, and generation in a few lines of Python.</p></div></li>
-        <li><div><a class="t" href="https://www.promptingguide.ai/" rel="noopener">Prompt Engineering Guide</a><span class="m">Article, 3 hours</span><p>Techniques for getting better results out of language models, with examples.</p></div></li>
+        <li><div><a class="t" href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" rel="noopener">3Blue1Brown: Neural Networks</a><span class="m">Video, 1 hour</span><p>Watch the first four videos: what a neural network is, how it learns, and backpropagation. Start here.</p></div></li>
+        <li><div><a class="t" href="https://playground.tensorflow.org/" rel="noopener">TensorFlow Playground</a><span class="m">Interactive, 30 minutes</span><p>Train a tiny network in your browser and watch what each neuron learns.</p></div></li>
+        <li><div><a class="t" href="https://www.kaggle.com/learn/intro-to-deep-learning" rel="noopener">Kaggle Learn: Intro to Deep Learning</a><span class="m">Course, 4 hours</span><p>Build and train networks in Keras, including dropout and batch normalization.</p></div></li>
+        <li><div><a class="t" href="https://github.com/helenc3/demo_notebooks/blob/main/mnistdemo.ipynb" rel="noopener">MNIST demo notebook</a><span class="m">Club notebook</span><p>The convolutional network from our December 2025 session. Run it, then change it.</p></div></li>
+        <li><div><a class="t" href="https://www.3blue1brown.com/topics/linear-algebra" rel="noopener">3Blue1Brown: Essence of Linear Algebra</a><span class="m">Video, 3 hours</span><p>Vectors and matrices explained with animation. Watch when the math starts to feel like a wall.</p></div></li>
       </ul>
       <p><a class="more" href="resources.html#planner">Full learning plan on Resources</a></p>
     </div>
     <aside class="side">
       <h2>Join this group</h2>
       <p class="small" style="color:var(--ink-2)">Tell us you're interested when you sign up. You can change groups at any time.</p>
-      <a class="btn" href="join.html#join-nlp">Express interest</a>
+      <a class="btn" href="join.html#join-neural-networks">Express interest</a>
       <hr>
       <dl>
         <dt>Meetings</dt><dd>Every other Tuesday, 3 to 4 PM, Room 700F</dd>
@@ -95,7 +94,7 @@
       </dl>
       <hr>
       <h2>Related groups</h2>
-      <ul><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul>
+      <ul><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li></ul>
     </aside>
   </div>
 </section>

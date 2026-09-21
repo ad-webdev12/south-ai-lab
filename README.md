@@ -1,108 +1,100 @@
 # South Artificial Intelligence Laboratory (SAIL)
 
-Website for the AI and machine learning lab at High School South. Thirteen static pages, no framework,
-no dependencies, no build step on the server.
+Website for the AI and machine learning club at High School South.
+Live at https://ad-webdev12.github.io/south-ai-lab/ once GitHub Pages is switched on
+(Settings, Pages, deploy from branch `main`, folder `/ (root)`).
+
+Thirteen static pages, no framework, no dependencies, no build step on the server.
 
 ```
-build.py            all site content plus the page templates
-*.html              generated output, committed so GitHub Pages can serve it directly
-assets/css/site.css layout and type
-assets/js/site.js   mobile nav, application form, hero visual
-assets/favicon.svg
+build.py             page copy, templates, and the build checks
+resources_data.py    everything on the Resources page: plan, learning planner, reading group, decks
+*.html               generated output (committed, so GitHub Pages serves it directly)
+assets/css/site.css  styles
+assets/js/site.js    navigation, join form, planner progress, hero animation
+assets/img/          figures and project photos
+assets/docs/         the project README template that Resources links to
 ```
 
-## Local preview
+## Preview locally
 
 ```bash
 python -m http.server 4175
 ```
 
-Then open http://localhost:4175.
+## Edit, then rebuild
 
-## Editing content
-
-Everything readable on the site comes from the data blocks at the top of `build.py`:
-
-| Block | Controls |
-| --- | --- |
-| `SITE` | Lab name, school, room, meeting time, Classroom code, Instagram |
-| `AREAS` | The six research group pages |
-| `LEADERSHIP`, `ALUMNI` | People page |
-| `TALKS` | Visitors listed on the Research page |
-| `PROJECTS` | Projects page and nothing else |
-| `NEWS` | News page and the three-column block on the home page |
-| `CURRICULUM`, `TOOLING`, `EXTERNAL` | Resources page |
-
-Rebuild after editing:
+Never edit the `.html` files by hand. Change the data blocks at the top of `build.py`
+or `resources_data.py`, then run:
 
 ```bash
 python build.py
 ```
 
-The build refuses to pass silently if an em dash, an en dash, or one of a list of stock phrases
-(`delve`, `seamless`, `cutting-edge`, `unlock`, `empower`, `dive into`, and so on) appears in the
-output. Keep that check in place; it is the reason the copy reads the way it does.
+| To change | Edit |
+| --- | --- |
+| Meeting time, room, Classroom code, Instagram | `SITE` in `build.py` (one place, used everywhere) |
+| Officers | `TEAM` and `PAST_OFFICERS` |
+| Research groups and their pages | `GROUPS` |
+| Featured projects, workshop archive | `FEATURED`, `SESSIONS` |
+| News | `NEWS` (keep it to announcements that matter) |
+| Monthly plan, learning planner, reading group, slide decks | `resources_data.py` |
+| Contact email | `LAB_EMAIL` at the top of `assets/js/site.js` |
 
-## The hero visual
+Adding a research group means adding one dict to `GROUPS`. The menu, home page, comparison
+table, join form, and related-group links all pick it up.
 
-The animation behind the home page title is gradient descent with momentum on a two-dimensional loss
-surface built from six Gaussian wells plus a shallow quadratic term. The contour lines are computed
-with marching squares at runtime, the optimizer runs the real update rule, and the step, loss, learning
-rate, and momentum printed in the corner are the live values. The small chart under the numbers is the
-loss history for the current run.
+## What the build checks
 
-Clicking the surface restarts the optimizer from that point, which is worth trying: different starting
-points fall into different local minima, and that is the reason this particular visual is on an AI lab
-site instead of an abstract pattern.
+`python build.py` fails loudly on any of these:
 
-Tuning lives at the top of the `hero` function in `assets/js/site.js`: `LR`, `MU`, `STEPS_PER_SEC`, and
-the `WELLS` array. Steps advance on elapsed time rather than per frame, so the speed is the same on a
-fast machine and a slow one. If a visitor has reduced motion turned on, the path is drawn once and the
-animation never starts.
+- **Contrast.** Every text and background pair used in the CSS must reach WCAG AA (4.5:1).
+- **Headings.** Exactly one `h1` per page, and no skipped levels.
+- **Phrasing.** No em dashes or en dashes, and none of a list of stock phrases. Add to `BANNED`
+  in `build.py` when you catch a new one.
+- **Images.** It lists featured projects that have no photo yet.
 
-## Content policy
+## Project photos
 
-The site claims only what the lab has actually done. Sessions and projects listed on the Projects page
-and on each group page are taken from the club's own announcement archive, and anything that has not
-happened yet is under a heading that says so. Please keep that separation when you add to it. A high
-school lab that lists real Teachable Machine sessions and a real Kaggle entry reads better than one
-that lists invented research output.
+Featured projects show a figure when one exists. Two already do (a chart built from the real
+Titanic training data, and real samples from MNIST and Fashion-MNIST). To add the others, drop
+a file in `assets/img/` with the matching name and rebuild:
 
-## Before publishing: replace these
+- `assets/img/teachable-machine.jpg`
+- `assets/img/ai-hub.jpg` (a screenshot of the site)
 
-1. **Contact email.** `LAB_EMAIL` at the top of `assets/js/site.js` is a placeholder. The footer link
-   and the application form both use it.
-2. **School name.** `SITE["school"]` says `High School South`.
-3. **Interest meeting date.** The first news entry says the date will be posted.
-4. Check the spelling of every name on the People page, and that each person is comfortable being
-   listed on a public site.
+## Still to confirm before you share the link widely
 
-## Publishing on GitHub Pages
+The site states these as fact. They were reconstructed from the Google Classroom archive, so
+check each one:
 
-The repository is already initialized and committed. Once the GitHub CLI is installed and you are
-signed in:
+1. **Contact email** in `assets/js/site.js` is a placeholder.
+2. **School name** in `SITE["school"]`.
+3. **Meeting rhythm.** The site says every other Tuesday, 3:00 to 4:00 PM, Room 700F, which is what
+   the 2025-26 announcements show.
+4. **First meeting date.** The top news item says it will be posted. Put the real date in.
+5. **Group timing.** The site says Applied Research teams work with their group from October and
+   Foundations members join group activities in the second semester. That is a policy decision,
+   so make sure the officers agree.
+6. **Analyzing AI Models** (January 2026) is listed in the workshop archive only, because the
+   actual task members were given isn't recorded anywhere I could see. If you add the task, a
+   result, and credits, move it into `FEATURED`.
+7. **AI Hub** has no link yet. Add its URL to the `links` list in `FEATURED`.
+8. Names on the People page: spelling, and that everyone is fine being listed publicly.
 
-```bash
-gh repo create south-ai-lab --public --source . --push
-```
+## The hero animation
 
-```bash
-gh api -X POST repos/:owner/south-ai-lab/pages -f "source[branch]=main" -f "source[path]=/"
-```
+Particles are carried through a slowly changing vector field, and each one keeps a few seconds of
+position history that is drawn as a tapered line, so the streamlines of the field become visible.
+Moving the pointer adds a local swirl that fades when the pointer leaves. A click sends out a ring.
 
-The site appears at `https://<your-username>.github.io/south-ai-lab/` a minute or two later. Without
-the CLI, create an empty public repository on github.com and run:
+It pauses when the hero is off screen or the tab is hidden, has a visible pause button, starts
+paused for visitors who ask for reduced motion, and rebuilds itself when the hero changes size.
+Tuning lives at the top of `hero()` in `site.js`: particle count in `build()`, trail length in
+`HIST` and `SAMPLE`, pointer strength in `advance()`.
 
-```bash
-git remote add origin https://github.com/<your-username>/south-ai-lab.git
-```
+## Where the learning resources came from
 
-```bash
-git push -u origin main
-```
-
-Then turn on Pages under Settings, Pages, "Deploy from a branch", branch `main`, folder `/ (root)`.
-
-Netlify works too: drop this folder onto app.netlify.com/drop for an instant URL, or connect the
-repository for automatic deploys. There is nothing to configure in either case, since the HTML is
-committed.
+The planner was assembled from two public link collections and a university AI safety syllabus,
+then cut down hard: a resource stays only if it is free, widely used, and gets a student closer
+to starting a project. Every link was checked by script on 2026-09-21. Re-check them once a year.

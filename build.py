@@ -5,494 +5,549 @@ Static site generator for the South Artificial Intelligence Laboratory.
     python build.py
 
 Writes plain .html files next to this script. No dependencies.
-Content lives in the data blocks below. Templates are at the bottom.
+Page content lives in the data blocks below. The learning planner on the
+Resources page lives in resources_data.py.
+
+The build also runs four checks and reports anything that fails:
+text contrast (WCAG AA), heading order, banned phrasing, and missing images.
 """
 
+import glob
 import os
+import re
+
+from resources_data import BUILD_SECTION, DECKS, IDEAS, PLAN, PROGRAMS, SAFETY, STAGES
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+YEAR = "2026-27"
 
 SITE = {
     "name": "South Artificial Intelligence Laboratory",
     "short": "SAIL",
     "school": "High School South",
     "room": "Room 700F",
-    "meets": "Tuesdays, 3:00 to 4:00 PM",
+    "meets": "Every other Tuesday, 3:00 to 4:00 PM",
+    "meets_short": "Every other Tuesday, 3 to 4 PM",
     "code": "selpcao",
     "instagram": "hss_aiclub",
-    "founded": "2022",
 }
-
-MARK = (
-    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">'
-    '<path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.6"/>'
-    '<path d="M6 16.5c3.4 0 4.2-9 7-9 2.2 0 2.6 5 5 5" stroke="#b4532a" stroke-width="1.7"/>'
-    "</svg>"
-)
 
 # ---------------------------------------------------------------- research groups
 
-AREAS = [
+GROUPS = [
     {
-        "slug": "nlp.html",
-        "code": "G-01",
-        "name": "Natural Language Processing",
-        "short": "Natural Language Processing",
-        "summary": "How text is represented numerically, what sequence models learn from it, and how to judge output that has no single right answer.",
-        "overview": [
-            "The language group works on models that read and produce text. Our first session on the subject ran in April 2026 and covered tokenization, word representations, and the places where large language models fail. Members submitted working example code at the end of that unit rather than notes.",
-            "The group starts from methods that can be inspected by hand, such as bag of words and TF-IDF, before moving to embeddings and attention. Evaluation is treated as part of the work: when a model produces a sentence instead of a label, someone has to decide what counts as correct, and that decision needs to be written down before the results are read.",
-        ],
-        "topics": [
-            "Tokenization and text cleaning",
-            "Bag of words, TF-IDF, and what they throw away",
-            "Word and sentence embeddings",
-            "Attention and the transformer block",
-            "Prompting, context, and failure modes of language models",
-            "Writing an evaluation rubric for generated text",
-        ],
-        "done": [
-            ("April 2026", "Introduction to NLP session, with slides covering representation, sequence models, and current applications."),
-            ("April 2026", "Members wrote and submitted their own NLP example code as the unit assignment."),
-            ("January 2026", "The Analyzing AI Models project: pick two models, give them the same task, and report where their behavior differs."),
-        ],
-        "planned": [
-            "Build a text classifier on a dataset the group collects and labels itself.",
-            "Read the original transformer paper together across two sessions.",
-            "Compare open models on one shared task using a rubric written in advance.",
-        ],
-        "tools": ["Python", "scikit-learn", "Hugging Face Transformers", "NLTK", "Google Colab"],
-        "reading": [
-            "Jurafsky and Martin, <i>Speech and Language Processing</i>, chapters 2 through 6 (free online).",
-            "Alammar, <i>The Illustrated Transformer</i>.",
-            "Vaswani et al., <i>Attention Is All You Need</i> (2017).",
-        ],
-        "entry": "Python functions, lists, and dictionaries. The attention unit is easier with some linear algebra, which the neural systems group covers.",
-    },
-    {
-        "slug": "vision.html",
-        "code": "G-02",
-        "name": "Computer Vision",
-        "short": "Computer Vision",
-        "summary": "Convolutional models on image data, from a first classifier trained in a browser to controlled experiments on standard datasets.",
-        "overview": [
-            "The vision group works with image data. In March 2026 we ran a session where every person present trained and tested a working image classifier inside the hour using Teachable Machine, then spent the rest of the session finding inputs that broke it. Most sessions follow that order: get something working, then test it against inputs it was not trained on.",
-            "From there the work moves to Keras. In December 2025 members built a convolutional network on MNIST from a shared notebook, then extended it to Fashion-MNIST and CIFAR-10, which are harder and produce lower accuracy. The same architecture scores very differently on the three datasets, which is a useful thing to see early.",
-        ],
-        "topics": [
-            "Image preprocessing, normalization, and augmentation",
-            "Convolution, pooling, and network depth",
-            "Transfer learning on small datasets",
-            "Collecting and labeling original image data",
-            "Running a model in the browser",
-            "Confusion matrices and per-class error analysis",
-        ],
-        "done": [
-            ("March 2026", "Computer vision session using Teachable Machine, covering vision, pose, and audio models."),
-            ("December 2025", "Convolutional network on MNIST built from a shared notebook, then extended to Fashion-MNIST and CIFAR-10."),
-            ("December 2025", "Architecture exercise: change one component of the network at a time and record what happens to accuracy."),
-        ],
-        "planned": [
-            "A class project on images members photograph and label themselves.",
-            "Transfer learning compared against training from scratch on the same small dataset.",
-            "A short writeup on where our best model fails and why.",
-        ],
-        "tools": ["Keras", "TensorFlow", "Teachable Machine", "OpenCV", "Google Colab"],
-        "reading": [
-            "Keras dataset documentation, used directly in sessions.",
-            "Goodfellow, Bengio and Courville, <i>Deep Learning</i>, chapter 9.",
-            "Stanford CS231n course notes on convolutional networks.",
-        ],
-        "entry": "Open to first-year members. The Keras work assumes you have used a notebook before, which the fall sessions cover.",
-    },
-    {
-        "slug": "neural-systems.html",
-        "code": "G-03",
-        "name": "Neural Systems",
-        "short": "Neural Systems",
-        "summary": "What a network is doing underneath the framework call: gradients, optimizers, and the mathematics each of them needs.",
-        "overview": [
-            "This group covers the foundations that the other groups rely on. Sessions in December 2025 introduced neural networks and convolutional networks, and earlier years covered the perceptron and backpropagation alongside demonstrations such as Google Quick, Draw!.",
-            "The aim is that members can explain what happens between calling fit and getting a number back. Alongside the implementation work, the group runs a mathematics track that covers the linear algebra, derivatives, and probability each unit actually needs, at the point in the sequence where it comes up.",
-        ],
-        "topics": [
-            "The perceptron and the forward pass",
-            "Loss functions and gradient descent",
-            "Backpropagation worked through by hand",
-            "Momentum, learning rates, and schedules",
-            "Overfitting, regularization, and early stopping",
-            "Supporting mathematics: vectors, matrices, partial derivatives, probability",
-        ],
-        "done": [
-            ("December 2025", "Sessions on deep learning, neural networks, and convolutional networks."),
-            ("Since 2023", "Recurring neural network lessons, introduced through Quick, Draw! and similar demonstrations."),
-            ("March 2026", "Python sessions covering the programming background the implementation work assumes."),
-        ],
-        "planned": [
-            "A two-layer network written in NumPy with gradients checked numerically.",
-            "Optimizers compared on one dataset under the same budget.",
-            "A short set of notes on the mathematics, maintained by members.",
-        ],
-        "tools": ["NumPy", "Matplotlib", "Keras", "Jupyter", "Google Colab"],
-        "reading": [
-            "Nielsen, <i>Neural Networks and Deep Learning</i>, chapters 1 and 2 (free online).",
-            "3Blue1Brown, neural network video series, used as a companion to the derivation.",
-            "Kingma and Ba, <i>Adam: A Method for Stochastic Optimization</i> (2014).",
-        ],
-        "entry": "Algebra II is enough to start. Calculus helps for the backpropagation unit but is introduced in the session.",
-    },
-    {
-        "slug": "agents.html",
-        "code": "G-04",
-        "name": "Agents and Reinforcement Learning",
-        "short": "Agents and RL",
-        "summary": "Systems that take actions rather than return one prediction. New for the 2026 to 2027 year.",
-        "overview": [
-            "This is a new group. It was added because the questions members asked during the language model sessions were mostly about systems that do things: models that call tools, take several steps, and are judged on whether the task got finished.",
-            "The reinforcement learning side starts in environments small enough that the right answer can be worked out by hand, so that a learned policy can be checked against it. The applied side builds small tool-using programs around a language model and keeps a log of where the multi-step plans break.",
-        ],
-        "topics": [
-            "States, actions, rewards, and discounting",
-            "Q-learning in gridworlds",
-            "Exploration against exploitation",
-            "Language models calling tools",
-            "Breaking a task into steps, and keeping track of them",
-            "Writing a repeatable task set so changes can be compared",
-        ],
-        "done": [
-            ("March 2026", "Members reviewed current industry work on agent systems and brought questions to the following session."),
-            ("2026", "Group proposed and approved for the 2026 to 2027 year."),
-        ],
-        "planned": [
-            "A gridworld Q-learning lab that members implement themselves.",
-            "A small tool-using assistant with a written log of its failures.",
-            "A fixed set of tasks used to compare two agent designs.",
-        ],
-        "tools": ["Python", "NumPy", "Gymnasium", "Google Colab"],
-        "reading": [
-            "Sutton and Barto, <i>Reinforcement Learning: An Introduction</i>, chapters 3 through 6 (free online).",
-            "Yao et al., <i>ReAct: Synergizing Reasoning and Acting in Language Models</i> (2022).",
-        ],
-        "entry": "One term of Python, or a completed project in another group. This group assumes you can debug your own code.",
-    },
-    {
+        "key": "data-science",
         "slug": "data-science.html",
-        "code": "G-05",
         "name": "Applied Data Science",
-        "short": "Applied Data Science",
-        "summary": "Tabular data, feature engineering, and competition work. The usual starting point for new members.",
-        "overview": [
-            "This group works with structured data: loading it, handling missing values, choosing which columns to use, and splitting the data so that a score can be trusted. The fall sequence spends most of its time here, since the later units assume all of it.",
-            "In November 2025 the lab entered the Titanic competition on Kaggle in teams, with scores submitted through a shared form and results discussed in the following session. The preprocessing notebooks written for that unit are reused every year, and the seaborn and scikit-learn work from the same term is the basis for how members present results.",
+        "sub": "",
+        "first": True,
+        "line": "Find patterns in real datasets and compete on Kaggle.",
+        "desc": "This group cleans messy data, finds the patterns in it, and builds models that make predictions. It's the best place to start if you're new, and it's the group for members who want to compete on Kaggle.",
+        "make_short": "Charts, prediction models, Kaggle entries",
+        "level": "None",
+        "make": [
+            "Charts that answer a question about a dataset",
+            "A model that predicts who survived the Titanic",
+            "A Kaggle competition entry with your team",
+            "An analysis of a dataset you pick, presented to the club",
         ],
-        "topics": [
-            "Loading and cleaning data with pandas",
-            "Missing values, encoding, and scaling",
-            "Train and test splits, and cross-validation",
-            "Linear models, decision trees, and ensembles",
-            "Metrics past accuracy, and class imbalance",
-            "Plots that answer a specific question",
-        ],
-        "done": [
-            ("November 2025", "Titanic survival prediction on Kaggle, entered in teams, with scores collected through a shared form."),
-            ("November 2025", "Sessions on seaborn, data cleaning, train and test splitting, scikit-learn, and model evaluation."),
-            ("December 2024", "Kaggle Learn courses in Python and introductory machine learning, worked through during meetings."),
-            ("April 2025", "pandas sessions covering indexing, grouping, and joining."),
-        ],
+        "experience": "None. The fall Foundations sessions start from the first line of Python.",
         "planned": [
-            "A second competition entry with teams formed at the start of the term.",
-            "A project on a dataset from the school or the district.",
-            "A shared style for charts used in presentations.",
+            "A second Kaggle competition, with teams formed in October",
+            "A project using data from our own school or town",
+            "A shared chart style for club presentations",
         ],
-        "tools": ["pandas", "NumPy", "scikit-learn", "seaborn", "Matplotlib", "Kaggle"],
-        "reading": [
-            "Kaggle Learn, Intro to Python and Intro to Machine Learning.",
-            "scikit-learn user guide, model selection section.",
-            "VanderPlas, <i>Python Data Science Handbook</i> (free online).",
+        "past": [
+            ("Nov 18, 2025", "Workshop on seaborn, data cleaning, train and test splits, scikit-learn, and model evaluation.",
+             [("Slides", "deck:python-2")]),
+            ("Nov 4, 2025", "Titanic survival prediction on Kaggle, entered in teams.",
+             [("Project page", "projects.html#titanic"), ("Kaggle competition", "https://www.kaggle.com/competitions/titanic")]),
+            ("Nov 4, 2025", "Python basics, useful libraries, and data preprocessing.",
+             [("Slides", "deck:getting-started"), ("Preprocessing notebook", "https://github.com/helenc3/demo_notebooks/blob/main/Data_preprocessing.ipynb")]),
+            ("Spring 2025", "pandas lessons, followed by member projects and presentations.", []),
         ],
-        "entry": "No prior experience. This is the recommended first group for members joining the Foundations Program.",
+        "stages": ["data", "classical-ml"],
+        "related": ["neural-networks", "society", "vision"],
     },
     {
-        "slug": "society.html",
-        "code": "G-06",
-        "name": "AI, Ethics and Society",
-        "short": "AI, Ethics and Society",
-        "summary": "Fairness, documentation, and the arguments about deployment, run as work with written output rather than open discussion.",
-        "overview": [
-            "The lab has run ethics sessions since its early years, including a Moral Machine activity on machine decisions with human consequences and a visit from researchers at MIT Lincoln Laboratory who answered questions on the subject from members.",
-            "The group works on specific outputs rather than open discussion. Members look at where a model built elsewhere in the lab performs worse on one part of the data than another, write the short documentation that should go with a released model, and read current policy in the original text.",
+        "key": "vision",
+        "slug": "vision.html",
+        "name": "Computer Vision",
+        "sub": "",
+        "first": False,
+        "line": "Train models that recognize what's in a photo or a video.",
+        "desc": "Computer vision is about getting a program to understand pictures. Members train models that tell digits, clothes, or hand gestures apart, then test them on photos the model has never seen to find where it breaks.",
+        "make_short": "Image classifiers, webcam demos",
+        "level": "A little Python",
+        "make": [
+            "An image classifier trained in your browser in one meeting",
+            "A convolutional neural network in Keras that reads handwritten digits",
+            "A model trained on photos you take and label yourself",
+            "A webcam demo that runs your model live",
         ],
-        "topics": [
-            "Error rates compared across groups within a dataset",
-            "What a dataset does not contain, and who that affects",
-            "Short model documentation for released work",
-            "Student data, privacy, and what is collected",
-            "Automation and work",
-            "Reading current regulation directly",
-        ],
-        "done": [
-            ("November 2024", "Moral Machine activity and discussion on automated decisions."),
-            ("October 2023", "Question session with Rob Seater and Kimberlee Chang of MIT Lincoln Laboratory, with questions prepared by members in advance."),
-            ("2025 and 2026", "Discussions on the limits of large language models, run alongside the technical sessions."),
-        ],
+        "experience": "A little Python. If you've used a notebook in the fall sessions, you're ready.",
         "planned": [
-            "A one-page model card written for each project that gets presented.",
-            "An error breakdown for the vision group's best classifier.",
-            "A debate format with positions assigned rather than chosen.",
+            "A group project on photos that members take and label",
+            "Transfer learning: reusing a large pretrained model on a small dataset",
+            "A short report on where our best model fails, and why",
         ],
-        "tools": ["pandas", "Jupyter", "Google Docs"],
-        "reading": [
-            "Mitchell et al., <i>Model Cards for Model Reporting</i> (2019).",
-            "Barocas, Hardt and Narayanan, <i>Fairness and Machine Learning</i>, chapters 1 through 3 (free online).",
-            "Moral Machine, from MIT Media Lab.",
+        "past": [
+            ("Mar 3, 2026", "Computer vision workshop. Members trained image classifiers with Teachable Machine. The take-home challenge added pose and sound models.",
+             [("Slides", "deck:vision"), ("Project page", "projects.html#teachable-machine")]),
+            ("Dec 2, 2025", "Built a convolutional network for MNIST in Keras, then tried the same idea on Fashion-MNIST and CIFAR-10.",
+             [("Project page", "projects.html#image-classifiers"), ("Notebook", "https://github.com/helenc3/demo_notebooks/blob/main/mnistdemo.ipynb")]),
         ],
-        "entry": "Open to everyone. Reading and writing carry more weight here than code, though the error analysis is done in Python.",
+        "stages": ["vision", "deep-learning"],
+        "related": ["neural-networks", "data-science", "nlp"],
+    },
+    {
+        "key": "nlp",
+        "slug": "nlp.html",
+        "name": "Natural Language Processing",
+        "sub": "",
+        "first": False,
+        "line": "Build programs that read, sort, and write text, from spam filters to chatbots.",
+        "desc": "This group works with language: programs that read a review and decide if it's positive, find the topic of an article, or answer questions. We start with simple word-counting methods you can check by hand, then move up to the transformer models behind today's chatbots.",
+        "make_short": "Text classifiers, similarity search, small chatbots",
+        "level": "Some Python",
+        "make": [
+            "A spam or sentiment classifier trained on text you collect",
+            "A tool that turns sentences into vectors and finds the most similar ones",
+            "A small chatbot or question-answering app built on an open model",
+            "A fair test for comparing two language models on the same task",
+        ],
+        "experience": "Basic Python: functions, lists, and dictionaries. The fall Foundations sessions cover all of it.",
+        "planned": [
+            "A text classifier trained on a dataset the group collects",
+            "Reading the original transformer paper together over two meetings",
+            "Comparing open language models on one shared task",
+        ],
+        "past": [
+            ("Apr 21, 2026", "Intro to NLP workshop. The follow-up assignment was to write and upload a short NLP program.",
+             [("Slides", "deck:nlp")]),
+            ("Jan 6, 2026", "Large language models session, which kicked off the Analyzing AI Models project.",
+             [("Slides", "deck:llm-2026")]),
+            ("Feb 18, 2025", "Presentation on how large language models work.",
+             [("Slides", "deck:llm-2025")]),
+        ],
+        "stages": ["nlp-llm"],
+        "related": ["agents", "neural-networks", "society"],
+    },
+    {
+        "key": "neural-networks",
+        "slug": "neural-networks.html",
+        "name": "Neural Networks",
+        "sub": "How they learn, and the math behind them",
+        "first": False,
+        "line": "Open up a neural network, build one from scratch, and learn the math that makes it work.",
+        "desc": "This group looks at how neural networks work on the inside. You'll build a small network from scratch, watch it learn, and pick up the algebra and calculus that explain why it works. The subject is artificial neural networks, not neuroscience.",
+        "make_short": "A network from scratch, training experiments",
+        "level": "Algebra II",
+        "make": [
+            "A neural network written from scratch in NumPy",
+            "A plot of a network's loss going down as it trains",
+            "An experiment comparing optimizers such as SGD and Adam",
+            "Short notes that explain backpropagation to next year's members",
+        ],
+        "experience": "Algebra II. We teach the calculus as it comes up.",
+        "planned": [
+            "A two-layer network in NumPy, with every gradient checked by hand",
+            "An optimizer comparison on a single dataset",
+            "A member-written set of math notes",
+        ],
+        "past": [
+            ("Dec 2, 2025", "Introduction to deep learning, neural networks, and convolutional networks.",
+             [("Notebook", "https://github.com/helenc3/demo_notebooks/blob/main/mnistdemo.ipynb")]),
+            ("2023 and 2024", "Neural network lessons, introduced with Google's Quick, Draw! game.",
+             [("Quick, Draw!", "https://quickdraw.withgoogle.com/")]),
+        ],
+        "stages": ["deep-learning"],
+        "related": ["vision", "nlp", "agents"],
+    },
+    {
+        "key": "agents",
+        "slug": "agents.html",
+        "name": "Agents and Reinforcement Learning",
+        "sub": "Trial-and-error learning, and assistants that use tools",
+        "first": False,
+        "line": "Make programs that learn by trial and error, and AI assistants that can use tools.",
+        "desc": "This group covers two related topics. Reinforcement learning is how a program learns by trial and error, the way game-playing AIs do. Agents are language models that can take actions, such as searching the web or running code, to finish a task.",
+        "make_short": "Game-playing agents, tool-using assistants",
+        "level": "Confident Python",
+        "make": [
+            "A program that learns to solve a maze through trial and error",
+            "A game-playing agent trained in Gymnasium",
+            "An AI assistant that uses tools such as search or a calculator",
+            "A set of test tasks that checks if an agent really finishes the job",
+        ],
+        "experience": "You should be comfortable writing and debugging Python on your own.",
+        "planned": [
+            "A gridworld Q-learning lab",
+            "A small assistant that uses tools, with a log of where it gets stuck",
+            "A fixed set of tasks for comparing two agent designs",
+        ],
+        "past": [
+            ("Mar 17, 2026", "An officer shared the agentic AI sections of NVIDIA's GTC 2026 keynote on Classroom as optional viewing.",
+             [("Keynote video", "https://www.youtube.com/watch?v=jw_o0xr8MWU")]),
+        ],
+        "stages": ["agents-rl"],
+        "related": ["nlp", "neural-networks", "society"],
+    },
+    {
+        "key": "society",
+        "slug": "society.html",
+        "name": "AI, Ethics and Society",
+        "sub": "",
+        "first": False,
+        "line": "Test models for fairness, study privacy and safety, and debate how AI should be used.",
+        "desc": "AI systems make decisions that affect people, and they don't always get them right. This group tests models for fairness, studies privacy and safety, writes the documentation that should come with a model, and discusses how AI is changing school, work, and society.",
+        "make_short": "Fairness checks, model cards, discussions",
+        "level": "None",
+        "make": [
+            "A fairness check of a model built by another group",
+            "A one-page model card that says what a model can and can't do",
+            "A discussion or debate that you plan and lead",
+            "An AI safety reading group, using the plan on our Resources page",
+        ],
+        "experience": "None. Writing and discussion matter as much as code here.",
+        "planned": [
+            "A model card for every project presented this year",
+            "An error breakdown of the vision group's best classifier",
+            "A six-session AI safety reading group",
+        ],
+        "past": [
+            ("Nov 12, 2024", "Moral Machine activity and discussion about automated decisions.",
+             [("Moral Machine", "https://www.moralmachine.net/")]),
+            ("Oct 17, 2023", "Rob Seater and Kimberlee Chang of MIT Lincoln Laboratory answered member questions about AI research and ethics.", []),
+        ],
+        "stages": ["safety"],
+        "related": ["nlp", "data-science", "agents"],
     },
 ]
+
+GROUP_BY_KEY = {g["key"]: g for g in GROUPS}
 
 # ---------------------------------------------------------------- people
 
-LEADERSHIP = [
-    ("Henna Patel", "Co-Director", "Foundations Program and the session schedule"),
-    ("Aarav Dey", "Co-Director", "Applied Research Division and lab infrastructure"),
-    ("Maushmi Miraj", "Co-Director", "Research groups and end-of-term presentations"),
-    ("Maahi Mehta", "Deputy Director", "Instruction and new member onboarding"),
-    ("Shriyan Kumar", "Deputy Director", "Project supervision and competition entries"),
-    ("Ishan Sarda", "Records and Communications", "Meeting records, announcements, and the archive"),
-    ("Jia Arora", "Junior Officer", "Outreach, guest speakers, and recruitment"),
+TEAM = [
+    ("Aarav Dey", "Co-President"),
+    ("Henna Patel", "Co-President"),
+    ("Maushmi Miraj", "Co-President"),
+    ("Maahi Mehta", "Co-Vice President"),
+    ("Shriyan Kumar", "Co-Vice President"),
+    ("Ishan Sarda", "Secretary"),
+    ("Jia Arora", "Junior Officer"),
 ]
 
-ALUMNI = [
-    ("2025 to 2026", "Eric Zou, president. Helen Chen and Henna Patel, vice presidents. Maushmi Miraj, secretary. Aarav Dey, treasurer. Syam Paladugu and Jia Arora, junior officers."),
-    ("2024 to 2025", "Atin Mathur, president. Eric Zou, vice president. Simran Cheema, secretary. Prajwal Bhat and Vivek Raghuram, treasurers."),
-    ("2023 to 2024", "Mahitha Thippireddy, president. Saumya Muthukumar, vice president. Nimai Ponna, secretary. Akshay Sharma, treasurer. Eric Zou, junior officer."),
-    ("2022 to 2023", "The founding year. Mahitha Thippireddy, Saumya Muthukumar, and Ramya Gouraiah ran the first sessions in Room 700B."),
+PAST_OFFICERS = [
+    ("2025-26", "<strong>Eric Zou</strong>, President. <strong>Helen Chen</strong> and <strong>Henna Patel</strong>, Co-Vice Presidents. <strong>Maushmi Miraj</strong>, Secretary. <strong>Aarav Dey</strong>, Treasurer. <strong>Syam Paladugu</strong> and <strong>Jia Arora</strong>, Junior Officers."),
+    ("2024-25", "<strong>Atin Mathur</strong>, President. <strong>Eric Zou</strong>, Vice President. <strong>Simran Cheema</strong>, Secretary. <strong>Prajwal Bhat</strong> and <strong>Vivek Raghuram</strong>, Co-Treasurers."),
+    ("2023-24", "<strong>Mahitha Thippireddy</strong>, President. <strong>Saumya Muthukumar</strong>, Vice President. <strong>Nimai Ponna</strong>, Secretary. <strong>Akshay Sharma</strong>, Treasurer. <strong>Eric Zou</strong>, Junior Officer."),
+    ("2022-23", "Founding year, led by <strong>Mahitha Thippireddy</strong>, <strong>Saumya Muthukumar</strong>, and <strong>Ramya Gouraiah</strong>."),
 ]
 
-TALKS = [
-    ("October 2023", "Rob Seater and Kimberlee Chang, MIT Lincoln Laboratory",
-     "A session on applied research at Lincoln Laboratory and on the ethics of automated systems. Members submitted questions in advance and the session was built around them."),
-    ("March 2023", "Prof. F. Xhakaj, Carnegie Mellon University",
-     "A talk on university research in intelligent learning systems, followed by questions collected from members through a form beforehand."),
+SPEAKERS = [
+    ("Oct 17, 2023", "Rob Seater and Kimberlee Chang, MIT Lincoln Laboratory",
+     "Talked about AI research at Lincoln Laboratory and answered member questions about AI ethics."),
+    ("Mar 7, 2023", "Prof. Xhakaj, Carnegie Mellon University",
+     "Presented recent research projects and took questions that members sent in ahead of time."),
 ]
 
-# ---------------------------------------------------------------- projects and news
+# ---------------------------------------------------------------- projects
 
-PROJECTS = [
-    ("April 2026", "NLP example code", "Natural Language Processing",
-     "Members wrote their own small natural language programs after the introductory session and submitted them as the unit assignment."),
-    ("March 2026", "Teachable Machine models", "Computer Vision",
-     "Vision, pose, and audio classifiers built during a single session, then tested against inputs outside the training data."),
-    ("January 2026", "Analyzing AI Models", "Natural Language Processing",
-     "A project comparing two language models on the same task and reporting where and why their answers diverge."),
-    ("December 2025", "Convolutional networks on MNIST, Fashion-MNIST, and CIFAR-10", "Computer Vision",
-     "A shared Keras notebook for digit classification, extended by members to two harder datasets with accuracy compared across all three."),
-    ("November 2025", "Titanic survival prediction", "Applied Data Science",
-     "Teams entered the Kaggle competition, submitted scores through a shared form, and presented their feature choices in the following session."),
-    ("November 2025", "scikit-learn and seaborn analyses", "Applied Data Science",
-     "Members chose their own datasets and worked through cleaning, splitting, fitting, and evaluation, then presented the plots."),
-    ("April 2025", "AI Hub", "Lab infrastructure",
-     "A website collecting club resources and materials in one place, built by Aarav Dey and used in meetings since."),
-    ("December 2024", "Kaggle Learn courses", "Applied Data Science",
-     "Members worked through the Python and introductory machine learning tracks during meetings, with officers available for questions."),
-    ("November 2024", "Moral Machine discussion", "AI, Ethics and Society",
-     "A session on automated decisions with human consequences, using the MIT Media Lab activity as the starting point."),
-    ("2023", "Neural network sessions", "Neural Systems",
-     "Lessons on the perceptron and backpropagation, introduced through Quick, Draw! and similar public demonstrations."),
+FEATURED = [
+    {
+        "id": "titanic",
+        "title": "Titanic survival prediction",
+        "when": "November 2025",
+        "group": "data-science",
+        "credit": "Entered by member teams. Starter notebook from Helen Chen's demo repository.",
+        "text": "Teams cleaned the passenger data, chose which details to feed the model, trained classifiers with scikit-learn, and submitted predictions to Kaggle's public leaderboard. The chart shows the strongest pattern in the training data: women survived far more often than men, and passengers in first class more often than those in third.",
+        "figure": "titanic",
+        "caption": "Survival rates in the 891-passenger training set that teams worked with.",
+        "links": [("Kaggle competition", "https://www.kaggle.com/competitions/titanic"),
+                  ("Preprocessing notebook", "https://github.com/helenc3/demo_notebooks/blob/main/Data_preprocessing.ipynb")],
+        "note": "",
+    },
+    {
+        "id": "image-classifiers",
+        "title": "Image classifiers, from digits to clothes to photos",
+        "when": "December 2025",
+        "group": "vision",
+        "credit": "Built by members from a shared starter notebook in Helen Chen's demo repository.",
+        "text": "Members built a convolutional neural network in Keras that reads handwritten digits from MNIST. Then they tried the same approach on two harder datasets, Fashion-MNIST and CIFAR-10, and changed the architecture to see what helped. The same network was less accurate on clothing and photos than on digits.",
+        "figure": "img:mnist-fashion-samples.png",
+        "alt": "Sample images: two rows of handwritten digits zero through nine from MNIST, and two rows of clothing items from Fashion-MNIST.",
+        "caption": "Samples from MNIST (top) and Fashion-MNIST (bottom), two of the datasets members trained on.",
+        "links": [("Starter notebook", "https://github.com/helenc3/demo_notebooks/blob/main/mnistdemo.ipynb"),
+                  ("Keras datasets", "https://keras.io/api/datasets/")],
+        "note": "",
+    },
+    {
+        "id": "teachable-machine",
+        "title": "Teachable Machine models",
+        "when": "March 2026",
+        "group": "vision",
+        "credit": "Built by members at and after the March 3 workshop, alone or with a partner.",
+        "text": "Members trained image classifiers in the browser with Teachable Machine. The take-home challenge was to find the most creative use of it, using images, body poses, or sound, alone or with a partner.",
+        "figure": "slot:teachable-machine",
+        "caption": "",
+        "links": [("Workshop slides", "deck:vision"), ("Teachable Machine", "https://teachablemachine.withgoogle.com/")],
+        "note": "Member models were turned in on Google Classroom and aren't public.",
+    },
+    {
+        "id": "ai-hub",
+        "title": "AI Hub",
+        "when": "April 2025",
+        "group": "",
+        "credit": "Built by Aarav Dey.",
+        "text": "A website that gathers the club's resources in one place. It was used in meetings during the spring 2025 AI Hub project, where members researched a topic and presented what they found.",
+        "figure": "slot:ai-hub",
+        "caption": "",
+        "links": [],
+        "note": "",
+    },
 ]
+
+SESSIONS = [
+    ("Apr 21, 2026", "Intro to natural language processing", "Workshop, followed by members writing their own short NLP programs.", [("Slides", "deck:nlp")]),
+    ("Mar 17, 2026", "Python coding session", "Hands-on Python practice.", [("Slides", "deck:python-3")]),
+    ("Mar 3, 2026", "Intro to computer vision", "Teachable Machine workshop.", [("Slides", "deck:vision")]),
+    ("Jan 6, 2026", "Large language models", "How LLMs work, and the start of the Analyzing AI Models project.", [("Slides", "deck:llm-2026")]),
+    ("Dec 2, 2025", "Deep learning and convolutional networks", "Lecture and MNIST demo.", [("Notebook", "https://github.com/helenc3/demo_notebooks/blob/main/mnistdemo.ipynb")]),
+    ("Nov 18, 2025", "Python for data science", "seaborn, data cleaning, scikit-learn, and model evaluation.", [("Slides", "deck:python-2")]),
+    ("Nov 4, 2025", "Getting started with machine learning", "Python basics, preprocessing, and traditional models.", [("Slides", "deck:getting-started")]),
+    ("Oct 21, 2025", "What is AI?", "First meeting of the year, with games and an intro to the club.", [("Slides", "deck:intro-2025")]),
+    ("Feb 18, 2025", "Large language models", "Presentation, then project work time.", [("Slides", "deck:llm-2025")]),
+    ("Nov 12, 2024", "Moral Machine", "Activity and discussion on automated decisions.", [("Moral Machine", "https://www.moralmachine.net/")]),
+]
+
+# ---------------------------------------------------------------- news
 
 NEWS = [
-    ("September 2026", "Recruitment is open for the 2026 to 2027 year",
-     "Both tracks are accepting members. The date of the first interest session will be posted here and on Google Classroom. Anyone may attend a meeting before applying."),
-    ("June 2026", "Officers named for 2026 to 2027",
-     "Henna Patel, Aarav Dey, and Maushmi Miraj were selected as co-presidents, with Maahi Mehta and Shriyan Kumar as co-vice presidents, Ishan Sarda as secretary, and Jia Arora as junior officer. Applicants who were not selected remain eligible for group leads and project roles."),
-    ("June 2026", "Last meeting of the year",
-     "The final session covered a review of the year and plans for the next one, including a longer project cycle and a written record for each project."),
-    ("May 2026", "Officership applications extended",
-     "The deadline for the officership interest form was moved to May 26. Meetings paused during AP examinations."),
-    ("April 2026", "Introduction to natural language processing",
-     "A session on how text is represented and what sequence models do with it, followed by an assignment where members submitted their own example code."),
-    ("March 2026", "Computer vision session",
-     "An interactive session where everyone present trained a working image classifier, then looked for inputs that broke it. Attendance was the highest of the year."),
-    ("March 2026", "Kaggle progress and Python sessions",
-     "Members continued their Kaggle coursework and worked through a Python session covering the background the later units assume."),
-    ("January 2026", "Large language models and the model analysis project",
-     "A session on how large language models work, which introduced the semester project comparing two models on one task."),
-    ("December 2025", "Deep learning, neural networks, and convolutional networks",
-     "Members built a digit classifier from a shared notebook and then extended it to harder datasets. The notebook is still used as the starting point for the vision group."),
-    ("November 2025", "Titanic competition and the modeling pipeline",
-     "Teams entered a public Kaggle competition and submitted scores through a shared form. Sessions in the same month covered seaborn, data cleaning, scikit-learn, and evaluation."),
-    ("October 2025", "First meeting of the year",
-     "An introductory session on what the lab does, the projects planned for the year, and how the two tracks work."),
-    ("April 2025", "AI Hub published",
-     "A website collecting club materials and resources was built by a member and added to the meeting workflow."),
-    ("October 2023", "Researchers from MIT Lincoln Laboratory visit",
-     "Rob Seater and Kimberlee Chang answered questions on applied AI research and on ethics, with questions collected from members in advance."),
-    ("March 2023", "Guest lecture from Carnegie Mellon",
-     "Prof. F. Xhakaj spoke about university research in intelligent learning systems and answered questions submitted by members beforehand."),
-    ("September 2022", "The lab holds its first meeting",
-     "The first interest session was held in Room 700B, beginning with Python foundations and an introduction to what machine learning is."),
+    {"id": "signups-2026", "date": "September 21, 2026", "iso": "2026-09-21",
+     "title": "Sign-ups are open for " + YEAR,
+     "body": "New members can join at any meeting. Send the form on the Join page, or join our Google Classroom with code " + SITE["code"] + ". The date of the first meeting will be posted here and on Classroom.",
+     "link": ("Join SAIL", "join.html")},
+    {"id": "officers-2026", "date": "June 2, 2026", "iso": "2026-06-02",
+     "title": "Officers announced for " + YEAR,
+     "body": "Aarav Dey, Henna Patel, and Maushmi Miraj are co-presidents. Maahi Mehta and Shriyan Kumar are co-vice presidents, Ishan Sarda is secretary, and Jia Arora is junior officer.",
+     "link": ("Meet the team", "people.html")},
+    {"id": "vision-workshop", "date": "March 3, 2026", "iso": "2026-03-03",
+     "title": "Computer vision workshop",
+     "body": "Members trained image classifiers in the browser with Teachable Machine, then took home a challenge to find its most creative use.",
+     "link": ("See the Teachable Machine project", "projects.html#teachable-machine")},
+    {"id": "titanic", "date": "November 4, 2025", "iso": "2025-11-04",
+     "title": "Teams enter the Titanic competition on Kaggle",
+     "body": "Members formed teams and submitted survival predictions to the public leaderboard, with prizes for the top scores.",
+     "link": ("See the Titanic project", "projects.html#titanic")},
+    {"id": "ai-hub", "date": "April 8, 2025", "iso": "2025-04-08",
+     "title": "AI Hub launches",
+     "body": "A member-built website that collects the club's resources in one place.",
+     "link": ("See the AI Hub project", "projects.html#ai-hub")},
+    {"id": "mit-ll", "date": "October 17, 2023", "iso": "2023-10-17",
+     "title": "Researchers from MIT Lincoln Laboratory visit",
+     "body": "Rob Seater and Kimberlee Chang spoke with members about AI research and ethics.",
+     "link": None},
+    {"id": "cmu", "date": "March 7, 2023", "iso": "2023-03-07",
+     "title": "Guest lecture from Carnegie Mellon",
+     "body": "Prof. Xhakaj of Carnegie Mellon University presented recent research and answered member questions.",
+     "link": None},
+    {"id": "first-meeting", "date": "September 27, 2022", "iso": "2022-09-27",
+     "title": "First meeting",
+     "body": "The club held its first interest meeting in Room 700B and started with Python basics.",
+     "link": None},
 ]
 
-CURRICULUM = [
-    ("Fall, first sessions", "Python and notebooks",
-     "Types, control flow, functions, and working in a browser notebook. Members who already program move ahead after a short check."),
-    ("Fall", "Data handling and plots",
-     "pandas, cleaning, exploratory analysis, and charts built with seaborn and Matplotlib."),
-    ("Late fall", "Classical machine learning",
-     "Train and test splits, scikit-learn estimators, cross-validation, and evaluation metrics. The competition entry sits here."),
-    ("Winter", "Neural networks",
-     "The perceptron, gradient descent, and backpropagation, followed by a convolutional network built in Keras."),
-    ("Late winter", "Vision and language",
-     "Image classifiers on standard datasets, then how text is represented and what language models do with it."),
-    ("Spring", "Group project",
-     "A project chosen by the member or the team, with a result, a short writeup, and a presentation at the end of the year."),
-]
+NAV = [("research.html", "Research"), ("projects.html", "Projects"), ("people.html", "People"),
+       ("resources.html", "Resources"), ("news.html", "News")]
 
-TOOLING = [
-    ("Compute", "Google Colab and Kaggle Notebooks for anything that needs a GPU. School laptops handle every session without one."),
-    ("Environment", "Browser notebooks by default, so nothing has to be installed. Members who prefer a local Python setup get help in the first session."),
-    ("Code sharing", "GitHub for project code. Applied Research Division projects are expected to have a README that lets another member run them."),
-    ("Writing", "Short writeups in Google Docs or Markdown. The project template is provided."),
-]
+DECK_BY_KEY = {d["key"]: d for d in DECKS}
 
-EXTERNAL = [
-    ("Kaggle Learn", "https://www.kaggle.com/learn",
-     "Short practical courses. The Python and Intro to Machine Learning tracks are used in the fall."),
-    ("Keras datasets", "https://keras.io/api/datasets/",
-     "MNIST, Fashion-MNIST, and CIFAR-10, used in the neural network and vision units."),
-    ("Project Jupyter", "https://jupyter.org/try-jupyter/lab/",
-     "Notebooks that run in a browser with nothing installed."),
-    ("Teachable Machine", "https://teachablemachine.withgoogle.com/",
-     "Used in introductory vision sessions before members move to Keras."),
-    ("MIT Beaver Works Summer Institute", "https://bwsi.mit.edu/",
-     "A summer program in AI, robotics, and cybersecurity. Members of the lab have attended and can answer questions about applying."),
-    ("Moral Machine", "https://www.moralmachine.net/",
-     "The activity used in the ethics sessions."),
-]
 
-NAV = [("index.html", "Home"), ("research.html", "Research"), ("projects.html", "Projects"),
-       ("people.html", "People"), ("resources.html", "Resources"), ("news.html", "News"),
-       ("join.html", "Join")]
+# ---------------------------------------------------------------- helpers
+
+def link(label, target):
+    """Render a link. 'deck:key' targets resolve to a club slide deck."""
+    if target.startswith("deck:"):
+        d = DECK_BY_KEY[target[5:]]
+        note = "" if d["access"] == "public" else ' <span class="meta">(school account)</span>'
+        return f'<a href="{d["url"]}">{label}</a>{note}'
+    ext = ' rel="noopener"' if target.startswith("http") else ""
+    return f'<a href="{target}"{ext}>{label}</a>'
+
+
+def linkrow(links):
+    if not links:
+        return ""
+    return '<p class="linkrow">' + "".join(f"<span>{link(a, b)}</span>" for a, b in links) + "</p>"
+
+
+def titanic_chart():
+    data = [("First class", 96.8, 36.9), ("Second class", 92.1, 15.7), ("Third class", 50.0, 13.5)]
+    x0, scale, bar, gap, between = 104, 3.7, 17, 3, 22
+    top = 10
+    plot_h = len(data) * (2 * bar + gap) + (len(data) - 1) * between
+    bottom = top + plot_h + 10
+    parts = []
+    for v in (0, 25, 50, 75, 100):
+        x = x0 + v * scale
+        parts.append(f'<line class="grid" x1="{x:.1f}" y1="{top - 4}" x2="{x:.1f}" y2="{bottom}"/>')
+        parts.append(f'<text x="{x:.1f}" y="{bottom + 18}" text-anchor="middle">{v}%</text>')
+    y = top
+    for label, women, men in data:
+        parts.append(f'<text class="grp" x="{x0 - 12}" y="{y + bar + 6}" text-anchor="end">{label}</text>')
+        for val, color, who in ((women, "#1f5fae", "Women"), (men, "#b4532a", "Men")):
+            w = val * scale
+            path = f"M{x0},{y} h{w - 4:.1f} a4,4 0 0 1 4,4 v{bar - 8} a4,4 0 0 1 -4,4 h-{w - 4:.1f} z"
+            parts.append(
+                f'<g class="b"><title>{who}, {label.lower()}: {val}% survived</title>'
+                f'<path class="bar" d="{path}" fill="{color}"/>'
+                f'<text class="val" x="{x0 + w + 7:.1f}" y="{y + bar - 4}">{val:g}%</text></g>'
+            )
+            y += bar + gap
+        y += between - gap
+    svg = (f'<svg class="chart" viewBox="0 0 540 {bottom + 26}" role="img" '
+           f'aria-label="Bar chart of Titanic survival rates by sex and ticket class. Women: 96.8 percent in first class, '
+           f'92.1 in second, 50 in third. Men: 36.9 percent in first class, 15.7 in second, 13.5 in third.">'
+           + "".join(parts) + "</svg>")
+    legend = ('<div class="chart-legend"><span><i style="background:#1f5fae"></i>Women</span>'
+              '<span><i style="background:#b4532a"></i>Men</span></div>')
+    return f'<div class="pad">{legend}{svg}</div>'
+
+
+MISSING_IMAGES = []
+
+
+def figure_html(item):
+    fig = item.get("figure", "")
+    cap = f'<figcaption>{item["caption"]}</figcaption>' if item.get("caption") else ""
+    if fig == "titanic":
+        return f"<figure>{titanic_chart()}{cap}</figure>"
+    if fig.startswith("img:"):
+        return f'<figure><img src="assets/img/{fig[4:]}" alt="{item.get("alt", "")}" loading="lazy" width="912" height="374">{cap}</figure>'
+    if fig.startswith("slot:"):
+        for ext in ("jpg", "png", "webp"):
+            name = f"{fig[5:]}.{ext}"
+            if os.path.exists(os.path.join(HERE, "assets", "img", name)):
+                return f'<figure><img src="assets/img/{name}" alt="{item.get("alt", item["title"])}" loading="lazy">{cap}</figure>'
+        MISSING_IMAGES.append(fig[5:])
+    return ""
 
 
 # ---------------------------------------------------------------- templates
 
 def head(title, desc):
+    full = SITE["name"] if title == "Home" else f'{title} | {SITE["short"]}'
     return f'''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title} | {SITE["short"]}</title>
+<title>{full}</title>
 <meta name="description" content="{desc}">
-<meta property="og:title" content="{title} | {SITE["name"]}">
+<meta property="og:title" content="{full}">
 <meta property="og:description" content="{desc}">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 '''
 
 
 def masthead(active):
     links = []
     for href, label in NAV:
-        key = "home" if href == "index.html" else href.replace(".html", "")
+        key = href.replace(".html", "")
         if label == "Research":
-            items = "".join(
-                f'<li><a href="{a["slug"]}">{a["code"]} &nbsp; {a["short"]}</a></li>' for a in AREAS
-            )
-            on = " on" if active in ("research", "area") else ""
+            items = "".join(f'<li><a href="{g["slug"]}">{g["name"]}</a></li>' for g in GROUPS)
+            on = " on" if active in ("research", "group") else ""
             links.append(
-                f'<div class="navgroup{on}"><button aria-haspopup="true">Research '
-                f'<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg>'
-                f'</button><ul><li><a href="research.html">Overview of all groups</a></li>{items}</ul></div>'
+                f'<div class="navgroup{on}" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research '
+                f'<svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg>'
+                f'</button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li>{items}</ul></div>'
             )
         else:
-            on = " class=\"on\"" if active == key else ""
-            links.append(f'<a{on} href="{href}">{label}</a>')
+            cur = ' aria-current="page"' if active == key else ""
+            links.append(f'<a{cur} href="{href}">{label}</a>')
     nav_html = "\n      ".join(links)
-
-    drawer_areas = "\n      ".join(
-        f'<a class="sub" href="{a["slug"]}">{a["code"]} &nbsp; {a["short"]}</a>' for a in AREAS
-    )
+    drawer_groups = "".join(f'<a href="{g["slug"]}">{g["name"]}</a>' for g in GROUPS)
 
     return f'''<header class="masthead">
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html">{MARK}<b>{SITE["short"]}</b><span>{SITE["school"]}</span></a>
-    <nav class="mainnav">
+    <a class="brand" href="index.html"><b>{SITE["short"]}</b><span>{SITE["school"]}</span></a>
+    <nav class="mainnav" aria-label="Main">
       {nav_html}
     </nav>
-    <button class="navtoggle" data-navtoggle aria-label="Menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <a class="btn btn--light btn--sm mast-join" href="join.html">Join</a>
+    <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
-  <div class="drawer" data-drawer>
+  <nav class="drawer" data-drawer aria-label="Mobile">
     <div class="wrap">
       <a href="index.html">Home</a>
-      <a href="research.html">Research overview</a>
-      <p class="lbl">Groups</p>
-      {drawer_areas}
-      <p class="lbl">More</p>
+      <details><summary>Research</summary><a href="research.html">Compare all groups</a>{drawer_groups}</details>
       <a href="projects.html">Projects</a>
       <a href="people.html">People</a>
       <a href="resources.html">Resources</a>
       <a href="news.html">News</a>
-      <a href="join.html">Join</a>
+      <a href="join.html">Join SAIL</a>
     </div>
-  </div>
+  </nav>
 </header>
+<main id="main">
 '''
 
 
-def pagetop(crumb, title, lede):
+def pagetop(crumbs, title, lede, sub=""):
+    trail = " / ".join([f'<a href="index.html">Home</a>'] + crumbs)
+    sub_html = f'<p class="sub">{sub}</p>' if sub else ""
     return f'''<section class="pagetop">
   <div class="wrap">
-    <p class="crumb"><a href="index.html">{SITE["short"]}</a> / {crumb}</p>
+    <p class="crumb">{trail}</p>
     <h1>{title}</h1>
-    <p class="lede">{lede}</p>
+    {sub_html}<p class="lede">{lede}</p>
   </div>
 </section>
 '''
 
 
 def footer():
-    area_links = "\n        ".join(f'<a href="{a["slug"]}">{a["short"]}</a>' for a in AREAS)
-    return f'''<footer class="foot">
+    return f'''</main>
+<footer class="foot">
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <h5>{SITE["short"]}</h5>
-        <p class="foot-about">{SITE["name"]}, the machine learning laboratory at {SITE["school"]}, running since {SITE["founded"]}. Meetings are {SITE["meets"]} in {SITE["room"]}.</p>
+        <p class="foot-name">{SITE["name"]}</p>
+        <p>The AI and machine learning club at {SITE["school"]}. {SITE["meets_short"]}, {SITE["room"]}.</p>
       </div>
-      <div class="foot-col">
-        <h5>Research</h5>
-        {area_links}
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="research.html">Research groups</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="people.html">People</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
       </div>
-      <div class="foot-col">
-        <h5>Lab</h5>
-        <a href="projects.html">Projects</a>
-        <a href="people.html">People</a>
-        <a href="resources.html">Resources</a>
-        <a href="news.html">News</a>
-      </div>
-      <div class="foot-col">
-        <h5>Contact</h5>
-        <a href="join.html">Join the lab</a>
-        <a href="#" data-email>contact</a>
-        <a href="https://www.instagram.com/{SITE["instagram"]}/" rel="noopener">Instagram</a>
+      <div>
+        <h2>Get in touch</h2>
+        <ul>
+          <li><a href="join.html">Join SAIL</a></li>
+          <li><a href="#" data-email>Email us</a></li>
+          <li><a href="https://www.instagram.com/{SITE["instagram"]}/" rel="noopener">Instagram</a></li>
+          <li>Google Classroom: {SITE["code"]}</li>
+        </ul>
       </div>
     </div>
-    <div class="foot-bot">
-      <span>&copy; <span data-year>2026</span> {SITE["name"]}</span>
-      <span>Google Classroom code: {SITE["code"]}</span>
-      <span>{SITE["room"]} &middot; {SITE["meets"]}</span>
-    </div>
+    <p class="foot-bot">&copy; <span data-year>2026</span> {SITE["name"]}. Run by students.</p>
   </div>
 </footer>
 <script src="assets/js/site.js"></script>
@@ -501,223 +556,250 @@ def footer():
 '''
 
 
-def h_rule(title, right=""):
-    r = f'<span class="right">{right}</span>' if right else ""
-    return f'<div class="h-rule"><h2>{title}</h2>{r}</div>'
-
-
-def area_rows():
-    rows = []
-    for a in AREAS:
-        topics = "; ".join(a["topics"][:3])
-        rows.append(f'''<div class="arearow">
-      <div class="code">{a["code"]}</div>
-      <div>
-        <h3><a href="{a["slug"]}">{a["name"]}</a></h3>
-        <p>{a["summary"]}</p>
+def tracks_block():
+    return '''<div class="tracks">
+      <div class="track">
+        <h3>Foundations Program</h3>
+        <p class="who">For anyone new to AI or coding</p>
+        <p>Learn Python, work with real data, enter a Kaggle competition with a team, and train your first neural network by December. In the spring you build a project of your own.</p>
+        <p>Most ninth and tenth graders start here. So do juniors and seniors who haven't programmed before.</p>
+        <a class="more" href="join.html#tracks">How Foundations works</a>
       </div>
-      <div class="topics">{topics}</div>
-    </div>''')
-    return '<div class="arealist">\n    ' + "\n    ".join(rows) + "\n    </div>"
+      <div class="track">
+        <h3>Applied Research Division</h3>
+        <p class="who">For members ready to run their own project</p>
+        <p>Work in a team of two to four on a project you choose, with one of our six research groups behind you. Teams present what they built at the end of each semester.</p>
+        <p>Mostly juniors and seniors, plus anyone who has finished Foundations or built something before.</p>
+        <a class="more" href="join.html#tracks">How the division works</a>
+      </div>
+    </div>'''
 
 
 # ---------------------------------------------------------------- pages
 
 def page_index():
-    news_items = "\n      ".join(
-        f'<li><span class="d">{d}</span><p>{t}</p></li>' for d, t, _b in
-        [(n[0], n[1], n[2]) for n in NEWS[:4]]
+    groups = "\n      ".join(
+        f'<li><h3><a href="{g["slug"]}">{g["name"]}</a>{" <span class=\"badge\">Start here</span>" if g["first"] else ""}</h3><p>{g["line"]}</p></li>'
+        for g in GROUPS
     )
-    return f'''<section class="hero">
-  <canvas data-surface aria-hidden="true"></canvas>
+    feats = "\n      ".join(
+        f'''<article class="feature">
+        {figure_html(f)}
+        <h3>{f["title"]}</h3>
+        <p>{f["text"].split(". ")[0]}.</p>
+        <a class="more" href="projects.html#{f["id"]}" aria-label="Read more about {f["title"]}">Read more</a>
+      </article>''' for f in FEATURED[:2]
+    )
+    news = "\n      ".join(
+        f'''<li><time datetime="{n["iso"]}">{n["date"]}</time>
+        <div><h3><a href="news.html#{n["id"]}">{n["title"]}</a></h3><p>{n["body"]}</p></div></li>'''
+        for n in NEWS[:2]
+    )
+    return f'''<section class="hero" data-hero>
+  <canvas data-field aria-hidden="true"></canvas>
   <div class="wrap hero-in">
-    <p class="kicker">{SITE["school"]} &middot; Established {SITE["founded"]}</p>
-    <h1>A student laboratory for machine learning</h1>
-    <p>Six research groups covering language, vision, neural network foundations, agents, applied modeling, and the ethics of deployed systems. Open to every grade, with no prior programming required to start.</p>
-    <div class="hero-links">
-      <a class="solid" href="join.html">Join the lab</a>
-      <a href="research.html">Research groups</a>
+    <h1>{SITE["name"]}</h1>
+    <p class="hero-sub">We're students at {SITE["school"]} who learn how AI works and build our own projects with it.</p>
+    <div class="hero-actions">
+      <a class="btn btn--light" href="join.html">Join SAIL</a>
+      <a class="textlink" href="projects.html">Explore our work</a>
     </div>
-    <p class="hero-note">Background: gradient descent with momentum on a two-dimensional loss surface, contours drawn with marching squares. Click the surface to start from a different point, or <button data-replay type="button">reinitialize</button>.</p>
-    <div class="readout">
-      step <b data-out-step>000</b><br>
-      loss <b data-out-loss>0.0000</b><br>
-      lr <b data-out-lr>0.042</b> &middot; momentum <b data-out-mu>0.88</b>
-      <canvas data-spark aria-hidden="true"></canvas>
+    <p class="hero-when">{SITE["meets"]} &middot; {SITE["room"]}</p>
+  </div>
+  <div class="wrap hero-tools">
+    <details class="hero-about">
+      <summary>About this animation</summary>
+      <p>A few hundred particles drift through a vector field that changes slowly over time, and their trails trace out its streamlines. Move your pointer to bend the field and watch it settle back. Click to send a ripple through it.</p>
+    </details>
+    <button type="button" data-pause>Pause animation</button>
+  </div>
+</section>
+
+<section class="section center">
+  <div class="narrow about">
+    <h2>About SAIL</h2>
+    <p>SAIL is {SITE["school"]}'s AI and machine learning club. We started in 2022 with after-school Python lessons. Now members teach each other Python and machine learning, and then build projects of their own.</p>
+    <p>You don't need any experience to join. Everything we use is free and runs in a browser, and the slides and notebooks from every meeting are posted for anyone who misses one.</p>
+  </div>
+  <div class="wrap">
+    <dl class="facts">
+      <div><dt>When</dt><dd>{SITE["meets_short"]}</dd></div>
+      <div><dt>Where</dt><dd>{SITE["room"]}</dd></div>
+      <div><dt>Cost</dt><dd>Free</dd></div>
+      <div><dt>Google Classroom</dt><dd>{SITE["code"]}</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="section section--soft center">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Two ways to join</h2>
+      <p>Pick the one that fits where you are now. You can move from the first to the second whenever you're ready.</p>
     </div>
+    {tracks_block()}
+  </div>
+</section>
+
+<section class="section center">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Research groups</h2>
+      <p>Six groups, each focused on one area of AI. <a href="research.html">Compare them side by side.</a></p>
+    </div>
+    <ul class="groups">
+      {groups}
+    </ul>
+  </div>
+</section>
+
+<section class="section section--soft center">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>What members have built</h2>
+    </div>
+    <div class="features">
+      {feats}
+    </div>
+    <p style="margin:34px 0 0"><a class="btn btn--ghost" href="projects.html">See all projects</a></p>
   </div>
 </section>
 
 <section class="section">
-  <div class="wrap cols3">
-    <div>
-      <h2>About the lab</h2>
-      <p>{SITE["short"]} has met at {SITE["school"]} since {SITE["founded"]}. Sessions are taught by members, and the subjects follow a sequence: Python and data handling in the fall, classical models and a competition entry before winter, neural networks and vision after that, and a project in the spring.</p>
-      <p>Everything the lab uses is free and runs in a browser. Members have gone on to summer research programs including MIT Beaver Works, and past sessions have included visits from researchers at MIT Lincoln Laboratory and Carnegie Mellon.</p>
+  <div class="narrow">
+    <div class="section-head center">
+      <h2>Latest</h2>
     </div>
-    <div>
-      <h2>How it is organized</h2>
-      <p>Members join one of two tracks. The Foundations Program is the taught track, for ninth graders and for sophomores in their first year with the lab. The Applied Research Division is for juniors and seniors working in small project teams, and is open to anyone else who applies with prior work.</p>
-      <p>Both tracks attach to one of six research groups. Group assignments happen after the first term, so that the choice is made with some idea of what each group does.</p>
-    </div>
-    <div>
-      <h2>Recent news</h2>
-      <ul class="news">
-      {news_items}
-      </ul>
-      <p class="small" style="margin:16px 0 0"><a href="news.html">All updates &rarr;</a></p>
-    </div>
-  </div>
-</section>
-
-<section class="section section--soft">
-  <div class="wrap">
-    {h_rule("Research groups", "Six groups, 2026 to 2027")}
-    {area_rows()}
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    {h_rule("Two ways to join")}
-    <div class="tracks">
-      <div class="track">
-        <div class="inner">
-          <h3>Foundations Program</h3>
-          <p class="who">Ninth graders, and sophomores joining the lab for the first time</p>
-          <p class="small">Taught sessions with guided exercises. Members write Python in the first session and train a working model before winter. No prior experience is assumed and no course is required beforehand.</p>
-          <ul>
-            <li>Weekly instruction following the published sequence</li>
-            <li>Team entry to a public competition</li>
-            <li>A project presented at the end of the year</li>
-          </ul>
-          <p class="foot"><a href="join.html#foundations">Program details</a></p>
-        </div>
-      </div>
-      <div class="track track--two">
-        <div class="inner">
-          <h3>Applied Research Division</h3>
-          <p class="who">Juniors and seniors, or anyone who applies with prior work</p>
-          <p class="small">Project teams of two to four members attached to a research group. Teams choose a question, agree on what they will produce, and present the result to the lab at the end of the term.</p>
-          <ul>
-            <li>A short proposal agreed before the work starts</li>
-            <li>Code in a repository another member can run</li>
-            <li>A presentation and a written record at the end of term</li>
-          </ul>
-          <p class="foot"><a href="join.html#division">Division details</a></p>
-        </div>
-      </div>
-    </div>
+    <ul class="ann">
+      {news}
+    </ul>
+    <p class="center" style="margin:26px 0 0"><a class="more" href="news.html">All news</a></p>
   </div>
 </section>
 '''
 
 
 def page_research():
-    talks = "\n      ".join(
-        f'<li><span class="when">{w}</span><div><h4>{who}</h4><p>{d}</p></div></li>'
-        for w, who, d in TALKS
+    rows = "\n        ".join(
+        f'''<tr>
+          <th scope="row"><a href="{g["slug"]}">{g["name"]}</a>{" <span class=\"badge\">Start here</span>" if g["first"] else ""}</th>
+          <td data-l="What members make">{g["make_short"]}</td>
+          <td data-l="Experience needed">{g["level"]}</td>
+        </tr>''' for g in GROUPS
     )
-    return pagetop("Research", "Six research groups",
-                   "Each group owns a subject area, a reading list, and its own projects. Members join a group after their first term and can move between groups at the start of a semester."
+    speakers = "\n      ".join(
+        f'<li><span class="when">{w}</span><div><h3>{who}</h3><p>{d}</p></div></li>' for w, who, d in SPEAKERS
+    )
+    return pagetop(["Research"], "Research groups",
+                   "Each group focuses on one area of AI. Use this page to compare them, then open a group to see what its members make."
                    ) + f'''<section class="section">
   <div class="wrap">
-    {h_rule("Groups")}
-    {area_rows()}
+    <table class="compare">
+      <thead><tr><th scope="col">Group</th><th scope="col">What members make</th><th scope="col">Experience needed</th></tr></thead>
+      <tbody>
+        {rows}
+      </tbody>
+    </table>
   </div>
 </section>
 
 <section class="section section--soft">
   <div class="wrap split">
     <div class="prose">
-      {h_rule("How a project runs")}
-      <p>Projects in the Applied Research Division follow the same four steps.</p>
-      <dl class="deflist">
-        <dt>1. Proposal</dt>
-        <dd>One page: the question, the data, what will be measured, and what result would count as a failure. A director signs off before the work starts.</dd>
-        <dt>2. Build</dt>
-        <dd>Four to six weeks in a shared repository, with a short progress check at each meeting so that problems come up early.</dd>
-        <dt>3. Review</dt>
-        <dd>A presentation to the lab, followed by questions. Reviewers usually ask whether another member could rerun the work and whether the measurement answers the original question.</dd>
-        <dt>4. Record</dt>
-        <dd>A short writeup kept with the code, including what did not work. Projects that do not reach a result are written up as well.</dd>
-      </dl>
+      <h2>How groups work</h2>
+      <p>The groups are new for {YEAR}. Past sessions listed on a group page were whole-club meetings on that topic.</p>
+      <p>You can name a group when you sign up, and you can switch whenever you like. Applied Research teams work with their group from October. Foundations members join their group's activities in the second semester, once the fall sessions have covered the basics.</p>
+      <h2>Project requirements</h2>
+      <p>Every Applied Research project finishes with the same four things.</p>
+      <ul class="checks">
+        <li>Share your code with setup instructions.</li>
+        <li>Choose how you will evaluate the project before running experiments.</li>
+        <li>Summarize your results and limitations in a one-page report.</li>
+        <li>Present your work in ten minutes and answer questions.</li>
+      </ul>
+      <p><a class="more" href="resources.html#build">Project template and tools</a></p>
     </div>
-    <aside>
-      <div class="factbox">
-        <h4>What a finished project has</h4>
-        <dl>
-          <dt>Code</dt><dd>In a repository, with instructions</dd>
-          <dt>A measurement</dt><dd>Chosen before results are seen</dd>
-          <dt>A writeup</dt><dd>One page, including limitations</dd>
-          <dt>A presentation</dt><dd>Ten minutes, plus questions</dd>
-        </dl>
-        <div class="act"><a class="btn btn--wide" href="projects.html">See past projects</a></div>
-      </div>
+    <aside class="side">
+      <h2>Not sure which group?</h2>
+      <p class="small" style="color:var(--ink-2)">Start with Applied Data Science. It covers the skills every other group builds on, and you can move later.</p>
+      <a class="btn btn--sm" href="data-science.html">See Applied Data Science</a>
     </aside>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    {h_rule("Visitors", "Invited talks")}
-    <p class="lede" style="margin-bottom:22px">Researchers from outside the school have spoken to the lab and taken questions from members.</p>
-    <ul class="itemlist">
-      {talks}
+    <div class="section-head"><h2>Guest speakers</h2></div>
+    <ul class="dated">
+      {speakers}
     </ul>
   </div>
 </section>
 '''
 
 
-def page_area(a):
-    topics = "".join(f"<li>{t}</li>" for t in a["topics"])
-    done = "\n      ".join(
-        f'<li><span class="when">{w}</span><div><p>{t}</p></div></li>' for w, t in a["done"]
+def page_group(g):
+    make = "".join(f"<li>{m}</li>" for m in g["make"])
+    planned = "".join(f"<li>{p}</li>" for p in g["planned"])
+    past = "\n        ".join(
+        f'<li><span class="when">{w}</span><div><p>{t}</p>{linkrow(links)}</div></li>' for w, t, links in g["past"]
     )
-    planned = "".join(f"<li>{p}</li>" for p in a["planned"])
-    reading = "".join(f"<li>{r}</li>" for r in a["reading"])
-    tools = "".join(f"<span>{t}</span>" for t in a["tools"])
-    overview = "".join(f"<p>{p}</p>" for p in a["overview"])
-    others = "".join(
-        f'<a href="{x["slug"]}">{x["short"]}</a>{", " if i < len([y for y in AREAS if y["slug"] != a["slug"]]) - 1 else ""}'
-        for i, x in enumerate([y for y in AREAS if y["slug"] != a["slug"]])
+    res_items = []
+    for key in g["stages"]:
+        if key == "safety":
+            res_items.extend(next(b for b in BUILD_SECTION if b["key"] == "responsible")["items"])
+            res_items.extend(s["items"][0] for s in SAFETY[1:3])
+            continue
+        stage = next(s for s in STAGES if s["key"] == key)
+        res_items.extend(stage["items"][:5 if len(g["stages"]) == 1 else 3])
+    res = "\n        ".join(
+        f'<li><div><a class="t" href="{it["url"]}" rel="noopener">{it["title"]}</a>'
+        f'<span class="m">{it["kind"]}{", " + it["time"] if it.get("time") else ""}</span><p>{it["note"]}</p></div></li>'
+        for it in res_items
     )
+    anchor = "safety" if "safety" in g["stages"] else "planner"
+    related = "".join(f'<li><a href="{GROUP_BY_KEY[k]["slug"]}">{GROUP_BY_KEY[k]["name"]}</a></li>' for k in g["related"])
+    first = '<p><span class="badge" style="margin-left:0">Good first group</span></p>' if g["first"] else ""
 
-    return pagetop(f'<a href="research.html">Research</a> / {a["code"]}', a["name"], a["summary"]) + f'''<section class="section">
+    return pagetop(['<a href="research.html">Research</a>'], g["name"], g["desc"], g["sub"]) + f'''<section class="section">
   <div class="wrap split">
     <div class="prose">
-      {overview}
+      {first}
+      <h2>What you'll learn and build</h2>
+      <ul class="checks">{make}</ul>
 
-      <h3>What the group covers</h3>
-      <ul>{topics}</ul>
+      <h2>Experience needed</h2>
+      <p>{g["experience"]}</p>
 
-      <h3>Sessions and work so far</h3>
-      <ul class="itemlist">
-      {done}
+      <h2>This year</h2>
+      <div class="planned">
+        <span class="tag">Planned for {YEAR}</span>
+        <ul>{planned}</ul>
+      </div>
+
+      <h2>Past sessions and work</h2>
+      <ul class="dated">
+        {past}
       </ul>
 
-      <h3>Planned for this year</h3>
-      <ul>{planned}</ul>
-
-      <h3>Reading</h3>
-      <ol class="refs">{reading}</ol>
+      <h2>Learning resources</h2>
+      <ul class="res res--plain">
+        {res}
+      </ul>
+      <p><a class="more" href="resources.html#{anchor}">Full learning plan on Resources</a></p>
     </div>
-    <aside>
-      <div class="factbox">
-        <h4>{a["code"]}</h4>
-        <dl>
-          <dt>Open to</dt><dd>Both tracks</dd>
-          <dt>Group lead</dt><dd>Appointed each fall from the Applied Research Division</dd>
-          <dt>Starting point</dt><dd>{a["entry"]}</dd>
-          <dt>Meets</dt><dd>{SITE["meets"]}, {SITE["room"]}</dd>
-        </dl>
-        <div class="act">
-          <p class="tags" style="margin:0 0 12px">{tools}</p>
-          <a class="btn btn--wide" href="join.html#apply">Apply and name this group</a>
-        </div>
-      </div>
-      <p class="small muted" style="margin-top:18px">Other groups: {others}.</p>
+    <aside class="side">
+      <h2>Join this group</h2>
+      <p class="small" style="color:var(--ink-2)">Tell us you're interested when you sign up. You can change groups at any time.</p>
+      <a class="btn" href="join.html#join-{g["key"]}">Express interest</a>
+      <hr>
+      <dl>
+        <dt>Meetings</dt><dd>{SITE["meets_short"]}, {SITE["room"]}</dd>
+        <dt>Group lead</dt><dd>To be named in October</dd>
+      </dl>
+      <hr>
+      <h2>Related groups</h2>
+      <ul>{related}</ul>
     </aside>
   </div>
 </section>
@@ -725,390 +807,448 @@ def page_area(a):
 
 
 def page_projects():
-    rows = "\n      ".join(
-        f'<li><span class="when">{w}</span><div><h4>{t}</h4><p>{d}</p>'
-        f'<p class="tags" style="margin-top:6px"><span>{g}</span></p></div></li>'
-        for w, t, g, d in PROJECTS
+    feats = []
+    for f in FEATURED:
+        fig = figure_html(f)
+        cls = "feature" if fig else "feature noimg"
+        grp = ""
+        if f["group"]:
+            gg = GROUP_BY_KEY[f["group"]]
+            grp = f' &middot; <a href="{gg["slug"]}">{gg["name"]}</a>'
+        note = f'<p class="meta">{f["note"]}</p>' if f["note"] else ""
+        feats.append(f'''<article class="{cls}" id="{f["id"]}">
+        <div>
+          <h3>{f["title"]}</h3>
+          <p class="credit">{f["when"]}{grp}<br>{f["credit"]}</p>
+          <p>{f["text"]}</p>
+          {linkrow(f["links"])}
+          {note}
+        </div>
+        {fig}
+      </article>''')
+    sessions = "\n      ".join(
+        f'<li><span class="when">{w}</span><div><h3>{t}</h3><p>{d}</p>{linkrow(links)}</div></li>'
+        for w, t, d, links in SESSIONS
     )
-    return pagetop("Projects", "Projects and sessions",
-                   "Work the lab has actually run, most recent first. Session work is the product of the whole group; project work is done by teams or individual members."
+    return pagetop(["Projects"], "Projects",
+                   "Projects and activities by SAIL members. Featured projects come first, followed by an archive of workshops."
                    ) + f'''<section class="section">
+  <div class="wrap showcase">
+    <div class="section-head"><h2>Featured projects</h2></div>
+    {"".join(feats)}
+  </div>
+</section>
+
+<section class="section section--soft">
   <div class="wrap">
-    {h_rule("Record", str(len(PROJECTS)) + " entries")}
-    <ul class="itemlist">
-      {rows}
+    <div class="section-head">
+      <h2>Workshops and sessions</h2>
+      <p>Slides and notebooks from past meetings. Some slide decks only open with a school account.</p>
+    </div>
+    <ul class="dated">
+      {sessions}
     </ul>
-    <p class="small muted" style="margin-top:26px">Project files and notebooks are posted in Google Classroom. Ask an officer if you need access to something older than the current year.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="narrow">
+    <h2>Learning activities</h2>
+    <p style="color:var(--ink-2)">Members also work through Kaggle's free Python and machine learning courses during meetings, with officers on hand for questions. The courses we use are in the <a href="resources.html#planner">learning planner</a>.</p>
   </div>
 </section>
 '''
 
 
 def page_people():
-    rows = "\n      ".join(
-        f'<tr><td>{n}</td><td class="role">{r}</td><td>{f}</td></tr>' for n, r, f in LEADERSHIP
-    )
-    past = "\n      ".join(
-        f'<tr><td>{y}</td><td colspan="2">{w}</td></tr>' for y, w in ALUMNI
-    )
-    return pagetop("People", "People",
-                   "Officers are selected each spring through an application and a short interview. Group leads are appointed in the fall from the Applied Research Division."
-                   ) + f'''<section class="section">
+    team = "\n      ".join(f'<li><span class="name">{n}</span><span class="role">{r}</span></li>' for n, r in TEAM)
+    past = "\n      ".join(f'<li><strong>{y}</strong><span>{w}</span></li>' for y, w in PAST_OFFICERS)
+    return pagetop(["People"], "People", f"The officers who run SAIL in {YEAR}.") + f'''<section class="section">
   <div class="wrap">
-    {h_rule("Officers, 2026 to 2027")}
-    <table class="roster">
-      <thead><tr><th>Name</th><th>Role</th><th>Responsibility</th></tr></thead>
-      <tbody>
-      {rows}
-      </tbody>
-    </table>
+    <div class="section-head"><h2>{YEAR} officers</h2></div>
+    <ul class="team">
+      {team}
+    </ul>
   </div>
 </section>
 
 <section class="section section--soft">
-  <div class="wrap split">
-    <div class="prose">
-      {h_rule("Roles")}
-      <dl class="deflist">
-        <dt>Directors</dt>
-        <dd>Set the session schedule, teach or assign each session, and decide what is presented at the end of the term. Three share the position so that no one person carries the year.</dd>
-        <dt>Deputy directors</dt>
-        <dd>Run instruction and supervise project teams. Most weekly sessions are taught by a deputy director or a group lead.</dd>
-        <dt>Group leads</dt>
-        <dd>One for each research group, appointed in the fall. A lead maintains the reading list, approves proposals, and reports on the group at the end of term.</dd>
-        <dt>Records and communications</dt>
-        <dd>Keeps the meeting record, posts announcements, and maintains the archive of past sessions and materials.</dd>
-        <dt>Junior officer</dt>
-        <dd>Usually an underclassman. Covers outreach, recruitment, and arranging guest speakers.</dd>
-      </dl>
-    </div>
-    <aside>
-      <div class="factbox">
-        <h4>Selection</h4>
-        <dl>
-          <dt>When</dt><dd>Applications in April, interviews in May</dd>
-          <dt>Who can apply</dt><dd>Any member in good standing</dd>
-          <dt>What counts</dt><dd>Attendance, finished work, and teaching other members</dd>
-          <dt>Term</dt><dd>One academic year</dd>
-        </dl>
-        <div class="act"><a class="btn btn--wide" href="join.html">Membership details</a></div>
-      </div>
-    </aside>
+  <div class="narrow">
+    <h2>Becoming an officer</h2>
+    <p style="color:var(--ink-2)">Officer applications open in April and close in May, and the new team is announced at the last meeting of the year. Any member can apply. Each research group also gets a group lead, named in October.</p>
   </div>
 </section>
 
 <section class="section">
-  <div class="wrap">
-    {h_rule("Past officers", "Since " + SITE["founded"])}
-    <table class="roster">
-      <tbody>
+  <div class="narrow">
+    <h2>Past officers</h2>
+    <ul class="past">
       {past}
-      </tbody>
-    </table>
-    <p class="small muted" style="margin-top:20px">Rosters as recorded in club announcements.</p>
-  </div>
-</section>
-'''
-
-
-def page_resources():
-    cur = "\n      ".join(
-        f'<tr><td>{w}</td><td><strong>{t}</strong><br>{d}</td></tr>' for w, t, d in CURRICULUM
-    )
-    tools = "\n      ".join(f'<dt>{t}</dt><dd>{d}</dd>' for t, d in TOOLING)
-    ext = "\n      ".join(
-        f'<li><span class="when"><a href="{u}" rel="noopener">open</a></span>'
-        f'<div><h4>{n}</h4><p>{d}</p></div></li>' for n, u, d in EXTERNAL
-    )
-    return pagetop("Resources", "Curriculum and resources",
-                   "The taught sequence, the tools used in sessions, and the outside material the lab relies on. Everything listed is free."
-                   ) + f'''<section class="section">
-  <div class="wrap">
-    {h_rule("Sequence", "Foundations Program")}
-    <div class="tbl-wrap">
-      <table class="tbl">
-        <thead><tr><th>When</th><th>Subject</th></tr></thead>
-        <tbody>
-      {cur}
-        </tbody>
-      </table>
-    </div>
-    <p class="small muted" style="margin-top:20px">Applied Research Division members are not held to this sequence. They follow their group reading list and their project schedule.</p>
-  </div>
-</section>
-
-<section class="section section--soft">
-  <div class="wrap split">
-    <div class="prose">
-      {h_rule("Tools")}
-      <dl class="deflist">
-      {tools}
-      </dl>
-    </div>
-    <aside>
-      <div class="factbox">
-        <h4>Before your first session</h4>
-        <dl>
-          <dt>Accounts</dt><dd>Kaggle and GitHub, both free</dd>
-          <dt>Bring</dt><dd>A laptop if you have one</dd>
-          <dt>Install</dt><dd>Nothing</dd>
-          <dt>Cost</dt><dd>None</dd>
-        </dl>
-        <div class="act"><a class="btn btn--wide" href="join.html#apply">Apply to join</a></div>
-      </div>
-    </aside>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    {h_rule("Outside resources")}
-    <ul class="itemlist">
-      {ext}
     </ul>
   </div>
 </section>
 '''
 
 
-def page_news():
-    groups = {}
-    order = []
-    for date, title, body in NEWS:
-        yr = date.split()[-1]
-        if yr not in groups:
-            groups[yr] = []
-            order.append(yr)
-        groups[yr].append(
-            f'<li><span class="d">{date}</span><div><h3>{title}</h3><p>{body}</p></div></li>'
+def res_list(items, prefix, checkable=True):
+    out = []
+    for i, it in enumerate(items):
+        rid = f'{prefix}-{i}'
+        meta = it["kind"] + (", " + it["time"] if it.get("time") else "")
+        box = f'<input type="checkbox" data-res="{rid}" aria-label="Mark {it["title"]} as done">' if checkable else ""
+        out.append(
+            f'<li>{box}<div><a class="t" href="{it["url"]}" rel="noopener">{it["title"]}</a>'
+            f'<span class="m">{meta}</span><p>{it["note"]}</p></div></li>'
         )
-    blocks = "\n".join(
-        f'''<div style="margin-bottom:34px">
-      {h_rule(yr, str(len(groups[yr])) + " entries")}
-      <ul class="newspage">{"".join(groups[yr])}</ul>
-    </div>''' for yr in order
+    return "\n          ".join(out)
+
+
+def page_resources():
+    plan_rows = "\n        ".join(
+        f'''<tr><td>{p["when"]}</td><td data-l="What we cover"><strong>{p["title"]}</strong><br>{p["text"]}{linkrow(p["links"])}</td></tr>'''
+        for p in PLAN
     )
-    return pagetop("News", "News and announcements",
-                   "Session notes and announcements. Members get the same information through Google Classroom using code " + SITE["code"] + "."
+    stages = []
+    for n, s in enumerate(STAGES, 1):
+        stages.append(f'''<details class="stage" data-stage id="stage-{s["key"]}"{" open" if n == 1 else ""}>
+        <summary><span class="num">{n}</span><span class="st-title">{s["title"]}</span><span class="st-count" data-stage-count></span><span class="st-goal">{s["goal"]}</span></summary>
+        <div class="body">
+          <ul class="res">
+          {res_list(s["items"], s["key"])}
+          </ul>
+          <p class="try"><b>Try it:</b> {s["try"]}</p>
+        </div>
+      </details>''')
+    safety = []
+    for n, s in enumerate(SAFETY, 1):
+        safety.append(f'''<div class="session">
+        <h3>Session {n}: {s["title"]}</h3>
+        <p class="q">{s["question"]}</p>
+        <ul class="res res--plain">
+          {res_list(s["items"], "safety-" + str(n), checkable=False)}
+        </ul>
+      </div>''')
+    build_blocks = []
+    for b in BUILD_SECTION:
+        build_blocks.append(f'''<h3>{b["title"]}</h3>
+      <p style="color:var(--ink-2)">{b["intro"]}</p>
+      <ul class="res res--plain">
+        {res_list(b["items"], "build-" + b["key"], checkable=False)}
+      </ul>''')
+    programs = res_list(PROGRAMS, "prog", checkable=False)
+    decks = "\n        ".join(
+        f'<li><span class="when">{d["date"]}</span><div><p>{link(d["title"], "deck:" + d["key"])}</p></div></li>' for d in DECKS
+    )
+    return pagetop(["Resources"], "Resources",
+                   "This page has what we cover in meetings, a self-paced learning planner, tools for building your project, and our slide decks. Everything in the planner is free."
                    ) + f'''<section class="section">
-  <div class="wrap">
-    {blocks}
+  <div class="wrap docs">
+    <nav class="subnav" data-subnav aria-label="On this page">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="#start">Start here</a></li>
+        <li><a href="#year">This year's plan</a></li>
+        <li><a href="#planner">Learning planner</a></li>
+        <li><a href="#build">Build your project</a></li>
+        <li><a href="#safety">AI safety reading group</a></li>
+        <li><a href="#programs">Competitions and programs</a></li>
+        <li><a href="#slides">Club slide decks</a></li>
+      </ul>
+    </nav>
+
+    <div class="docs-main">
+      <section id="start">
+        <h2>Start here</h2>
+        <p class="intro">Three things to do before your first meeting. They take about fifteen minutes in total.</p>
+        <ol class="startgrid">
+          <li><h3>Join our Classroom</h3><p>Use code <strong>{SITE["code"]}</strong> in Google Classroom. Slides, notebooks, and announcements are posted there.</p></li>
+          <li><h3>Make two free accounts</h3><p><a href="https://www.kaggle.com/" rel="noopener">Kaggle</a> for courses, datasets, and competitions, and <a href="https://github.com/" rel="noopener">GitHub</a> for saving your code.</p></li>
+          <li><h3>Open a notebook</h3><p>Try <a href="https://colab.research.google.com/" rel="noopener">Google Colab</a>. It runs Python in your browser, so there's nothing to install. Bring a laptop if you have one.</p></li>
+        </ol>
+      </section>
+
+      <section id="year">
+        <h2>This year's plan</h2>
+        <p class="intro">What Foundations meetings cover, month by month. The linked slides and notebooks are from last year's sessions on the same topics. The schedule can shift.</p>
+        <table class="plan">
+          <thead><tr><th scope="col">When</th><th scope="col">What we cover</th></tr></thead>
+          <tbody>
+        {plan_rows}
+          </tbody>
+        </table>
+      </section>
+
+      <section id="planner">
+        <h2>Learning planner</h2>
+        <p class="intro">A self-paced path from your first line of Python to your own project. We picked a few of the best free resources for each stage, so you don't have to sort through hundreds. Check things off as you go. Your progress is saved in this browser.</p>
+        <div class="planner-bar">
+          <progress data-progress value="0" max="1" aria-label="Planner progress"></progress>
+          <span data-progress-label></span>
+          <button type="button" data-reset>Reset progress</button>
+        </div>
+        {"".join(stages)}
+      </section>
+
+      <section id="build">
+        <h2>Build your project</h2>
+        <p class="intro">You don't need to finish the whole planner first. Once you're through stage 3, pick an idea and start. You'll learn the rest as you need it.</p>
+        <h3>Ideas to start from</h3>
+        <ul class="checks">{"".join(f"<li>{i}</li>" for i in IDEAS)}</ul>
+        {"".join(build_blocks)}
+      </section>
+
+      <section id="safety">
+        <h2>AI safety reading group</h2>
+        <p class="intro">A six-session plan for the AI, Ethics and Society group, adapted from a university AI safety course and cut down to the most readable pieces. Each session needs about an hour of reading or watching beforehand.</p>
+        {"".join(safety)}
+      </section>
+
+      <section id="programs">
+        <h2>Competitions and programs</h2>
+        <p class="intro">Ways to keep going outside the club.</p>
+        <ul class="res res--plain">
+          {programs}
+        </ul>
+      </section>
+
+      <section id="slides">
+        <h2>Club slide decks</h2>
+        <p class="intro">Decks from past meetings. Those marked "school account" only open when you're signed in with your school Google account.</p>
+        <ul class="dated">
+        {decks}
+        </ul>
+      </section>
+    </div>
+  </div>
+</section>
+'''
+
+
+def page_news():
+    items = []
+    for n in NEWS:
+        act = f'<p class="act"><a class="more" href="{n["link"][1]}">{n["link"][0]}</a></p>' if n["link"] else ""
+        items.append(f'''<li id="{n["id"]}"><time datetime="{n["iso"]}">{n["date"]}</time>
+        <div><h2 style="font-size:1.2rem;margin-bottom:4px">{n["title"]}</h2><p>{n["body"]}</p>{act}</div></li>''')
+    return pagetop(["News"], "News", "Major club announcements are posted here. Week-to-week reminders go out on Google Classroom.") + f'''<section class="section">
+  <div class="narrow">
+    <ul class="ann">
+      {"".join(items)}
+    </ul>
   </div>
 </section>
 '''
 
 
 def page_join():
-    group_opts = "".join(f'<option>{a["code"]} {a["short"]}</option>' for a in AREAS)
-    return pagetop("Join", "Join the lab",
-                   "The lab takes new members every fall and reads every application. There is no cost and no prerequisite course."
+    group_opts = "".join(f'<option data-key="{g["key"]}">{g["name"]}</option>' for g in GROUPS)
+    anchors = "".join(f'<span class="anchor" id="join-{g["key"]}"></span>' for g in GROUPS)
+    return pagetop(["Join"], "Join SAIL",
+                   f"Any {SITE['school']} student can join. There's no tryout, no cost, and you don't need to know how to code."
                    ) + f'''<section class="section">
-  <div class="wrap">
-    {h_rule("Two tracks")}
-    <div class="tracks">
-      <div class="track" id="foundations">
-        <div class="inner">
-          <h3>Foundations Program</h3>
-          <p class="who">Ninth graders, and sophomores joining the lab for the first time</p>
-          <p>This track is taught from the beginning. Members write Python in the first session, work with real data within the first month or two, and train a convolutional network before the winter.</p>
-          <ul>
-            <li>Taught sessions with guided exercises and shared notebooks</li>
-            <li>The published sequence, from Python through language models</li>
-            <li>A team entry to a public competition, with the feature choices explained in the next session</li>
-            <li>A project at the end of the year, presented to the lab</li>
-            <li>A research group assignment after the first term</li>
-          </ul>
-          <p class="foot">Expected of members: attend meetings, finish the exercise for each unit, and present once during the year.</p>
-        </div>
-      </div>
-      <div class="track track--two" id="division">
-        <div class="inner">
-          <h3>Applied Research Division</h3>
-          <p class="who">Juniors and seniors, or anyone who applies with prior work</p>
-          <p>The division does project work. Teams of two to four attach to a research group, agree on a question and a deliverable, and present the result at the end of the term. Underclassmen with prior projects can apply directly.</p>
-          <ul>
-            <li>A one-page proposal agreed before the work starts</li>
-            <li>A repository with instructions another member can follow</li>
-            <li>A progress check at each meeting</li>
-            <li>A presentation with questions at the end of the term</li>
-            <li>A short written record kept with the code, including what did not work</li>
-          </ul>
-          <p class="foot">Expected of members: roughly two hours a week outside meetings while a project is running.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section section--soft">
   <div class="wrap split">
     <div class="prose">
-      {h_rule("What we look for")}
-      <p>Applications are not ranked by how much someone already knows. What matters more, for project teams and later for officer roles, is attendance and finished work.</p>
-      <dl class="deflist">
-        <dt>Attendance</dt>
-        <dd>Meetings are every other Tuesday and the sequence builds on itself. Members who attend consistently get the project roles, and attendance is the first thing looked at during officer selection.</dd>
-        <dt>Finished work</dt>
-        <dd>A small project that works is worth more on an application than an ambitious one that was left unfinished. Include the error analysis if you have it.</dd>
-        <dt>A specific interest</dt>
-        <dd>On the form below, naming a question you want to answer helps more than naming a field. It makes the group assignment easier to get right.</dd>
-        <dt>Explaining things to other members</dt>
-        <dd>Most sessions are taught by students, so members who can explain a topic to someone a year behind them are usually the ones appointed as group leads.</dd>
-      </dl>
+      <h2>When and where</h2>
+      <p>We meet {SITE["meets"][0].lower() + SITE["meets"][1:]}, in {SITE["room"]}. You're welcome to come to a meeting before you sign up, and to bring a friend.</p>
+
+      <h2 id="tracks">Two tracks</h2>
+      <p>Foundations is open sign-up. The Applied Research Division asks for a short project idea, so officers can help you find a team.</p>
+      <table class="twocol">
+        <thead><tr><td></td><th scope="col">Foundations Program</th><th scope="col">Applied Research Division</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Best for</th>
+            <td data-l="Foundations">Anyone new to AI or coding. Most ninth and tenth graders start here. Juniors and seniors who are new to programming start here too.</td>
+            <td data-l="Applied Research">Members who have finished Foundations or have built a project before. Mostly juniors and seniors.</td></tr>
+          <tr><th scope="row">What you do</th>
+            <td data-l="Foundations">Learn Python, work with data, enter a Kaggle competition, and train a neural network by December. Build your own project in the spring.</td>
+            <td data-l="Applied Research">Build a project in a team of two to four, with a research group behind you. Present it at the end of the semester.</td></tr>
+          <tr><th scope="row">Time</th>
+            <td data-l="Foundations">Meetings, plus about an hour of practice between them.</td>
+            <td data-l="Applied Research">Meetings, plus about two hours a week while your project is running.</td></tr>
+          <tr><th scope="row">Getting in</th>
+            <td data-l="Foundations">Sign up below. Everyone who signs up is in.</td>
+            <td data-l="Applied Research">Send a short project idea below. An officer will follow up to help shape it and find you a team.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>How to join</h2>
+      <ol class="steps">
+        <li><h3>Join our Google Classroom</h3><p>Use code <strong>{SITE["code"]}</strong>. Meeting reminders, slides, and notebooks are posted there.</p></li>
+        <li><h3>Come to a meeting</h3><p>{SITE["meets"]}, {SITE["room"]}. Bring a laptop if you have one.</p></li>
+        <li><h3>Send us the form</h3><p>It tells us your grade, your track, and which research group interests you.</p></li>
+      </ol>
+      <p><strong>Joining after the year has started?</strong> Come to any meeting and tell an officer you're new. Everything we've covered so far is on the <a href="resources.html#year">Resources page</a>, and we'll help you catch up.</p>
     </div>
-    <aside>
-      <div class="factbox">
-        <h4>Meetings</h4>
-        <dl>
-          <dt>When</dt><dd>{SITE["meets"]}</dd>
-          <dt>Where</dt><dd>{SITE["room"]}, {SITE["school"]}</dd>
-          <dt>Classroom code</dt><dd>{SITE["code"]}</dd>
-          <dt>Instagram</dt><dd>@{SITE["instagram"]}</dd>
-          <dt>Cost</dt><dd>None</dd>
-        </dl>
-        <div class="act"><a class="btn btn--wide" href="#apply">Go to the form</a></div>
-      </div>
+    <aside class="side">
+      <h2>At a glance</h2>
+      <dl>
+        <dt>When</dt><dd>{SITE["meets"]}</dd>
+        <dt>Where</dt><dd>{SITE["room"]}</dd>
+        <dt>Google Classroom</dt><dd>{SITE["code"]}</dd>
+        <dt>Instagram</dt><dd>@{SITE["instagram"]}</dd>
+        <dt>Cost</dt><dd>Free</dd>
+      </dl>
+      <a class="btn" href="#form">Go to the form</a>
     </aside>
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap split">
-    <div class="prose">
-      {h_rule("How to apply")}
-      <dl class="deflist">
-        <dt>Join the Google Classroom</dt>
-        <dd>Use code <strong>{SITE["code"]}</strong>. Announcements, slides, and notebooks are posted there.</dd>
-        <dt>Come to a meeting</dt>
-        <dd>{SITE["meets"]} in {SITE["room"]}. You do not need to apply first, and visitors are welcome at any session.</dd>
-        <dt>Send the form below</dt>
-        <dd>Foundations Program applications are accepted through the first month of the fall term. Applied Research Division applications are read at the start of each semester.</dd>
-        <dt>Short conversation</dt>
-        <dd>Division applicants meet a director for about ten minutes to talk through the project they want to work on. There is no interview for the Foundations Program.</dd>
-      </dl>
-    </div>
-    <aside>
-      <div class="factbox">
-        <h4>Joining mid-year</h4>
-        <dl>
-          <dt>Foundations Program</dt><dd>Open while catching up is realistic, usually until the winter unit</dd>
-          <dt>After that</dt><dd>Attend as a visitor and join the next cycle</dd>
-          <dt>Transfers between groups</dt><dd>At the start of a semester</dd>
-        </dl>
-      </div>
-    </aside>
-  </div>
-</section>
-
-<section class="section section--soft" id="apply">
+<section class="section section--soft" id="form">
   <div class="narrow">
-    {h_rule("Application", "Fall 2026")}
-    <form class="form" data-apply novalidate>
+    {anchors}
+    <h2>Sign-up form</h2>
+    <form class="form" data-apply>
+      <p class="form-how"><strong>How this works:</strong> this form doesn't send anything by itself. When you press the button, your email app opens with a message to us already written. Press send there, and you're done.</p>
       <div class="f2">
-        <div class="f"><label for="n">Full name</label><input id="n" name="name" type="text" required></div>
-        <div class="f"><label for="e">School email</label><input id="e" name="email" type="email" required></div>
+        <div class="f"><label for="n">Full name</label><input id="n" name="name" type="text" autocomplete="name" required></div>
+        <div class="f"><label for="e">School email</label><input id="e" name="email" type="email" autocomplete="email" required></div>
       </div>
       <div class="f2">
-        <div class="f"><label for="g">Graduating class</label>
-          <select id="g" name="grade">
-            <option>2030 (grade 9)</option>
-            <option>2029 (grade 10)</option>
-            <option>2028 (grade 11)</option>
-            <option>2027 (grade 12)</option>
-          </select>
+        <div class="f"><label for="g">Grade</label>
+          <select id="g" name="grade"><option>9</option><option>10</option><option>11</option><option>12</option></select>
         </div>
         <div class="f"><label for="t">Track</label>
           <select id="t" name="track">
-            <option>Foundations Program</option>
-            <option>Applied Research Division</option>
-            <option>Not sure yet</option>
+            <option data-key="foundations">Foundations Program</option>
+            <option data-key="division">Applied Research Division</option>
+            <option data-key="unsure">Not sure yet</option>
           </select>
         </div>
       </div>
-      <div class="f"><label for="gr">Research group you are interested in</label>
-        <select id="gr" name="group"><option>Undecided</option>{group_opts}</select>
+      <div class="f"><label for="gr">Research group you're interested in <span class="opt">(optional, and you can change it later)</span></label>
+        <select id="gr" name="group"><option data-key="">Not sure yet</option>{group_opts}</select>
       </div>
-      <div class="f"><label for="x">Anything you have done before</label>
-        <input id="x" name="experience" type="text" placeholder="Courses, languages, projects, or none">
+      <div class="f"><label for="x">Any experience so far <span class="opt">(optional)</span></label>
+        <input id="x" name="experience" type="text" placeholder="Classes, languages, projects. It's fine to leave this blank.">
       </div>
-      <div class="f"><label for="s">What would you want to work on, and why</label>
-        <textarea id="s" name="statement" placeholder="A few sentences. Naming a specific question helps more than naming a field."></textarea>
+      <div class="f"><label for="s">What would you like to work on? <span class="opt">(optional for Foundations, needed for Applied Research)</span></label>
+        <textarea id="s" name="statement" placeholder="A couple of sentences is plenty."></textarea>
       </div>
-      <div class="f">
-        <label class="fcheck"><input type="checkbox" name="commit" value="yes"><span>I can attend meetings {SITE["meets"]}, and will tell an officer when I cannot.</span></label>
-      </div>
-      <button class="btn" type="submit">Send application</button>
-      <p class="fstatus"></p>
-      <p class="fnote">This opens your mail program with the application filled in. If you would rather not use email, post the same information as a private comment on the application assignment in Google Classroom.</p>
+      <button class="btn" type="submit">Create application email</button>
+      <p class="fstatus" role="status"></p>
     </form>
   </div>
 </section>
 
 <section class="section">
   <div class="narrow">
-    {h_rule("Questions")}
+    <h2>What we ask of members</h2>
+    <ul class="checks">
+      <li>Come to meetings when you can, and tell an officer when you can't.</li>
+      <li>Try the practice exercise for each topic.</li>
+      <li>Present something once a year, even if it's small.</li>
+    </ul>
+
+    <h2 style="margin-top:44px">Questions</h2>
     <div class="faq">
-      <details open><summary>Do I need to know how to code?</summary><div class="ans"><p>Not for the Foundations Program. The first unit teaches Python from the beginning, and the exercises are built so that someone with no background can finish them. The Applied Research Division expects that you can already write and debug your own Python.</p></div></details>
-      <details><summary>I am a sophomore. Which track is mine?</summary><div class="ans"><p>If this is your first year with the lab, start in the Foundations Program. If you were here last year, or you have project work you can show, apply to the Applied Research Division.</p></div></details>
-      <details><summary>How much time does it take?</summary><div class="ans"><p>The Foundations Program is the meeting plus about an hour between sessions. The Applied Research Division is the meeting plus roughly two hours a week while a project is running, and less between projects.</p></div></details>
-      <details><summary>Can I pick my research group right away?</summary><div class="ans"><p>You can name a preference on the form, and it is usually honored. Group assignments happen after your first term so the choice is made with some idea of what each group actually does.</p></div></details>
-      <details><summary>Do I need a laptop or a GPU?</summary><div class="ans"><p>No. Every session runs in a browser notebook, and Colab and Kaggle provide free GPU time for the few projects that need it.</p></div></details>
-      <details><summary>What if I miss meetings?</summary><div class="ans"><p>Materials for every session are posted in Google Classroom. Tell an officer and catch up. Attendance matters for leadership selection, not for membership.</p></div></details>
-      <details><summary>Can I bring a friend?</summary><div class="ans"><p>Yes. Bring them to a Tuesday session. There is no cap and no application needed to visit.</p></div></details>
+      <details open><summary>Do I need to know how to code?</summary><div class="ans"><p>No. Foundations starts from the first line of Python. The Applied Research Division does expect you to be able to write and fix your own code.</p></div></details>
+      <details><summary>I'm a junior or senior, but I'm new to this. Can I still join?</summary><div class="ans"><p>Yes. Start in Foundations. The tracks are about experience, not grade, and you can move to the Applied Research Division as soon as you're ready.</p></div></details>
+      <details><summary>How much time does it take?</summary><div class="ans"><p>Meetings are an hour every other week. Foundations members should plan on about an hour of practice between meetings. Applied Research teams spend about two hours a week while a project is running.</p></div></details>
+      <details><summary>When do I pick a research group?</summary><div class="ans"><p>You can name one on the form, and you can change it at any time. Applied Research teams work with their group from October. Foundations members join group activities in the second semester.</p></div></details>
+      <details><summary>Do I need my own laptop?</summary><div class="ans"><p>It helps, but it isn't required. Everything runs in a browser, and free tools such as Google Colab and Kaggle provide the computing power.</p></div></details>
+      <details><summary>What if I miss a meeting?</summary><div class="ans"><p>Slides and notebooks are posted on Google Classroom, and the main decks are also linked on the Resources page, so you can catch up.</p></div></details>
     </div>
   </div>
 </section>
 '''
 
 
-# ---------------------------------------------------------------- build
+# ---------------------------------------------------------------- checks
+
+def luminance(hex_color):
+    h = hex_color.lstrip("#")
+    rgb = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    lin = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in rgb]
+    return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+
+
+def contrast(a, b):
+    la, lb = sorted((luminance(a), luminance(b)), reverse=True)
+    return (la + 0.05) / (lb + 0.05)
+
+
+CONTRAST_PAIRS = [
+    ("body text on white", "#141d27", "#ffffff"), ("secondary text on white", "#3f4a56", "#ffffff"),
+    ("muted text on white", "#5a6571", "#ffffff"), ("muted text on soft", "#5a6571", "#f4f6f9"),
+    ("secondary text on soft", "#3f4a56", "#f4f6f9"), ("link on white", "#14498c", "#ffffff"),
+    ("link on soft", "#14498c", "#f4f6f9"), ("rust label on white", "#9c4522", "#ffffff"),
+    ("hero subtitle on navy", "#cbd8e8", "#081426"), ("hero meta on navy", "#a9bdd6", "#081426"),
+    ("footer text on navy", "#c9d6e6", "#0e2340"), ("footer heading on navy", "#a9bdd6", "#0e2340"),
+    ("nav link on navy", "#dbe5f1", "#0e2340"), ("badge text", "#1d5a35", "#e3f3e8"),
+    ("planned tag", "#7a5506", "#fdf7e8"),
+]
+
+BANNED = [
+    "—", "–", "delve", "seamless", "cutting-edge", "leverage", "in today's", "game-chang", "unlock",
+    "empower", "dive into", "at the intersection of", "journey", "elite", "rather than", "actually run",
+    "what they throw away", "count as a failure", "sign-off", "signs off", "2026 to 2027", "1 entries",
+]
+
+
+def strip_tags(html):
+    html = re.sub(r"(?s)<(script|style|svg).*?</\1>", " ", html)
+    return re.sub(r"(?s)<[^>]+>", " ", html)
+
+
+def run_checks(written):
+    problems = []
+    for label, fg, bg in CONTRAST_PAIRS:
+        ratio = contrast(fg, bg)
+        if ratio < 4.5:
+            problems.append(f"contrast {ratio:.2f}:1 below 4.5 for {label}")
+    for filename in written:
+        with open(os.path.join(HERE, filename), encoding="utf-8") as fh:
+            html = fh.read()
+        text = strip_tags(html).lower()
+        for term in BANNED:
+            if term in text:
+                problems.append(f"{filename}: banned phrase '{term.strip()}'")
+        levels = [int(m) for m in re.findall(r"<h([1-6])[\s>]", html)]
+        if levels.count(1) != 1:
+            problems.append(f"{filename}: expected exactly one h1, found {levels.count(1)}")
+        for a, b in zip(levels, levels[1:]):
+            if b > a + 1:
+                problems.append(f"{filename}: heading jumps from h{a} to h{b}")
+                break
+    return problems
+
 
 def build():
     pages = [
-        ("index.html", "Home",
-         "Student machine learning laboratory at " + SITE["school"] + ". Six research groups, two membership tracks, open to every grade.",
-         "home", page_index()),
-        ("research.html", "Research",
-         "Six research groups covering language, vision, neural network foundations, agents, applied data science, and ethics.",
-         "research", page_research()),
-        ("projects.html", "Projects",
-         "Projects and sessions the lab has run since 2022.", "projects", page_projects()),
-        ("people.html", "People",
-         "Officers, roles, and past leadership of the laboratory.", "people", page_people()),
-        ("resources.html", "Resources",
-         "The taught sequence, tools used in sessions, and outside resources.", "resources", page_resources()),
-        ("news.html", "News",
-         "Announcements and session notes from the laboratory.", "news", page_news()),
-        ("join.html", "Join",
-         "Membership tracks, what we look for, and the application form.", "join", page_join()),
+        ("index.html", "Home", "The AI and machine learning club at " + SITE["school"] + ". Learn how AI works and build your own projects. No experience needed.", "home", page_index()),
+        ("research.html", "Research groups", "Compare SAIL's six research groups and find the one that fits you.", "research", page_research()),
+        ("projects.html", "Projects", "Projects, workshops, and activities by SAIL members.", "projects", page_projects()),
+        ("people.html", "People", "The student officers who run SAIL.", "people", page_people()),
+        ("resources.html", "Resources", "A free learning planner, this year's meeting plan, project tools, and club slide decks.", "resources", page_resources()),
+        ("news.html", "News", "Announcements from SAIL.", "news", page_news()),
+        ("join.html", "Join", "How to join SAIL: who can join, when we meet, the two tracks, and the sign-up form.", "join", page_join()),
     ]
-    for a in AREAS:
-        pages.append((a["slug"], a["name"], a["summary"], "area", page_area(a)))
+    for g in GROUPS:
+        pages.append((g["slug"], g["name"], g["line"], "group", page_group(g)))
+
+    keep = {p[0] for p in pages}
+    for old in glob.glob(os.path.join(HERE, "*.html")):
+        if os.path.basename(old) not in keep:
+            os.remove(old)
+            print("removed stale page:", os.path.basename(old))
 
     written = []
     for filename, title, desc, active, body in pages:
-        html = head(title, desc) + masthead(active) + "<main>\n" + body + "</main>\n" + footer()
+        html = head(title, desc) + masthead(active) + body + footer()
         with open(os.path.join(HERE, filename), "w", encoding="utf-8") as fh:
             fh.write(html)
         written.append(filename)
 
-    problems = []
-    banned = ["—", "–", "delve", "seamless", "cutting-edge", "leverage the",
-              "in today's", "game-chang", "unlock", "empower", "robust solution",
-              "dive into", "at the intersection of", "journey"]
-    for filename in written:
-        with open(os.path.join(HERE, filename), encoding="utf-8") as fh:
-            text = fh.read().lower()
-        for term in banned:
-            if term in text:
-                problems.append(filename + ": " + term)
     print("built %d pages" % len(written))
+    problems = run_checks(written)
     if problems:
-        print("FLAGGED:")
+        print("CHECKS FAILED:")
         for p in problems:
-            print("  " + p)
+            print("  - " + p)
     else:
-        print("copy check passed")
+        print("checks passed: contrast, heading order, phrasing")
+    for name in sorted(set(MISSING_IMAGES)):
+        print(f"note: no image yet for '{name}' (add assets/img/{name}.jpg to show one)")
 
 
 if __name__ == "__main__":
