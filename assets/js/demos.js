@@ -38,7 +38,7 @@
       S.W = rect.width; S.H = rect.height; S.dpr = dpr; S.r = region(S.W, S.H);
       canvas.width = Math.round(S.W * dpr); canvas.height = Math.round(S.H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      scene = make(S, root);
+      scene = make(S, root, function () { paint(); });
       if (reduced && scene.settle) scene.settle(S);
       paint(); say(true);
     }
@@ -231,79 +231,86 @@
   }
 
   /* ---------------------------------------------------------- computer vision
-     Real footage of a city intersection, with a real object detector (COCO-SSD,
-     running in the browser through TensorFlow.js) drawing what it finds. The
-     model runs a few times a second and the boxes glide between its answers. */
-  var TF_URL = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js";
-  var SSD_URL = "https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js";
-  function loadScript(src) {
-    return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
-  }
-  var detectorPromise = null;
-  function detector() {
-    if (!detectorPromise) detectorPromise = loadScript(TF_URL).then(function () { return loadScript(SSD_URL); }).then(function () { return window.cocoSsd.load({ base: "lite_mobilenet_v2" }); });
-    return detectorPromise;
-  }
-  function detection(S, root) {
+     Real footage of a city intersection. An object detector (Faster R-CNN) was run
+     over every other frame ahead of time and a tracker linked its answers into
+     tracks, saved in assets/data/street-tracks.json. The page only has to draw the
+     boxes for the frame on screen, so nothing heavy runs in the browser and the
+     boxes stay locked to the video. */
+  var trackData = null;
+  function detection(S, root, repaint) {
     var video = root.querySelector("video"), status = root.querySelector("[data-status]");
-    var model = null, busy = false, since = 0, retry = 0, tracks = [], failed = false;
-    var PEOPLE = { person: 1 }, reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    function note(t) { if (status) status.textContent = t; }
-    note("Loading the detector…");
-    detector().then(function (m) { model = m; note(""); }, function () { failed = true; note("The detector could not load, so this is just the footage."); });
+    var data = trackData, vt = 0, exact = false, retry = 0, wanted = true;
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var BLUE = "143,180,255", GOLD = "255,214,102", GREEN = "160,232,140";
+    var COLORS = { person: WARM, car: TEAL, bus: BLUE, truck: BLUE, motorcycle: GOLD, bicycle: GOLD, "traffic light": GREEN };
+    if (!data) fetch("assets/data/street-tracks.json").then(function (r) { return r.json(); }).then(function (d) { data = trackData = d; repaint(); })
+      .catch(function () { if (status) status.textContent = "The boxes could not load, so this is just the footage."; });
+    if (video && video.requestVideoFrameCallback) {
+      exact = true;
+      var onFrame = function (now, meta) { vt = meta.mediaTime; if (video.paused) repaint(); video.requestVideoFrameCallback(onFrame); };
+      video.requestVideoFrameCallback(onFrame);
+    }
     if (video && !reduced) { var pr = video.play(); if (pr && pr.catch) pr.catch(function () {}); }
 
-    function iou(a, b) {
-      var x1 = Math.max(a[0], b[0]), y1 = Math.max(a[1], b[1]), x2 = Math.min(a[0] + a[2], b[0] + b[2]), y2 = Math.min(a[1] + a[3], b[1] + b[3]);
-      var inter = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
-      return inter / (a[2] * a[3] + b[2] * b[3] - inter || 1);
-    }
-    function absorb(preds) {
-      tracks.forEach(function (t) { t.hit = false; });
-      preds.forEach(function (p) {
-        var best = null, bi = 0.25;
-        tracks.forEach(function (t) { if (t.cls !== p.class || t.hit) return; var v = iou(t.target, p.bbox); if (v > bi) { bi = v; best = t; } });
-        if (best) { best.target = p.bbox; best.score = p.score; best.hit = true; }
-        else tracks.push({ cls: p.class, box: p.bbox.slice(), target: p.bbox, score: p.score, a: 0, hit: true });
-      });
-    }
+    function at(t, i, u) { var a = t.b[i], b = t.b[Math.min(i + 1, t.b.length - 1)]; return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u, a[3] + (b[3] - a[3]) * u]; }
+
     return {
       step: function (dt) {
-        since += dt; retry += dt;
-        if (video.paused && retry > 1) { retry = 0; var again = video.play(); if (again && again.catch) again.catch(function () {}); }   // some browsers hold autoplay until the page is visible
-        if (model && !busy && since > 0.16 && video.readyState >= 2) {
-          busy = true; since = 0;
-          model.detect(video, 24, 0.42).then(function (p) { absorb(p); busy = false; }, function () { busy = false; });
-        }
-        for (var i = tracks.length - 1; i >= 0; i--) {
-          var t = tracks[i], k = Math.min(1, dt * 9);
-          for (var j = 0; j < 4; j++) t.box[j] += (t.target[j] - t.box[j]) * k;
-          t.a += ((t.hit ? 1 : 0) - t.a) * Math.min(1, dt * (t.hit ? 8 : 3));
-          if (!t.hit && t.a < 0.03) tracks.splice(i, 1);
-        }
+        retry += dt;
+        if (wanted && video && video.paused && retry > 1) { retry = 0; var again = video.play(); if (again && again.catch) again.catch(function () {}); }   // some browsers hold autoplay until the page is visible
       },
-      setRunning: function (on) { if (!video) return; if (on) { var pr = video.play(); if (pr && pr.catch) pr.catch(function () {}); } else video.pause(); },
+      setRunning: function (on) { wanted = on; if (!video) return; if (on) { var pr = video.play(); if (pr && pr.catch) pr.catch(function () {}); } else video.pause(); },
       draw: function (ctx, S) {
         ctx.clearRect(0, 0, S.W, S.H);
-        if (!video || !video.videoWidth) return;
-        var sc = Math.max(S.W / video.videoWidth, S.H / video.videoHeight), ox = (S.W - video.videoWidth * sc) / 2, oy = (S.H - video.videoHeight * sc) / 2;
-        for (var i = 0; i < tracks.length; i++) {
-          var t = tracks[i], x = ox + t.box[0] * sc, y = oy + t.box[1] * sc, w = t.box[2] * sc, h = t.box[3] * sc;
-          var rgb = PEOPLE[t.cls] ? WARM : TEAL, L = Math.max(8, Math.min(w, h) * 0.24);
-          ctx.globalAlpha = t.a;
-          ctx.fillStyle = "rgba(" + rgb + ",0.07)"; ctx.fillRect(x, y, w, h);
+        if (!data || !video || !video.videoWidth) return;
+        var sc = Math.max(S.W / data.w, S.H / data.h), ox = (S.W - data.w * sc) / 2, oy = (S.H - data.h * sc) / 2;
+        var f = Math.min(data.n - 1, (exact ? vt : video.currentTime) / data.dt);
+        ctx.lineJoin = "miter"; ctx.lineCap = "butt";
+        for (var n = 0; n < data.tracks.length; n++) {
+          var t = data.tracks[n], age = f - t.s, left = t.s + t.b.length - 1 - f;
+          if (age < 0 || left < 0) continue;
+          var i = Math.floor(age), b = at(t, i, age - i), rgb = COLORS[t.c] || TEAL;
+          var lock = Math.min(1, age / 4), a = Math.min(lock, left / 3 + 0.001, 1), grow = 1 + (1 - lock) * (1 - lock) * 0.4;
+          var w = b[2] * sc * grow, h = b[3] * sc * grow, x = ox + (b[0] + b[2] / 2) * sc - w / 2, y = oy + (b[1] + b[3] / 2) * sc - h / 2;
+
+          // where it has been: the last second of the track, from the point where it meets the ground
+          var from = Math.max(0, i - Math.round(0.34 / data.dt));
+          if (i - from > 1) {
+            var p0 = t.b[from], moved = Math.hypot(p0[0] + p0[2] / 2 - b[0] - b[2] / 2, p0[1] + p0[3] - b[1] - b[3]) * sc;
+            if (moved > 10) {
+              ctx.globalCompositeOperation = "lighter";
+              for (var k = from; k < i; k++) {
+                var p = t.b[k], q = k + 1 < i ? t.b[k + 1] : b, fade = (k - from + 1) / (i - from);
+                ctx.beginPath(); ctx.moveTo(ox + (p[0] + p[2] / 2) * sc, oy + (p[1] + p[3]) * sc); ctx.lineTo(ox + (q[0] + q[2] / 2) * sc, oy + (q[1] + q[3]) * sc);
+                ctx.lineWidth = 2; ctx.strokeStyle = "rgba(" + rgb + "," + (0.55 * fade * a).toFixed(3) + ")"; ctx.stroke();
+              }
+              ctx.globalCompositeOperation = "source-over";
+            }
+          }
+
+          ctx.fillStyle = "rgba(" + rgb + "," + (0.06 * a).toFixed(3) + ")"; ctx.fillRect(x, y, w, h);
+          ctx.lineWidth = 1; ctx.strokeStyle = "rgba(" + rgb + "," + (0.32 * a).toFixed(3) + ")"; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+          var L = Math.max(6, Math.min(w, h) * 0.22);
           ctx.beginPath();
           ctx.moveTo(x, y + L); ctx.lineTo(x, y); ctx.lineTo(x + L, y);
           ctx.moveTo(x + w - L, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + L);
           ctx.moveTo(x + w, y + h - L); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w - L, y + h);
           ctx.moveTo(x + L, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + h - L);
-          glow(ctx, rgb, 2, t.a);
-          var label = t.cls + " " + Math.round(t.score * 100) + "%";
-          ctx.font = "600 12px 'Libre Franklin', sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-          var tw = ctx.measureText(label).width + 10;
-          ctx.fillStyle = "rgba(" + rgb + ",0.92)"; ctx.fillRect(x, y - 18, tw, 17);
-          ctx.fillStyle = "#04101c"; ctx.fillText(label, x + 5, y - 5);
-          ctx.globalAlpha = 1;
+          glow(ctx, rgb, 2, a);
+
+          if (w >= 40 && h >= 44) {
+            var name = t.c.toUpperCase() + " " + (t.id < 10 ? "0" : "") + t.id, conf = Math.round(t.p * 100) + "%";
+            ctx.font = "600 10.5px 'Libre Franklin', sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+            if ("letterSpacing" in ctx) ctx.letterSpacing = "0.9px";
+            var nw = ctx.measureText(name).width, cw = ctx.measureText(conf).width, tw = nw + cw + 25, ty = y - 19 < 76 ? y + 2 : y - 19;
+            ctx.globalAlpha = a;
+            ctx.fillStyle = "rgba(4,10,22,.82)"; ctx.fillRect(x, ty, tw, 17);
+            ctx.fillStyle = "rgb(" + rgb + ")"; ctx.fillRect(x, ty, 3, 17);
+            ctx.fillText(name, x + 9, ty + 9);
+            ctx.fillStyle = "rgba(235,243,255,.85)"; ctx.fillText(conf, x + 16 + nw, ty + 9);
+            if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+            ctx.globalAlpha = 1;
+          }
         }
       }
     };
@@ -403,66 +410,252 @@
   }
 
   /* ---------------------------------------------------------- agents
-     Learning by trial and error, as an evolution strategy. Every round a crowd of
-     agents flies a plan of steering moves toward the goal. The plans that ended
-     closest are copied, with small random changes, into the next round. */
-  function evolve(S) {
-    var wide = S.W >= 860, N = wide ? 80 : 46, T = 190, unit = Math.min(S.W, S.H);
-    var start = { x: S.W * (wide ? 0.5 : 0.5), y: S.H * (wide ? 0.78 : 0.9) }, goal = { x: S.W * (wide ? 0.8 : 0.72), y: S.H * (wide ? 0.2 : 0.56) };
-    var walls = wide ? [[S.W * 0.52, S.H * 0.5, S.W * 0.2, 12], [S.W * 0.78, S.H * 0.62, S.W * 0.16, 12]] : [[S.W * 0.2, S.H * 0.74, S.W * 0.42, 10]];
-    var pop = [], tick = 0, acc = 0, gen = 1, hold = 0;
-    function genome() { var g = new Float32Array(T * 2); for (var i = 0; i < T * 2; i++) g[i] = (Math.random() - 0.5) * 2; return g; }
-    function fresh(g) { return { g: g, x: start.x, y: start.y, vx: 0, vy: -unit * 0.1, alive: true, done: false, best: 1e9, path: [[start.x, start.y]] }; }
-    for (var i = 0; i < N; i++) pop.push(fresh(genome()));
-    function hitWall(x, y) { for (var w = 0; w < walls.length; w++) { var r = walls[w]; if (x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3]) return true; } return x < 0 || x > S.W || y < 0 || y > S.H; }
-    function stepAll() {
-      for (var i = 0; i < pop.length; i++) {
-        var a = pop[i]; if (!a.alive || a.done) continue;
-        a.vx = a.vx * 0.965 + a.g[tick * 2] * unit * 0.02; a.vy = a.vy * 0.965 + a.g[tick * 2 + 1] * unit * 0.02;
-        a.x += a.vx / 60; a.y += a.vy / 60;
-        var d = Math.hypot(a.x - goal.x, a.y - goal.y); if (d < a.best) a.best = d;
-        if (d < unit * 0.035) a.done = true; else if (hitWall(a.x, a.y)) a.alive = false;
-        if (tick % 2 === 0) a.path.push([a.x, a.y]);
-      }
-      tick++;
+     An agent at work. Letters of the page title fall to the floor, and a hovering
+     robot runs the loop every agent runs: look for what is out of place, pick the
+     nearest job, move, grasp, carry, place, check. The letters are the real heading
+     text (split into spans), so the robot is rearranging the page itself. */
+  function robot(S, root) {
+    var h1 = root.querySelector("h1"), bar = root.querySelector(".ghero-bar");
+    var wide = S.W >= 860;
+    var R = Math.max(34, Math.min(62, Math.min(S.W, S.H) * (wide ? 0.07 : 0.085)));
+    var L1 = R * 1.3, L2 = R * 1.25, HOLD = R * 0.36, G = 1900;
+
+    if (h1 && !h1.getAttribute("data-split")) {
+      var words = h1.textContent.trim().split(/\s+/);
+      h1.setAttribute("aria-label", words.join(" ")); h1.setAttribute("data-split", "1"); h1.textContent = "";
+      words.forEach(function (word, wi) {
+        if (wi) h1.appendChild(document.createTextNode(" "));
+        var w = document.createElement("span"); w.className = "w"; w.setAttribute("aria-hidden", "true");
+        word.split("").forEach(function (ch) { var l = document.createElement("span"); l.className = "l"; l.textContent = ch; w.appendChild(l); });
+        h1.appendChild(w);
+      });
     }
-    function next() {
-      var scored = pop.map(function (a) { var d = a.done ? 0 : Math.hypot(a.x - goal.x, a.y - goal.y) * 0.7 + a.best * 0.3; return { g: a.g, f: 1 / (1 + d * d / (unit * unit) * 60) * (a.done ? 3 : 1) * (a.alive ? 1 : 0.35) }; });
-      scored.sort(function (p, q) { return q.f - p.f; });
-      function pick() { var a = scored[(Math.random() * N) | 0], b = scored[(Math.random() * N) | 0], c = scored[(Math.random() * N) | 0]; return [a, b, c].sort(function (p, q) { return q.f - p.f; })[0].g; }
-      var out = []; for (var e = 0; e < 4; e++) out.push(fresh(scored[e].g));
-      while (out.length < N) {
-        var ma = pick(), pa = pick(), cut = (Math.random() * T) | 0, g = new Float32Array(T * 2);
-        for (var k = 0; k < T * 2; k++) { g[k] = (k < cut * 2 ? ma : pa)[k]; if (Math.random() < 0.02) g[k] = (Math.random() - 0.5) * 2; else if (Math.random() < 0.1) g[k] += (Math.random() - 0.5) * 0.3; }
-        out.push(fresh(g));
-      }
-      pop = out; tick = 0; gen++;
+    var letters = [].map.call(h1 ? h1.querySelectorAll(".l") : [], function (el) {
+      el.style.transform = "";
+      return { el: el, hx: 0, hy: 0, w: 0, h: 0, x: 0, y: 0, rot: 0, vx: 0, vy: 0, vr: 0, state: "home", wait: 0 };
+    });
+    var floorY = S.H - 120;
+    function measure() {
+      letters.forEach(function (l) {
+        var x = 0, y = 0, n = l.el;
+        while (n && n !== root) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+        l.w = l.el.offsetWidth; l.h = l.el.offsetHeight; l.hx = x + l.w / 2; l.hy = y + l.h / 2;
+        if (l.state === "home") { l.x = l.hx; l.y = l.hy; }
+      });
+      if (bar) floorY = bar.offsetTop + 20;
     }
-    return {
-      step: function (dt) {
-        if (hold > 0) { hold -= dt; if (hold <= 0) next(); return; }
-        acc += dt * 60; while (acc >= 1 && tick < T) { acc--; stepAll(); }
-        if (tick >= T || pop.every(function (a) { return !a.alive || a.done; })) { hold = 0.5; acc = 0; }
-      },
-      settle: function () { for (var r = 0; r < 25; r++) { while (tick < T) stepAll(); if (r < 24) next(); } },
-      click: function (x, y) { if (!hitWall(x, y)) { goal.x = x; goal.y = y; } },
-      act: function (name, v, S) { if (name === "goal") { do { goal.x = S.W * (0.45 + Math.random() * 0.5); goal.y = S.H * (0.12 + Math.random() * 0.5); } while (hitWall(goal.x, goal.y)); } },
-      draw: function (ctx, S) {
-        ctx.clearRect(0, 0, S.W, S.H);
-        for (var w = 0; w < walls.length; w++) { var r = walls[w]; ctx.beginPath(); ctx.rect(r[0], r[1], r[2], r[3]); glow(ctx, INK, 1.4, 0.8); ctx.fillStyle = "rgba(" + INK + ",0.18)"; ctx.fillRect(r[0], r[1], r[2], r[3]); }
-        ctx.globalCompositeOperation = "lighter"; ctx.lineJoin = "round";
-        for (var i = 0; i < pop.length; i++) {
-          var a = pop[i], rgb = a.done ? WARM : TEAL, al = a.alive ? 1 : 0.3;
-          ctx.beginPath(); ctx.moveTo(a.path[0][0], a.path[0][1]); for (var k = 1; k < a.path.length; k++) ctx.lineTo(a.path[k][0], a.path[k][1]); ctx.lineTo(a.x, a.y);
-          ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(" + rgb + "," + 0.05 * al + ")"; ctx.stroke();
-          ctx.lineWidth = 1; ctx.strokeStyle = "rgba(" + rgb + "," + 0.34 * al + ")"; ctx.stroke();
+    measure();
+
+    var rb = { x: S.W + R * 4, y: S.H * 0.3, vx: 0, vy: 0, lean: 0, look: { x: 0, y: 0 }, blink: 0, nextBlink: 2 };
+    var arms = [-1, 1].map(function (side) { return { side: side, x: rb.x + side * R, y: rb.y + R * 2, ex: rb.x + side * R, ey: rb.y + R, grip: 1, dx: 0, dy: 1 }; });
+    var job = null, clock = 0, idle = 0, started = false, sinceMeasure = 0, rings = [], motes = [];
+    for (var m = 0; m < (wide ? 46 : 24); m++) motes.push({ x: Math.random() * S.W, y: Math.random() * S.H, z: 0.3 + Math.random() * 0.7, ph: Math.random() * 6.28 });
+
+    function knock(l, delay) {
+      if (l.state !== "home") return;
+      var lx = wide ? S.W * (0.3 + Math.random() * 0.62) : S.W * (0.1 + Math.random() * 0.8);
+      var fall = Math.sqrt(2 * Math.max(40, floorY - l.hy) / G);
+      l.state = "falling"; l.wait = delay || 0; l.vx = (lx - l.hx) / fall * 0.8; l.vy = -160 - Math.random() * 180; l.vr = (Math.random() - 0.5) * 9;
+    }
+    function knockSome(n) {
+      var home = letters.filter(function (l) { return l.state === "home"; });
+      for (var i = 0; i < n && home.length; i++) knock(home.splice((Math.random() * home.length) | 0, 1)[0], i * 0.11);
+    }
+    function homeBase() { return { x: S.W * (wide ? 0.74 : 0.5), y: wide ? S.H * 0.42 : Math.min(floorY - R * 3.2, S.H * 0.66) }; }
+    function shoulder(side) { var c = Math.cos(rb.lean), s = Math.sin(rb.lean), lx = side * R * 0.74, ly = -R * 0.5; return { x: rb.x + lx * c - ly * s, y: rb.y + lx * s + ly * c }; }
+
+    function stepLetters(dt) {
+      letters.forEach(function (l) {
+        if (l.state !== "falling") return;
+        if (l.wait > 0) { l.wait -= dt; return; }
+        l.vy += G * dt; l.x += l.vx * dt; l.y += l.vy * dt; l.rot += l.vr * dt;
+        if (l.x < l.w) { l.x = l.w; l.vx = Math.abs(l.vx) * 0.5; } else if (l.x > S.W - l.w) { l.x = S.W - l.w; l.vx = -Math.abs(l.vx) * 0.5; }
+        var rest = floorY - l.h * 0.3;
+        if (l.y > rest) {
+          l.y = rest;
+          if (l.vy < 190) { l.state = "rest"; l.vx = l.vy = l.vr = 0; l.rot = Math.max(-0.6, Math.min(0.6, ((l.rot + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI)); }
+          else { l.vy *= -0.36; l.vx *= 0.62; l.vr *= 0.5; }
         }
-        ctx.globalCompositeOperation = "source-over";
-        for (var j = 0; j < pop.length; j++) if (pop[j].alive) dot(ctx, pop[j].x, pop[j].y, 3, "255,255,255", 0.9);
-        var pulse = 1 + Math.sin(S.t * 2.4) * 0.12;
-        dot(ctx, goal.x, goal.y, unit * 0.05 * pulse, WARM, 1); ctx.beginPath(); ctx.arc(goal.x, goal.y, unit * 0.035, 0, 6.2832); ctx.strokeStyle = "rgb(" + WARM + ")"; ctx.lineWidth = 2; ctx.stroke();
-        dot(ctx, start.x, start.y, 7, "255,255,255", 0.7);
-        caption(ctx, "Round " + gen, S.W - 24, 30, "right");
+      });
+    }
+
+    function stepRobot(dt) {
+      var target = homeBase(), focus = null, active = null;
+      if (!job) {
+        var best = null, bd = 1e9;
+        letters.forEach(function (l) { if (l.state === "rest") { var d = Math.hypot(l.x - rb.x, l.y - rb.y); if (d < bd) { bd = d; best = l; } } });
+        if (best) job = { l: best, phase: "approach", t: 0, side: 0 };
+      }
+      if (job) {
+        var l = job.l; job.t += dt; idle = 0;
+        if (job.phase === "approach" || job.phase === "reach" || job.phase === "grasp") {
+          if (!job.side) job.side = l.x + R * 2.6 < S.W ? 1 : -1;               // work from the right, so the left arm ends up over the title
+          target = { x: l.x + job.side * R * 1.15, y: l.y - R * 1.75 }; focus = l;
+          var near = Math.hypot(rb.x - target.x, rb.y - target.y) < R * 0.6 && Math.hypot(rb.vx, rb.vy) < 140;
+          if (job.phase === "approach" && near) { job.phase = "reach"; job.t = 0; }
+          if (job.phase !== "approach") {
+            active = arms[job.side < 0 ? 1 : 0];                               // the arm nearest the letter
+            active.tx = l.x - active.dx * HOLD; active.ty = l.y - active.dy * HOLD; active.open = job.phase === "reach" ? 1 : 0;
+            if (job.phase === "reach" && Math.hypot(active.x + active.dx * HOLD - l.x, active.y + active.dy * HOLD - l.y) < 5) { job.phase = "grasp"; job.t = 0; }
+            if (job.phase === "grasp" && job.t > 0.22) { l.state = "held"; job.phase = "carry"; job.t = 0; job.arm = active; }
+          }
+        } else {
+          active = job.arm;
+          var s = -active.side;                                                 // body sits on the far side of the working arm
+          target = { x: Math.max(R * 1.3, Math.min(S.W - R * 1.3, l.hx + s * R * 1.35)), y: l.hy + R * 1.5 };
+          focus = { x: l.hx, y: l.hy };
+          var close = Math.hypot(rb.x - target.x, rb.y - target.y) < R * 1.1;
+          if (job.phase === "carry") {
+            active.open = 0;
+            if (close) { active.tx = l.hx - active.dx * HOLD; active.ty = l.hy - active.dy * HOLD; }
+            else { var sh = shoulder(active.side); active.tx = sh.x + active.side * R * 0.7; active.ty = sh.y + R * 1.3; }
+            l.x = active.x + active.dx * HOLD; l.y = active.y + active.dy * HOLD; l.rot += (0 - l.rot) * Math.min(1, dt * 5);
+            if (close && Math.hypot(l.x - l.hx, l.y - l.hy) < 2.2 && Math.abs(l.rot) < 0.04) {
+              l.state = "home"; l.x = l.hx; l.y = l.hy; l.rot = 0; rings.push({ x: l.hx, y: l.hy, r: Math.max(l.w, l.h) * 0.5, t: 0 });
+              job.phase = "release"; job.t = 0;
+            }
+          } else { active.open = 1; active.tx = active.x; active.ty = active.y; if (job.t > 0.28) job = null; }
+        }
+      } else {
+        idle += dt;
+        if (idle > 11 && letters.every(function (l) { return l.state === "home"; })) { knockSome(wide ? 3 : 2); idle = 0; }
+        if (S.inside) focus = { x: S.mx, y: S.my };
+      }
+
+      // body: a damped spring toward the target, with a slow bob
+      target.y += Math.sin(clock * 2.1) * R * 0.07;
+      var ax = (target.x - rb.x) * 19 - rb.vx * 8.6, ay = (target.y - rb.y) * 19 - rb.vy * 8.6;
+      rb.vx += ax * dt; rb.vy += ay * dt;
+      var sp = Math.hypot(rb.vx, rb.vy), cap = Math.max(S.W, S.H) * 0.95; if (sp > cap) { rb.vx *= cap / sp; rb.vy *= cap / sp; }
+      rb.x += rb.vx * dt; rb.y += rb.vy * dt;
+      rb.y = Math.min(rb.y, floorY - R * 1.25);
+      rb.lean += (Math.max(-0.32, Math.min(0.32, rb.vx * 0.0007)) - rb.lean) * Math.min(1, dt * 6);
+
+      var fx = focus ? focus.x - rb.x : rb.vx, fy = focus ? focus.y - (rb.y - R * 1.5) : rb.vy, fd = Math.hypot(fx, fy) || 1;
+      rb.look.x += (fx / fd - rb.look.x) * Math.min(1, dt * 7); rb.look.y += (fy / fd - rb.look.y) * Math.min(1, dt * 7);
+      rb.nextBlink -= dt; if (rb.nextBlink < 0) { rb.blink = 0.16; rb.nextBlink = 2 + Math.random() * 3.5; } if (rb.blink > 0) rb.blink -= dt;
+
+      arms.forEach(function (a) {
+        var sh = shoulder(a.side);
+        if (a !== active) { a.tx = sh.x + a.side * R * 0.42 - rb.vx * 0.04; a.ty = sh.y + R * 1.95 - Math.abs(rb.vx) * 0.02 + Math.sin(clock * 2.1 + a.side) * R * 0.05; a.open = 0.6; }
+        var k = Math.min(1, dt * (a === active ? 9 : 6));
+        a.x += (a.tx - a.x) * k; a.y += (a.ty - a.y) * k; a.grip += (a.open - a.grip) * Math.min(1, dt * 12);
+        // two-link inverse kinematics; of the two elbow solutions take the one that points away from the body
+        var dx = a.x - sh.x, dy = a.y - sh.y, d = Math.hypot(dx, dy) || 1, max = L1 + L2 - 1;
+        if (d > max) { a.x = sh.x + dx / d * max; a.y = sh.y + dy / d * max; dx = a.x - sh.x; dy = a.y - sh.y; d = max; }
+        var base = Math.atan2(dy, dx), c = Math.max(-1, Math.min(1, (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d))), bend = Math.acos(c);
+        var e1 = { x: sh.x + Math.cos(base + bend) * L1, y: sh.y + Math.sin(base + bend) * L1 }, e2 = { x: sh.x + Math.cos(base - bend) * L1, y: sh.y + Math.sin(base - bend) * L1 };
+        var pick = (e1.x - rb.x) * a.side + e1.y * 0.25 > (e2.x - rb.x) * a.side + e2.y * 0.25 ? e1 : e2;
+        a.ex += (pick.x - a.ex) * Math.min(1, dt * 14); a.ey += (pick.y - a.ey) * Math.min(1, dt * 14);
+        var fxx = a.x - a.ex, fyy = a.y - a.ey, fl = Math.hypot(fxx, fyy) || 1; a.dx = fxx / fl; a.dy = fyy / fl;
+      });
+    }
+
+    function sync() {
+      letters.forEach(function (l) {
+        var t = l.state === "home" ? "" : "translate(" + (l.x - l.hx).toFixed(1) + "px," + (l.y - l.hy).toFixed(1) + "px) rotate(" + l.rot.toFixed(3) + "rad)";
+        if (l.t !== t) { l.el.style.transform = t; l.t = t; }
+      });
+    }
+
+    function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+    function shell(ctx, x0, y0, x1, y1) { var g = ctx.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, "#ffffff"); g.addColorStop(0.5, "#d9e0ea"); g.addColorStop(1, "#8793a8"); return g; }
+    function link(ctx, x0, y0, x1, y1, w) {
+      var nx = -(y1 - y0), ny = x1 - x0, n = Math.hypot(nx, ny) || 1; nx /= n; ny /= n; if (ny > 0) { nx = -nx; ny = -ny; }
+      ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineWidth = w + 3; ctx.strokeStyle = "#060b16"; ctx.stroke();
+      ctx.lineWidth = w; ctx.strokeStyle = "#c3ccd9"; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x0 + nx * w * 0.16, y0 + ny * w * 0.16); ctx.lineTo(x1 + nx * w * 0.16, y1 + ny * w * 0.16); ctx.lineWidth = w * 0.52; ctx.strokeStyle = "#f4f7fb"; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x0 - nx * w * 0.3, y0 - ny * w * 0.3); ctx.lineTo(x1 - nx * w * 0.3, y1 - ny * w * 0.3); ctx.lineWidth = w * 0.18; ctx.strokeStyle = "rgba(70,84,110,.55)"; ctx.stroke();
+    }
+    function joint(ctx, x, y, r, rgb) {
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = "#0d1524"; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#2a3956"; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, r * 0.5, 0, 6.2832); ctx.lineWidth = Math.max(1.5, r * 0.18); ctx.strokeStyle = "rgb(" + rgb + ")"; ctx.stroke();
+      dot(ctx, x, y, r * 0.5, rgb, 0.5);
+    }
+
+    function drawRobot(ctx) {
+      var busy = job && (job.phase === "carry" || job.phase === "grasp"), rgb = busy ? WARM : TEAL, flick = 0.85 + Math.sin(clock * 31) * 0.08 + Math.sin(clock * 17) * 0.07;
+      // light on the floor, and the soft pool of light the robot sits in
+      var lift = Math.max(0, floorY - rb.y - R), fa = Math.max(0.1, 0.55 - lift / (S.H * 0.7));
+      ctx.save(); ctx.translate(rb.x, floorY + 2); ctx.scale(1, 0.16); dot(ctx, 0, 0, R * (1.1 + lift / S.H * 2), TEAL, fa); ctx.restore();
+      dot(ctx, rb.x, rb.y - R * 0.4, R * 1.9, INK, 0.1);
+
+      ctx.save(); ctx.translate(rb.x, rb.y); ctx.rotate(rb.lean);
+      // thruster
+      dot(ctx, 0, R * 1.2, R * 0.5 * flick, TEAL, 0.95); dot(ctx, 0, R * 1.05, R * 0.2, "255,255,255", 0.8 * flick);
+      ctx.beginPath(); ctx.ellipse(0, R * 0.92, R * 0.34, R * 0.11, 0, 0, 6.2832); ctx.fillStyle = "#0a101c"; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "rgb(" + TEAL + ")"; ctx.stroke();
+      // body
+      ctx.beginPath(); ctx.moveTo(-R * 0.68, -R * 0.42); ctx.bezierCurveTo(-R * 0.68, -R * 0.92, R * 0.68, -R * 0.92, R * 0.68, -R * 0.42);
+      ctx.bezierCurveTo(R * 0.68, R * 0.38, R * 0.42, R * 0.9, 0, R * 0.94); ctx.bezierCurveTo(-R * 0.42, R * 0.9, -R * 0.68, R * 0.38, -R * 0.68, -R * 0.42); ctx.closePath();
+      ctx.fillStyle = shell(ctx, -R * 0.6, -R * 0.9, R * 0.55, R * 0.95); ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#060b16"; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-R * 0.6, R * 0.08); ctx.quadraticCurveTo(0, R * 0.3, R * 0.6, R * 0.08); ctx.lineWidth = 1.2; ctx.strokeStyle = "rgba(40,54,82,.45)"; ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(-R * 0.3, -R * 0.5, R * 0.16, R * 0.3, 0.5, 0, 6.2832); ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.fill();
+      rr(ctx, -R * 0.2, -R * 0.26, R * 0.4, R * 0.09, R * 0.045); ctx.fillStyle = "rgb(" + rgb + ")"; ctx.fill(); dot(ctx, 0, -R * 0.215, R * 0.16, rgb, 0.7);
+      // neck and head
+      ctx.fillStyle = "#0d1524"; ctx.fillRect(-R * 0.17, -R * 1.02, R * 0.34, R * 0.26);
+      ctx.beginPath(); ctx.arc(-R * 0.82, -R * 1.52, R * 0.13, 0, 6.2832); ctx.arc(R * 0.82, -R * 1.52, R * 0.13, 0, 6.2832); ctx.fillStyle = "#121b2e"; ctx.fill();
+      rr(ctx, -R * 0.8, -R * 2.08, R * 1.6, R * 1.12, R * 0.5); ctx.fillStyle = shell(ctx, -R * 0.7, -R * 2.1, R * 0.6, -R * 0.9); ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#060b16"; ctx.stroke();
+      rr(ctx, -R * 0.64, -R * 1.9, R * 1.28, R * 0.76, R * 0.36); var vg = ctx.createLinearGradient(0, -R * 1.9, 0, -R * 1.14); vg.addColorStop(0, "#03060c"); vg.addColorStop(1, "#131d33"); ctx.fillStyle = vg; ctx.fill();
+      ctx.save(); ctx.clip(); ctx.beginPath(); ctx.moveTo(-R * 0.7, -R * 1.2); ctx.lineTo(-R * 0.2, -R * 1.95); ctx.lineTo(R * 0.05, -R * 1.95); ctx.lineTo(-R * 0.45, -R * 1.2); ctx.closePath(); ctx.fillStyle = "rgba(255,255,255,.07)"; ctx.fill(); ctx.restore();
+      var ex = rb.look.x * R * 0.13, ey = rb.look.y * R * 0.09, eh = R * 0.3 * (rb.blink > 0 ? 0.12 : 1);
+      [-1, 1].forEach(function (s) {
+        rr(ctx, s * R * 0.27 + ex - R * 0.085, -R * 1.52 + ey - eh / 2, R * 0.17, eh, Math.min(R * 0.085, eh / 2)); ctx.fillStyle = "rgb(" + rgb + ")"; ctx.fill();
+        dot(ctx, s * R * 0.27 + ex, -R * 1.52 + ey, R * 0.2, rgb, 0.75);
+      });
+      // shoulder caps
+      [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.arc(s * R * 0.74, -R * 0.5, R * 0.27, 0, 6.2832); ctx.fillStyle = shell(ctx, s * R * 0.74 - R * 0.3, -R * 0.8, s * R * 0.74 + R * 0.3, -R * 0.2); ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#060b16"; ctx.stroke(); });
+      ctx.restore();
+
+      arms.forEach(function (a) {
+        var sh = shoulder(a.side), px = a.x, py = a.y, ang = Math.atan2(a.dy, a.dx), sp = 0.22 + a.grip * 0.5, fl = R * 0.36;
+        link(ctx, sh.x, sh.y, a.ex, a.ey, R * 0.3); link(ctx, a.ex, a.ey, px, py, R * 0.26);
+        joint(ctx, a.ex, a.ey, R * 0.2, rgb);
+        ctx.lineCap = "round";
+        [-1, 1].forEach(function (f) {
+          var kx = px + Math.cos(ang + f * sp * 1.5) * fl * 0.55, ky = py + Math.sin(ang + f * sp * 1.5) * fl * 0.55, tx = kx + Math.cos(ang + f * sp * 0.2) * fl * 0.6, ty = ky + Math.sin(ang + f * sp * 0.2) * fl * 0.6;
+          ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(kx, ky); ctx.lineTo(tx, ty); ctx.lineJoin = "round"; ctx.lineWidth = R * 0.12; ctx.strokeStyle = "#060b16"; ctx.stroke(); ctx.lineWidth = R * 0.07; ctx.strokeStyle = "#3a4a68"; ctx.stroke();
+        });
+        ctx.beginPath(); ctx.arc(px, py, R * 0.15, 0, 6.2832); ctx.fillStyle = "#0d1524"; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = "#3a4a68"; ctx.stroke();
+      });
+    }
+
+    function intro(dt) {
+      if (!started && clock > 0.9) { started = true; knockSome(wide ? 7 : 4); }
+    }
+
+    return {
+      step: function (dt, S) {
+        clock += dt; sinceMeasure += dt; if (sinceMeasure > 0.5) { sinceMeasure = 0; measure(); }
+        intro(dt); stepLetters(dt); if (clock > 1.5) stepRobot(dt);
+        rings.forEach(function (r) { r.t += dt; }); rings = rings.filter(function (r) { return r.t < 0.7; });
+        var over = S.inside && letters.some(function (l) { return l.state === "home" && Math.abs(S.mx - l.hx) < l.w / 2 + 2 && Math.abs(S.my - l.hy) < l.h / 2; });
+        root.style.cursor = over ? "pointer" : "";
+      },
+      settle: function () { var b = homeBase(); rb.x = b.x; rb.y = b.y; started = true; for (var i = 0; i < 40; i++) stepRobot(0.03); },
+      click: function (x, y) {
+        var hit = null, bd = 1e9;
+        letters.forEach(function (l) { var d = Math.hypot(x - l.hx, y - l.hy); if (l.state === "home" && Math.abs(x - l.hx) < l.w / 2 + 3 && Math.abs(y - l.hy) < l.h / 2 && d < bd) { bd = d; hit = l; } });
+        if (hit) { knock(hit, 0); hit.vy = -320; }
+      },
+      act: function (name) { if (name === "knock") knockSome(wide ? 5 : 3); },
+      draw: function (ctx, S) {
+        ctx.clearRect(0, 0, S.W, S.H); sync();
+        // the floor, and dust in the light
+        var fg = ctx.createLinearGradient(0, 0, S.W, 0); fg.addColorStop(0, "rgba(" + INK + ",0)"); fg.addColorStop(0.2, "rgba(" + INK + ",.34)"); fg.addColorStop(0.8, "rgba(" + INK + ",.34)"); fg.addColorStop(1, "rgba(" + INK + ",0)");
+        ctx.fillStyle = fg; ctx.fillRect(0, floorY + 2, S.W, 1);
+        motes.forEach(function (p) { var y = (p.y - clock * 9 * p.z) % S.H; if (y < 0) y += S.H; dot(ctx, p.x + Math.sin(clock * 0.4 + p.ph) * 14, y, 1.1 * p.z, INK, 0.3 * p.z); });
+        // the plan: where the letter in hand belongs
+        if (job) {
+          var l = job.l, pad = 5, x0 = l.hx - l.w / 2 - pad, y0 = l.hy - l.h / 2 + l.h * 0.08, x1 = l.hx + l.w / 2 + pad, y1 = l.hy + l.h / 2 - l.h * 0.04, c = 8;
+          ctx.beginPath();
+          ctx.moveTo(x0, y0 + c); ctx.lineTo(x0, y0); ctx.lineTo(x0 + c, y0); ctx.moveTo(x1 - c, y0); ctx.lineTo(x1, y0); ctx.lineTo(x1, y0 + c);
+          ctx.moveTo(x1, y1 - c); ctx.lineTo(x1, y1); ctx.lineTo(x1 - c, y1); ctx.moveTo(x0 + c, y1); ctx.lineTo(x0, y1); ctx.lineTo(x0, y1 - c);
+          glow(ctx, TEAL, 1.4, 0.7 + Math.sin(clock * 6) * 0.25);
+          if (l.state !== "home") { ctx.setLineDash([2, 8]); ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(l.hx, l.hy); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(" + TEAL + ",.45)"; ctx.stroke(); ctx.setLineDash([]); }
+        }
+        rings.forEach(function (r) { var k = r.t / 0.7; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (0.7 + k * 1.6), 0, 6.2832); glow(ctx, TEAL, 1.6, (1 - k) * 0.9); });
+        drawRobot(ctx);
       }
     };
   }
@@ -501,7 +694,7 @@
     };
   }
 
-  var SCENES = { "data-science": boundary, vision: detection, nlp: attention, "neural-networks": descent, agents: evolve, society: feed };
+  var SCENES = { "data-science": boundary, vision: detection, nlp: attention, "neural-networks": descent, agents: robot, society: feed };
 
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("[data-demo]").forEach(function (root) {

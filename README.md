@@ -101,15 +101,20 @@ appears where something can be paused. The copy for each demo is in `DEMOS` in `
 | Group | What runs |
 | --- | --- |
 | Applied Data Science | A support vector classifier (RBF kernel), refit on every frame with the pointer as a data point. |
-| Computer Vision | Real street footage (`assets/video/street.mp4`) with COCO-SSD object detection running in the browser through TensorFlow.js. |
+| Computer Vision | Real street footage (`assets/video/street.mp4`) with object boxes drawn from `assets/data/street-tracks.json`. The boxes were computed ahead of time (Faster R-CNN on every frame, then a motion tracker), so nothing heavy runs in the browser. |
 | Natural Language Processing | Attention arcs. The weights are illustrative and the text says so. |
 | Neural Networks | Gradient descent with momentum on a loss surface. Click to pick the starting point. |
-| Agents and RL | A crowd of agents learns to fly to a goal by trial and error (an evolution strategy). Click to move the goal. |
+| Agents and RL | Letters of the page title fall to the floor and a hovering robot (drawn on canvas, two-link arm IK) picks each one up and puts it back. Clicking a letter knocks it down. The letters are the real `h1` text split into spans. |
 | AI, Ethics and Society | A simulated feed. A slider sets how often people see posts that match their views, and the crowd splits in two. |
 
-The street clip is Mixkit video 4000, used under the Mixkit free license. TensorFlow.js and the
-COCO-SSD model load from the jsdelivr CDN only on the Computer Vision page. If they fail to load,
-the page still shows the footage without boxes.
+The street clip is Mixkit video 4000, used under the Mixkit free license. It is sped-up footage, so
+people move a long way between frames; the tracker matches on predicted motion, not box overlap.
+The scripts that made the track file are not in the repo. To redo it for a new clip: run a detector
+over every frame, link detections into tracks, and write `{w, h, dt, n, tracks: [{c, id, s, p, b}]}`
+where `b` is one `[x, y, w, h]` per frame starting at frame `s`.
+
+The navigation bar is clear over the top of each page and turns to frosted glass once the page
+scrolls under it (`nav()` in `assets/js/site.js`, `.masthead` in the stylesheet).
 
 ## People page
 

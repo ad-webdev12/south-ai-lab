@@ -11,6 +11,19 @@
 
   /* ---------------- 1. navigation ---------------- */
   function nav() {
+    // the bar is clear over the top of the page and turns to frosted glass once content scrolls under it
+    var mast = document.querySelector("[data-masthead]");
+    if (mast) {
+      var hero = document.querySelector(".hero, .ghero");
+      var onScroll = function () {
+        var limit = hero ? hero.offsetHeight - mast.offsetHeight - 4 : 6;
+        mast.classList.toggle("scrolled", window.scrollY > limit);
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+    }
+
     var toggle = document.querySelector("[data-navtoggle]");
     var drawer = document.querySelector("[data-drawer]");
     if (toggle && drawer) {

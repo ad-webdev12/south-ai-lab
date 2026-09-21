@@ -22,7 +22,7 @@ YEAR = "2026-27"
 SITE = {
     "name": "South Artificial Intelligence Laboratory",
     "short": "SAIL",
-    "school": "High School South",
+    "school": "West Windsor-Plainsboro High School South",
     "room": "Room 700F",
     "meets": "Every other Tuesday, 3:00 to 4:00 PM",
     "code": "selpcao",
@@ -31,9 +31,9 @@ SITE = {
 
 LOGO = (
     '<svg viewBox="0 0 34 30" fill="none" aria-hidden="true">'
-    '<path d="M18.2 0c6.9 5.4 10.8 12.1 11.4 20.2H18.2V0z" fill="#fff"/>'
-    '<path d="M15.4 4.9v15.3H4.7C6.7 14 10.3 8.9 15.4 4.9z" fill="#8fb4ff"/>'
-    '<path d="M2 23.2h30c-1.1 3.5-4.2 5.3-8.4 5.3H10.4c-4.2 0-7.3-1.8-8.4-5.3z" fill="#fff"/>'
+    '<path d="M18.2 0c6.9 5.4 10.8 12.1 11.4 20.2H18.2V0z" fill="currentColor"/>'
+    '<path d="M15.4 4.9v15.3H4.7C6.7 14 10.3 8.9 15.4 4.9z" fill="var(--logo-accent,#8fb4ff)"/>'
+    '<path d="M2 23.2h30c-1.1 3.5-4.2 5.3-8.4 5.3H10.4c-4.2 0-7.3-1.8-8.4-5.3z" fill="currentColor"/>'
     "</svg>"
 )
 
@@ -188,8 +188,8 @@ DEMOS = {
         "pause": False,
     },
     "vision": {
-        "title": "Object detection, running live",
-        "text": "This is real footage of a city intersection, and a real detector (COCO-SSD, running in your browser) is labeling what it sees a few times a second. Watch for its mistakes. Finding where a model breaks is a lot of what this group does.",
+        "title": "Object detection and tracking",
+        "text": "Real footage of a New York intersection. A detector (Faster R-CNN) went through it frame by frame ahead of time and marked every person, car and bus, and a tracker linked its answers so each box follows one thing. Watch for what it misses or mislabels. Finding where a model breaks is a lot of what this group does.",
         "controls": "",
         "pause": True,
     },
@@ -206,9 +206,9 @@ DEMOS = {
         "pause": True,
     },
     "agents": {
-        "title": "Learning by trial and error",
-        "text": "Each round, a crowd of agents tries to fly to the goal. The attempts that end closest are copied, with small random changes, into the next round, so the crowd gets better over time. Click anywhere to move the goal and make them learn it again.",
-        "controls": '<button type="button" data-act="goal">Move the goal</button><button type="button" data-act="reset">Start over</button>',
+        "title": "An agent at work",
+        "text": "The robot runs the loop every agent runs: look at the world, pick a goal, act, check the result. Its goal is a complete title, so it finds the fallen letters, picks each one up and puts it back where it belongs. Click any letter in the title to knock it down.",
+        "controls": '<button type="button" data-act="knock">Knock some down</button>',
         "pause": True,
     },
     "society": {
@@ -454,13 +454,14 @@ def masthead(active):
             links.append(f'<a{cur} href="{href}">{label}</a>')
     nav_html = "\n      ".join(links)
     drawer_groups = "".join(f'<a href="{g["slug"]}">{g["name"]}</a>' for g in GROUPS)
-    return f'''<header class="masthead">
+    dark = " on-dark" if active in ("home", "group") else ""
+    return f'''<header class="masthead{dark}" data-masthead>
   <div class="wrap masthead-in">
     {brand()}
     <nav class="mainnav" aria-label="Main">
       {nav_html}
     </nav>
-    <a class="btn btn--sm mast-join" href="join.html">Join</a>
+    <a class="mast-join" href="join.html">Join</a>
     <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
@@ -677,10 +678,6 @@ def page_research():
 '''
 
 
-def legend_html(entries):
-    return '<ul class="legend">' + "".join(f'<li><i class="k {cls}"></i>{text}</li>' for cls, text in entries) + "</ul>"
-
-
 def page_group(g):
     d = DEMOS[g["key"]]
     work = "".join(f"<li>{w}</li>" for w in g["work"])
@@ -805,8 +802,11 @@ def officers_code():
         comment = f'  <span class="c"># {note}</span>' if note else ""
         lines.append(f'    {s(year, "k")}: {{{comment}')
         for role, names in roles:
+            flat = ", ".join(f'<b>{s(n, "nm")}</b>' for n in names)
             if len(names) == 1:
-                lines.append(f'        {s(role)}: <b>{s(names[0], "nm")}</b>,')
+                lines.append(f'        {s(role)}: {flat},')
+            elif len(role) + sum(len(n) + 4 for n in names) < 76:
+                lines.append(f'        {s(role)}: [{flat}],')
             else:
                 lines.append(f'        {s(role)}: [')
                 lines.extend(f'            <b>{s(n, "nm")}</b>,' for n in names)
