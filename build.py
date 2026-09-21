@@ -208,12 +208,9 @@ DEMOS = {
         "pause": True,
     },
     "agents": {
-        "title": "A robot that learns from you",
-        "text": "It keeps the title in order and it watches what you do. Click letters, move around it, and answer when it asks whether a move was good. Your answers are its only reward, and they change what it does next. Everything it learns stays in this browser.",
-        "controls": '<button type="button" data-act="knock">Knock letters down</button>'
-                    '<button type="button" data-act="typo">Scramble a word</button>'
-                    '<button type="button" data-act="battery">Give it a battery</button>'
-                    '<button type="button" data-act="learned">What it learned</button>',
+        "title": "Tap a letter",
+        "text": "The agent will put it back.",
+        "controls": '<button type="button" data-act="restore" hidden>Restore interface</button>',
         "pause": True,
     },
     "society": {
@@ -1204,7 +1201,7 @@ def build():
 
     written = []
     for filename, title, desc, active, body in pages:
-        scenes = {"nlp.html": ["scene-nlp"], "agents.html": ["memory", "bot", "scene-agents"], "society.html": ["scene-ethics"]}
+        scenes = {"nlp.html": ["scene-nlp"], "agents.html": ["scene-agents"], "society.html": ["scene-ethics"]}
         extra = "".join(f'<script src="assets/js/{s}.js"></script>\n' for s in ["demos"] + scenes.get(filename, [])) if active == "group" else ""
         html = head(title, desc) + masthead(active) + body + footer(extra)
         with open(os.path.join(HERE, filename), "w", encoding="utf-8") as fh:
