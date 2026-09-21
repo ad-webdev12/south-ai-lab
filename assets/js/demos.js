@@ -53,6 +53,7 @@
     function setRunning(on) {
       running = on;
       if (pauseBtn) pauseBtn.textContent = on ? "Pause" : "Play";
+      if (scene && scene.setRunning) scene.setRunning(on);
       if (on) { last = 0; window.requestAnimationFrame(frame); }
     }
     function refresh() { if (scene) { if (!running) scene.step(0, S); paint(); say(true); } }
@@ -230,46 +231,80 @@
   }
 
   /* ---------------------------------------------------------- computer vision
-     A 3x3 convolution over real MNIST digits, one output pixel per position. */
-  var DIGITS = ["000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000017cfffffa5000000000000000000bfffffffff200000000000000000cfeb6cceff9000000000000000005930002cff600000000000000000000000dffc00000000000000000000007dfff50000000000000000000003ffff910000000000000000000000dfffed750000000000000000000007dfffff4000000000000000000000138dffc0000000000000000000000001aff6000000000000000000000001cff3000000000000000000000008ff5000000000000000000000018ffe10000000000000000000002dffd0000000000000000000000afffa00000000000000000000aafffe5000000000000000000008ffffa10000000000000000000009ffc5000000000000000000000005c70000000000000000000000000000000000000000000000000000000000000000000000000", "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004fffffaa815300000000000000006fffffffffffc742000000000000068667ccceffffff800000000000000000000277cffff00000000000000000000000029ff80000000000000000000000002ff20000000000000000000000007ff7000000000000000000000002fff1000000000000000000000006ff8000000000000000000000002fff200000000000000000000001bff7000000000000000000000008ffd000000000000000000000005fff200000000000000000000003fff500000000000000000000001fff9000000000000000000000006ffc000000000000000000000003fff500000000000000000000000effc000000000000000000000005ffc1000000000000000000000002ec1000000000000000000000000000000000000000000", "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000038dfffca200000000000000068ccffff94000000000000000000fffc865000000000000000000000afc00000000000000000000000001de100000000000000000000000007f300000000000000000000000007f53330000000000000000000001dfffffa50000000000000000001dfca66cdff300000000000000003fa0000017cfd200000000000000000000000006ce300000000000000000000000001de500000000000000000000000003ce700000000000000000000000001df000000000000000000000000009f00000000000000000000000002ed0000000000007500000000001af2000000000005f9000000166bed50000000000005ffe99caffffd8100000000000000499efdc98330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"];
-  var KERNELS = [[-1, 0, 1, -2, 0, 2, -1, 0, 1], [-1, -2, -1, 0, 0, 0, 1, 2, 1], [0, -1, 0, -1, 5, -1, 0, -1, 0]];
-  function convolution(S) {
-    var r = S.r, gap = Math.max(16, r.w * 0.06), topPad = 26;
-    var cell = Math.max(3, Math.floor(Math.min((r.w - gap) / 54, (r.h - topPad) / 28)));
-    var ox = r.x + (r.w - (cell * 54 + gap)) / 2, oy = r.y + topPad + (r.h - topPad - cell * 28) / 2;
-    var ox2 = ox + cell * 28 + gap + cell, oy2 = oy + cell;
-    var digit = 0, kern = 0, img = [], out = new Float32Array(676), done = 0, acc = 0, hold = 0;
-    function load() { var s = DIGITS[digit % DIGITS.length]; img = []; for (var i = 0; i < 784; i++) img.push(parseInt(s[i], 16) / 15); out.fill(0); done = 0; }
-    function at(i) { var cx = i % 26, cy = (i / 26) | 0, k = KERNELS[kern], s = 0; for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) s += k[a * 3 + b] * img[(cy + a) * 28 + cx + b]; return s; }
-    function one() { if (done < 676) { out[done] = at(done); done++; } }
-    load();
+     Real footage of a city intersection, with a real object detector (COCO-SSD,
+     running in the browser through TensorFlow.js) drawing what it finds. The
+     model runs a few times a second and the boxes glide between its answers. */
+  var TF_URL = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js";
+  var SSD_URL = "https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js";
+  function loadScript(src) {
+    return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  }
+  var detectorPromise = null;
+  function detector() {
+    if (!detectorPromise) detectorPromise = loadScript(TF_URL).then(function () { return loadScript(SSD_URL); }).then(function () { return window.cocoSsd.load({ base: "lite_mobilenet_v2" }); });
+    return detectorPromise;
+  }
+  function detection(S, root) {
+    var video = root.querySelector("video"), status = root.querySelector("[data-status]");
+    var model = null, busy = false, since = 0, retry = 0, tracks = [], failed = false;
+    var PEOPLE = { person: 1 }, reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function note(t) { if (status) status.textContent = t; }
+    note("Loading the detector…");
+    detector().then(function (m) { model = m; note(""); }, function () { failed = true; note("The detector could not load, so this is just the footage."); });
+    if (video && !reduced) { var pr = video.play(); if (pr && pr.catch) pr.catch(function () {}); }
+
+    function iou(a, b) {
+      var x1 = Math.max(a[0], b[0]), y1 = Math.max(a[1], b[1]), x2 = Math.min(a[0] + a[2], b[0] + b[2]), y2 = Math.min(a[1] + a[3], b[1] + b[3]);
+      var inter = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+      return inter / (a[2] * a[3] + b[2] * b[3] - inter || 1);
+    }
+    function absorb(preds) {
+      tracks.forEach(function (t) { t.hit = false; });
+      preds.forEach(function (p) {
+        var best = null, bi = 0.25;
+        tracks.forEach(function (t) { if (t.cls !== p.class || t.hit) return; var v = iou(t.target, p.bbox); if (v > bi) { bi = v; best = t; } });
+        if (best) { best.target = p.bbox; best.score = p.score; best.hit = true; }
+        else tracks.push({ cls: p.class, box: p.bbox.slice(), target: p.bbox, score: p.score, a: 0, hit: true });
+      });
+    }
     return {
       step: function (dt) {
-        if (hold > 0) { hold -= dt; if (hold <= 0) { digit++; load(); } return; }
-        acc += dt * 170; while (acc >= 1) { acc--; one(); }
-        if (done >= 676) hold = 1.8;
+        since += dt; retry += dt;
+        if (video.paused && retry > 1) { retry = 0; var again = video.play(); if (again && again.catch) again.catch(function () {}); }   // some browsers hold autoplay until the page is visible
+        if (model && !busy && since > 0.16 && video.readyState >= 2) {
+          busy = true; since = 0;
+          model.detect(video, 24, 0.42).then(function (p) { absorb(p); busy = false; }, function () { busy = false; });
+        }
+        for (var i = tracks.length - 1; i >= 0; i--) {
+          var t = tracks[i], k = Math.min(1, dt * 9);
+          for (var j = 0; j < 4; j++) t.box[j] += (t.target[j] - t.box[j]) * k;
+          t.a += ((t.hit ? 1 : 0) - t.a) * Math.min(1, dt * (t.hit ? 8 : 3));
+          if (!t.hit && t.a < 0.03) tracks.splice(i, 1);
+        }
       },
-      settle: function () { while (done < 676) one(); },
-      act: function (name, value) { if (name === "filter") { kern = Number(value); out.fill(0); done = 0; hold = 0; } if (name === "step") { hold = 0; one(); } },
-      text: function () { return "Position " + done + " of 676. Filter response here: " + out[Math.max(0, done - 1)].toFixed(2) + "."; },
+      setRunning: function (on) { if (!video) return; if (on) { var pr = video.play(); if (pr && pr.catch) pr.catch(function () {}); } else video.pause(); },
       draw: function (ctx, S) {
         ctx.clearRect(0, 0, S.W, S.H);
-        var i, v;
-        ctx.globalCompositeOperation = "lighter";
-        for (i = 0; i < 784; i++) { ctx.fillStyle = "rgba(" + INK + "," + (0.05 + img[i] * 0.9) + ")"; ctx.fillRect(ox + (i % 28) * cell, oy + ((i / 28) | 0) * cell, cell - 1, cell - 1); }
-        for (i = 0; i < 676; i++) {
-          v = i < done ? Math.max(-1, Math.min(1, out[i] / 3)) : 0;
-          ctx.fillStyle = v >= 0 ? "rgba(" + TEAL + "," + (0.04 + v * 0.92) + ")" : "rgba(" + WARM + "," + (0.04 - v * 0.92) + ")";
-          ctx.fillRect(ox2 + (i % 26) * cell, oy2 + ((i / 26) | 0) * cell, cell - 1, cell - 1);
+        if (!video || !video.videoWidth) return;
+        var sc = Math.max(S.W / video.videoWidth, S.H / video.videoHeight), ox = (S.W - video.videoWidth * sc) / 2, oy = (S.H - video.videoHeight * sc) / 2;
+        for (var i = 0; i < tracks.length; i++) {
+          var t = tracks[i], x = ox + t.box[0] * sc, y = oy + t.box[1] * sc, w = t.box[2] * sc, h = t.box[3] * sc;
+          var rgb = PEOPLE[t.cls] ? WARM : TEAL, L = Math.max(8, Math.min(w, h) * 0.24);
+          ctx.globalAlpha = t.a;
+          ctx.fillStyle = "rgba(" + rgb + ",0.07)"; ctx.fillRect(x, y, w, h);
+          ctx.beginPath();
+          ctx.moveTo(x, y + L); ctx.lineTo(x, y); ctx.lineTo(x + L, y);
+          ctx.moveTo(x + w - L, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + L);
+          ctx.moveTo(x + w, y + h - L); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w - L, y + h);
+          ctx.moveTo(x + L, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + h - L);
+          glow(ctx, rgb, 2, t.a);
+          var label = t.cls + " " + Math.round(t.score * 100) + "%";
+          ctx.font = "600 12px 'Libre Franklin', sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+          var tw = ctx.measureText(label).width + 10;
+          ctx.fillStyle = "rgba(" + rgb + ",0.92)"; ctx.fillRect(x, y - 18, tw, 17);
+          ctx.fillStyle = "#04101c"; ctx.fillText(label, x + 5, y - 5);
+          ctx.globalAlpha = 1;
         }
-        ctx.globalCompositeOperation = "source-over";
-        var pos = Math.min(675, Math.max(0, done - 1)), kx = pos % 26, ky = (pos / 26) | 0;
-        dot(ctx, ox + (kx + 1.5) * cell, oy + (ky + 1.5) * cell, cell * 1.6, "255,255,255", 0.5);
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
-        ctx.strokeRect(ox + kx * cell - 1, oy + ky * cell - 1, cell * 3 + 1, cell * 3 + 1);
-        ctx.strokeRect(ox2 + kx * cell - 1, oy2 + ky * cell - 1, cell + 1, cell + 1);
-        ctx.beginPath(); ctx.moveTo(ox + (kx + 3) * cell, oy + (ky + 1.5) * cell); ctx.lineTo(ox2 + kx * cell, oy2 + (ky + 0.5) * cell); glow(ctx, "255,255,255", 1, 0.5);
-        caption(ctx, "Input", ox, oy - 10); caption(ctx, "Output", ox2, oy2 - 10);
       }
     };
   }
@@ -368,106 +403,105 @@
   }
 
   /* ---------------------------------------------------------- agents
-     Many agents share one Q-table and explore a field of obstacles. What they learn
-     about the way to the goal shows up as light spreading outward from it. Click to
-     move the goal, and the light has to find its way again. */
-  function swarm(S) {
-    var size = S.W < 860 ? 34 : 44, cols = Math.ceil(S.W / size), rows = Math.ceil(S.H / size), N = cols * rows;
-    var walls = new Uint8Array(N), seed = 23, i;
-    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
-    for (i = 0; i < N * 0.17; i++) walls[(rnd() * N) | 0] = 1;
-    var goal = Math.floor(rows * 0.35) * cols + Math.floor(cols * 0.78); walls[goal] = 0;
-    var Q = new Float32Array(N * 4), DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0], agents = [], reached = 0, acc = 0, eps = 0.2;
-    function free() { var c; do { c = (Math.random() * N) | 0; } while (walls[c] || c === goal); return c; }
-    for (i = 0; i < (S.W < 860 ? 14 : 26); i++) { var c0 = free(); agents.push({ s: c0, steps: 0, x: (c0 % cols + .5) * size, y: (((c0 / cols) | 0) + .5) * size, trail: [] }); }
-    function best(st) { var b = 0; for (var a = 1; a < 4; a++) if (Q[st * 4 + a] > Q[st * 4 + b]) b = a; return b; }
-    function move(ag) {
-      var a = Math.random() < eps ? (Math.random() * 4) | 0 : best(ag.s);
-      var x = ag.s % cols + DX[a], y = ((ag.s / cols) | 0) + DY[a], ns = ag.s, rew = -0.02;
-      if (x >= 0 && x < cols && y >= 0 && y < rows && !walls[y * cols + x]) ns = y * cols + x; else rew = -0.2;
-      if (ns === goal) rew = 1;
-      Q[ag.s * 4 + a] += 0.4 * (rew + (ns === goal ? 0 : 0.95 * Q[ns * 4 + best(ns)]) - Q[ag.s * 4 + a]);
-      ag.s = ns; ag.steps++;
-      if (ns === goal || ag.steps > 220) { if (ns === goal) reached++; ag.s = free(); ag.steps = 0; ag.trail = []; ag.x = (ag.s % cols + .5) * size; ag.y = (((ag.s / cols) | 0) + .5) * size; }
+     Learning by trial and error, as an evolution strategy. Every round a crowd of
+     agents flies a plan of steering moves toward the goal. The plans that ended
+     closest are copied, with small random changes, into the next round. */
+  function evolve(S) {
+    var wide = S.W >= 860, N = wide ? 80 : 46, T = 190, unit = Math.min(S.W, S.H);
+    var start = { x: S.W * (wide ? 0.5 : 0.5), y: S.H * (wide ? 0.78 : 0.9) }, goal = { x: S.W * (wide ? 0.8 : 0.72), y: S.H * (wide ? 0.2 : 0.56) };
+    var walls = wide ? [[S.W * 0.52, S.H * 0.5, S.W * 0.2, 12], [S.W * 0.78, S.H * 0.62, S.W * 0.16, 12]] : [[S.W * 0.2, S.H * 0.74, S.W * 0.42, 10]];
+    var pop = [], tick = 0, acc = 0, gen = 1, hold = 0;
+    function genome() { var g = new Float32Array(T * 2); for (var i = 0; i < T * 2; i++) g[i] = (Math.random() - 0.5) * 2; return g; }
+    function fresh(g) { return { g: g, x: start.x, y: start.y, vx: 0, vy: -unit * 0.1, alive: true, done: false, best: 1e9, path: [[start.x, start.y]] }; }
+    for (var i = 0; i < N; i++) pop.push(fresh(genome()));
+    function hitWall(x, y) { for (var w = 0; w < walls.length; w++) { var r = walls[w]; if (x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3]) return true; } return x < 0 || x > S.W || y < 0 || y > S.H; }
+    function stepAll() {
+      for (var i = 0; i < pop.length; i++) {
+        var a = pop[i]; if (!a.alive || a.done) continue;
+        a.vx = a.vx * 0.965 + a.g[tick * 2] * unit * 0.02; a.vy = a.vy * 0.965 + a.g[tick * 2 + 1] * unit * 0.02;
+        a.x += a.vx / 60; a.y += a.vy / 60;
+        var d = Math.hypot(a.x - goal.x, a.y - goal.y); if (d < a.best) a.best = d;
+        if (d < unit * 0.035) a.done = true; else if (hitWall(a.x, a.y)) a.alive = false;
+        if (tick % 2 === 0) a.path.push([a.x, a.y]);
+      }
+      tick++;
     }
-    function setGoal(g) { goal = g; walls[g] = 0; Q.fill(0); reached = 0; }
+    function next() {
+      var scored = pop.map(function (a) { var d = a.done ? 0 : Math.hypot(a.x - goal.x, a.y - goal.y) * 0.7 + a.best * 0.3; return { g: a.g, f: 1 / (1 + d * d / (unit * unit) * 60) * (a.done ? 3 : 1) * (a.alive ? 1 : 0.35) }; });
+      scored.sort(function (p, q) { return q.f - p.f; });
+      function pick() { var a = scored[(Math.random() * N) | 0], b = scored[(Math.random() * N) | 0], c = scored[(Math.random() * N) | 0]; return [a, b, c].sort(function (p, q) { return q.f - p.f; })[0].g; }
+      var out = []; for (var e = 0; e < 4; e++) out.push(fresh(scored[e].g));
+      while (out.length < N) {
+        var ma = pick(), pa = pick(), cut = (Math.random() * T) | 0, g = new Float32Array(T * 2);
+        for (var k = 0; k < T * 2; k++) { g[k] = (k < cut * 2 ? ma : pa)[k]; if (Math.random() < 0.02) g[k] = (Math.random() - 0.5) * 2; else if (Math.random() < 0.1) g[k] += (Math.random() - 0.5) * 0.3; }
+        out.push(fresh(g));
+      }
+      pop = out; tick = 0; gen++;
+    }
     return {
       step: function (dt) {
-        acc += dt * 14; while (acc >= 1) { acc--; for (var k = 0; k < agents.length; k++) move(agents[k]); }
-        for (var m = 0; m < agents.length; m++) {
-          var ag = agents[m], tx = (ag.s % cols + .5) * size, ty = (((ag.s / cols) | 0) + .5) * size;
-          ag.x += (tx - ag.x) * Math.min(1, dt * 12); ag.y += (ty - ag.y) * Math.min(1, dt * 12);
-          ag.trail.push([ag.x, ag.y]); if (ag.trail.length > 26) ag.trail.shift();
-        }
+        if (hold > 0) { hold -= dt; if (hold <= 0) next(); return; }
+        acc += dt * 60; while (acc >= 1 && tick < T) { acc--; stepAll(); }
+        if (tick >= T || pop.every(function (a) { return !a.alive || a.done; })) { hold = 0.5; acc = 0; }
       },
-      settle: function () { for (var k = 0; k < 600; k++) for (var m = 0; m < agents.length; m++) move(agents[m]); },
-      click: function (x, y) { var g = ((y / size) | 0) * cols + ((x / size) | 0); if (g >= 0 && g < N && !walls[g]) setGoal(g); },
-      act: function (name) { if (name === "goal") setGoal(free()); },
-      text: function () { return agents.length + " agents sharing what they learn. They have reached the goal " + reached + " times since it last moved."; },
+      settle: function () { for (var r = 0; r < 25; r++) { while (tick < T) stepAll(); if (r < 24) next(); } },
+      click: function (x, y) { if (!hitWall(x, y)) { goal.x = x; goal.y = y; } },
+      act: function (name, v, S) { if (name === "goal") { do { goal.x = S.W * (0.45 + Math.random() * 0.5); goal.y = S.H * (0.12 + Math.random() * 0.5); } while (hitWall(goal.x, goal.y)); } },
       draw: function (ctx, S) {
         ctx.clearRect(0, 0, S.W, S.H);
-        for (var c = 0; c < N; c++) {
-          var x = (c % cols) * size, y = ((c / cols) | 0) * size;
-          if (walls[c]) { ctx.fillStyle = "rgba(" + DIM + ",0.16)"; ctx.fillRect(x + 3, y + 3, size - 6, size - 6); continue; }
-          var v = Math.max(0, Math.min(1, Q[c * 4 + best(c)]));
-          if (v > 0.015) dot(ctx, x + size / 2, y + size / 2, size * 0.34, TEAL, Math.pow(v, 0.8) * 0.85);
+        for (var w = 0; w < walls.length; w++) { var r = walls[w]; ctx.beginPath(); ctx.rect(r[0], r[1], r[2], r[3]); glow(ctx, INK, 1.4, 0.8); ctx.fillStyle = "rgba(" + INK + ",0.18)"; ctx.fillRect(r[0], r[1], r[2], r[3]); }
+        ctx.globalCompositeOperation = "lighter"; ctx.lineJoin = "round";
+        for (var i = 0; i < pop.length; i++) {
+          var a = pop[i], rgb = a.done ? WARM : TEAL, al = a.alive ? 1 : 0.3;
+          ctx.beginPath(); ctx.moveTo(a.path[0][0], a.path[0][1]); for (var k = 1; k < a.path.length; k++) ctx.lineTo(a.path[k][0], a.path[k][1]); ctx.lineTo(a.x, a.y);
+          ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(" + rgb + "," + 0.05 * al + ")"; ctx.stroke();
+          ctx.lineWidth = 1; ctx.strokeStyle = "rgba(" + rgb + "," + 0.34 * al + ")"; ctx.stroke();
         }
-        var gx = (goal % cols + .5) * size, gy = (((goal / cols) | 0) + .5) * size, pulse = 1 + Math.sin(S.t * 2.2) * 0.12;
-        dot(ctx, gx, gy, size * 0.5 * pulse, WARM, 1); ctx.beginPath(); ctx.arc(gx, gy, size * 0.2, 0, 6.2832); ctx.fillStyle = "rgb(" + WARM + ")"; ctx.fill();
-        for (var m = 0; m < agents.length; m++) {
-          var ag = agents[m];
-          if (ag.trail.length > 1) { ctx.beginPath(); ctx.moveTo(ag.trail[0][0], ag.trail[0][1]); for (var k = 1; k < ag.trail.length; k++) ctx.lineTo(ag.trail[k][0], ag.trail[k][1]); glow(ctx, "235,243,255", 1.2, 0.55); }
-          dot(ctx, ag.x, ag.y, 4, "255,255,255", 0.9);
-        }
+        ctx.globalCompositeOperation = "source-over";
+        for (var j = 0; j < pop.length; j++) if (pop[j].alive) dot(ctx, pop[j].x, pop[j].y, 3, "255,255,255", 0.9);
+        var pulse = 1 + Math.sin(S.t * 2.4) * 0.12;
+        dot(ctx, goal.x, goal.y, unit * 0.05 * pulse, WARM, 1); ctx.beginPath(); ctx.arc(goal.x, goal.y, unit * 0.035, 0, 6.2832); ctx.strokeStyle = "rgb(" + WARM + ")"; ctx.lineWidth = 2; ctx.stroke();
+        dot(ctx, start.x, start.y, 7, "255,255,255", 0.7);
+        caption(ctx, "Round " + gen, S.W - 24, 30, "right");
       }
     };
   }
 
   /* ---------------------------------------------------------- ethics
-     Two groups of simulated applicants stream toward one gate. Everyone scoring above
-     the threshold passes. The groups' scores are spread differently, so one rule lets
-     them through at different rates. */
-  function gate(S, root) {
-    var slider = root.querySelector('[data-act="threshold"]'), th = slider ? Number(slider.value) / 100 : 0.55;
-    var top = S.H * (S.W < 860 ? 0.5 : 0.1), bot = S.H * 0.84, gx = S.W * (S.W < 860 ? 0.62 : 0.72), x0 = S.W * (S.W < 860 ? 0 : 0.36);
-    var people = [], pass = [0, 0], seen = [0, 0], spawn = 0;
-    function gauss() { return Math.sqrt(-2 * Math.log(Math.random() + 1e-9)) * Math.cos(6.2832 * Math.random()); }
-    function add(x) { var g = Math.random() < 0.5 ? 0 : 1, s = Math.max(0.03, Math.min(0.97, (g ? 0.44 : 0.58) + gauss() * 0.15)); people.push({ g: g, s: s, x: x, y: bot - s * (bot - top), v: 70 + Math.random() * 50, state: 0, a: 1, trail: [] }); }
-    for (var i = 0; i < 70; i++) add(x0 + Math.random() * (gx - x0));
-    function ty() { return bot - th * (bot - top); }
+     A simulated feed and a crowd. Each dot is a person, placed left to right by
+     opinion. Every moment each person sees one post and moves a little toward it.
+     The slider sets how often that post is picked to match what they already think. */
+  function feed(S, root) {
+    var slider = root.querySelector('[data-act="feed"]'), strength = slider ? Number(slider.value) / 100 : 0.15;
+    var wide = S.W >= 860, x0 = S.W * (wide ? 0.4 : 0.06), x1 = S.W * 0.96, y0 = S.H * (wide ? 0.12 : 0.52), y1 = S.H * (wide ? 0.8 : 0.86);
+    var n = wide ? 320 : 170, people = [];
+    for (var i = 0; i < n; i++) { var o = (Math.random() * 2 - 1) * 0.8; people.push({ o: o, y: y0 + Math.random() * (y1 - y0), vy: (Math.random() - 0.5) * 10, ph: Math.random() * 6.28, sx: 0 }); }
+    function mix(o) { var t = (o + 1) / 2; return [Math.round(79 + (255 - 79) * t), Math.round(209 + (138 - 209) * t), Math.round(197 + (92 - 197) * t)].join(","); }
     return {
       step: function (dt, S) {
-        if (S.inside && S.my > top - 20 && S.my < bot + 20) { th += ((bot - S.my) / (bot - top) - th) * Math.min(1, dt * 10 + (dt ? 0 : 1)); th = Math.max(0.05, Math.min(0.95, th)); if (slider) slider.value = Math.round(th * 100); }
-        spawn += dt * 16; while (spawn >= 1) { spawn--; add(x0 - 10); }
-        for (var k = people.length - 1; k >= 0; k--) {
-          var p = people[k];
-          if (p.state === 0 && p.x >= gx) { seen[p.g]++; if (p.s >= th) { p.state = 1; pass[p.g]++; } else { p.state = 2; } }
-          if (p.state === 2) { p.x += p.v * 0.15 * dt; p.y += 60 * dt; p.a -= dt * 1.1; } else { p.x += p.v * dt; }
-          p.trail.push([p.x, p.y]); if (p.trail.length > 14) p.trail.shift();
-          if (p.a <= 0 || p.x > S.W + 20) people.splice(k, 1);
+        for (var i = 0; i < n; i++) {
+          var p = people[i], post;
+          if (Math.random() < strength) post = Math.max(-1, Math.min(1, p.o + (p.o >= 0 ? 1 : -1) * (0.1 + Math.random() * 0.25)));   // picked to match, and a bit further out
+          else post = people[(Math.random() * n) | 0].o;                                                                           // something from anyone
+          p.o += (post - p.o) * dt * 0.55;
+          p.o += (Math.random() - 0.5) * dt * 0.5;
+          p.o = Math.max(-1, Math.min(1, p.o));
+          p.y += Math.sin(S.t * 0.6 + p.ph) * 8 * dt;
+          var tx = x0 + (p.o + 1) / 2 * (x1 - x0); p.sx += (tx - p.sx) * Math.min(1, dt * 4 + (p.sx ? 0 : 1));
         }
-        if (seen[0] + seen[1] > 900) { pass[0] /= 2; pass[1] /= 2; seen[0] /= 2; seen[1] /= 2; }
       },
-      settle: function () { for (var k = 0; k < 300; k++) this.step(0.05, { inside: false, W: S.W }); },
-      act: function (name, value) { if (name === "threshold") th = Number(value) / 100; },
-      text: function () { return "Threshold " + th.toFixed(2) + ". Approved so far: group A " + (seen[0] ? Math.round(100 * pass[0] / seen[0]) : 0) + "%, group B " + (seen[1] ? Math.round(100 * pass[1] / seen[1]) : 0) + "%. Scores are simulated."; },
+      settle: function (S) { for (var k = 0; k < 400; k++) this.step(0.05, S); },
+      act: function (name, value) { if (name === "feed") strength = Number(value) / 100; },
       draw: function (ctx, S) {
         ctx.clearRect(0, 0, S.W, S.H);
-        var y = ty();
-        ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx, bot + 8); glow(ctx, "235,243,255", 2.4);      // the closed part of the gate
-        ctx.beginPath(); ctx.moveTo(gx - 26, y); ctx.lineTo(gx + 26, y); glow(ctx, "235,243,255", 2);
-        ctx.setLineDash([3, 8]); ctx.strokeStyle = "rgba(" + DIM + ",0.7)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(gx, top - 8); ctx.lineTo(gx, y); ctx.stroke(); ctx.setLineDash([]);
-        for (var k = 0; k < people.length; k++) {
-          var p = people[k], col = p.g ? WARM : TEAL, a = p.a * (p.state === 1 ? 1 : 0.7);
-          if (p.state === 1 && p.trail.length > 1) { ctx.beginPath(); ctx.moveTo(p.trail[0][0], p.trail[0][1]); for (var t = 1; t < p.trail.length; t++) ctx.lineTo(p.trail[t][0], p.trail[t][1]); glow(ctx, col, 1.4, 0.6); }
-          dot(ctx, p.x, p.y, p.state === 1 ? 6 : 4, col, a);
-        }
-        caption(ctx, "Threshold", gx + 32, y + 4); caption(ctx, "Higher score", gx + 10, top - 12); caption(ctx, "Approved", Math.min(S.W - 16, gx + 150), top + 18, "right");
+        var mid = (x0 + x1) / 2; ctx.setLineDash([3, 9]); ctx.strokeStyle = "rgba(" + DIM + ",0.55)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(mid, y0 - 20); ctx.lineTo(mid, y1 + 20); ctx.stroke(); ctx.setLineDash([]);
+        for (var i = 0; i < n; i++) { var p = people[i]; dot(ctx, p.sx, p.y, 4.2, mix(Math.round(p.o * 8) / 8), 0.85); }
+        caption(ctx, "One view", x0, y1 + 44); caption(ctx, "The opposite view", x1, y1 + 44, "right"); caption(ctx, "Middle ground", mid, y0 - 28, "center");
       }
     };
   }
 
-  var SCENES = { "data-science": boundary, vision: convolution, nlp: attention, "neural-networks": descent, agents: swarm, society: gate };
+  var SCENES = { "data-science": boundary, vision: detection, nlp: attention, "neural-networks": descent, agents: evolve, society: feed };
 
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("[data-demo]").forEach(function (root) {

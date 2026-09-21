@@ -94,18 +94,22 @@ one strand per pair on slow machines.
 ## Research group demos
 
 Each group page opens with a full-screen hero that is the demo itself, in `assets/js/demos.js`.
-The title sits on top of it, and a bar along the bottom holds the instruction, real buttons or a
-slider (so it works with a keyboard or a finger), Reset and Pause, and a text readout, because
-the canvas itself is hidden from screen readers. The legend sits in a strip directly below. The copy for each demo is in `DEMOS` in `build.py`.
+The title sits on top of it, and a bar along the bottom holds one short paragraph (what it is and
+how to use it) plus real buttons or a slider, so it works with a keyboard or a finger. Pause only
+appears where something can be paused. The copy for each demo is in `DEMOS` in `build.py`.
 
 | Group | What runs |
 | --- | --- |
-| Applied Data Science | A support vector classifier (RBF kernel), refit whenever a point is added. |
-| Computer Vision | A 3 by 3 convolution over three real MNIST digits, with a filter picker and a step button. |
-| Natural Language Processing | Attention arcs. The weights are illustrative and the block says so in its title. |
-| Neural Networks | Gradient descent with momentum on a loss surface, with a loss history chart. |
-| Agents and RL | A swarm of agents sharing one Q-table. What they learn shows as light spreading from the goal. |
-| AI, Ethics and Society | Two simulated groups stream toward one gate with one threshold, with a slider and a note on what the gap does and does not show. |
+| Applied Data Science | A support vector classifier (RBF kernel), refit on every frame with the pointer as a data point. |
+| Computer Vision | Real street footage (`assets/video/street.mp4`) with COCO-SSD object detection running in the browser through TensorFlow.js. |
+| Natural Language Processing | Attention arcs. The weights are illustrative and the text says so. |
+| Neural Networks | Gradient descent with momentum on a loss surface. Click to pick the starting point. |
+| Agents and RL | A crowd of agents learns to fly to a goal by trial and error (an evolution strategy). Click to move the goal. |
+| AI, Ethics and Society | A simulated feed. A slider sets how often people see posts that match their views, and the crowd splits in two. |
+
+The street clip is Mixkit video 4000, used under the Mixkit free license. TensorFlow.js and the
+COCO-SSD model load from the jsdelivr CDN only on the Computer Vision page. If they fail to load,
+the page still shows the footage without boxes.
 
 ## People page
 

@@ -55,20 +55,12 @@
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
-      <p class="how"><strong>Illustrative attention weights.</strong> Pick a word. The arcs show how much it looks at every other word.</p>
+      <p class="how"><strong>Illustrative attention weights.</strong> Hover over a word. The arcs show how much it looks at every other word, which is the core idea inside a transformer. These weights are made up for the picture. A trained model learns them. <span data-status></span></p>
       <div class="demo-controls">
         <button type="button" data-act="prev">Previous word</button><button type="button" data-act="next">Next word</button>
-        <button type="button" data-act="reset">Reset</button>
         <button type="button" data-act="pause">Pause</button>
       </div>
-      <p class="demo-readout" data-readout aria-live="polite"></p>
     </div>
-  </div>
-</section>
-<section class="ghero-notes">
-  <div class="wrap">
-    <ul class="legend"><li><i class="k line teal"></i>Thicker arc, more attention</li></ul>
-    <p class="demo-shows">These weights are made up for the picture and do not come from a trained model. In a real transformer every word computes weights like these for every other word, and training sets their values.</p>
   </div>
 </section>
 

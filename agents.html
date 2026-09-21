@@ -55,20 +55,12 @@
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
-      <p class="how"><strong>Agents learning the way to a goal.</strong> Click anywhere to move the goal, and watch the light find its way back to it.</p>
+      <p class="how"><strong>Learning by trial and error.</strong> Each round, a crowd of agents tries to fly to the goal. The attempts that end closest are copied, with small random changes, into the next round, so the crowd gets better over time. Click anywhere to move the goal and make them learn it again. <span data-status></span></p>
       <div class="demo-controls">
-        <button type="button" data-act="goal">Move the goal</button>
-        <button type="button" data-act="reset">Reset</button>
+        <button type="button" data-act="goal">Move the goal</button><button type="button" data-act="reset">Start over</button>
         <button type="button" data-act="pause">Pause</button>
       </div>
-      <p class="demo-readout" data-readout aria-live="polite"></p>
     </div>
-  </div>
-</section>
-<section class="ghero-notes">
-  <div class="wrap">
-    <ul class="legend"><li><i class="k dot white"></i>An agent</li><li><i class="k dot coral"></i>The goal</li><li><i class="k sw dim"></i>Obstacle</li><li><i class="k dot teal"></i>What the agents have learned: brighter means closer to the goal</li></ul>
-    <p class="demo-shows">This is Q-learning. The agents start out wandering at random and share one table of what they learn. A reward at the goal spreads backward, step by step, until the whole field knows which way to go.</p>
   </div>
 </section>
 

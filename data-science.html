@@ -55,20 +55,12 @@
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
-      <p class="how"><strong>A classifier drawing its boundary.</strong> Move your pointer across the screen. It counts as a data point, and the line bends to keep the two kinds apart. Click to leave the point there.</p>
+      <p class="how"><strong>A classifier drawing its boundary.</strong> Move your pointer across the screen. It counts as a data point, and the line bends to keep the two kinds apart. Click to leave the point there. This is a real classifier, a support vector machine, refit on every frame. <span data-status></span></p>
       <div class="demo-controls">
-        <fieldset class="seg"><legend>New points are</legend><label><input type="radio" name="cls" value="1" data-act="class" checked> teal</label><label><input type="radio" name="cls" value="-1" data-act="class"> orange</label></fieldset><button type="button" data-act="random">Add a random point</button>
-        <button type="button" data-act="reset">Reset</button>
-        <button type="button" data-act="pause">Pause</button>
+        <fieldset class="seg"><legend>New points are</legend><label><input type="radio" name="cls" value="1" data-act="class" checked> teal</label><label><input type="radio" name="cls" value="-1" data-act="class"> orange</label></fieldset><button type="button" data-act="reset">Reset</button>
+        
       </div>
-      <p class="demo-readout" data-readout aria-live="polite"></p>
     </div>
-  </div>
-</section>
-<section class="ghero-notes">
-  <div class="wrap">
-    <ul class="legend"><li><i class="k dot teal"></i>One kind of data</li><li><i class="k ring coral"></i>The other kind</li><li><i class="k dot white"></i>Your pointer</li><li><i class="k line"></i>Where the model switches its answer</li><li><i class="k dash"></i>Its margin of doubt</li></ul>
-    <p class="demo-shows">This is a real classifier, a support vector machine with an RBF kernel, refit on every frame. The faint colors show which kind the model would predict at each spot.</p>
   </div>
 </section>
 

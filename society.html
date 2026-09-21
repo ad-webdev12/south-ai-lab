@@ -55,20 +55,12 @@
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
-      <p class="how"><strong>One rule, two groups.</strong> Move your pointer up and down to set the threshold. Everyone scoring above it gets through the gate.</p>
+      <p class="how"><strong>A feed that learns what you like.</strong> Each dot is a person, placed from left to right by opinion. Everyone keeps seeing posts and drifting toward them. Turn up how often the feed picks posts that match what a person already thinks, and watch the crowd split in two. This is a simulation of a feedback loop, not data from a real platform. <span data-status></span></p>
       <div class="demo-controls">
-        <label>Threshold <input type="range" min="5" max="95" value="55" data-act="threshold"></label>
-        <button type="button" data-act="reset">Reset</button>
+        <label>Feed matches your views <input type="range" min="0" max="95" value="15" data-act="feed"></label>
         <button type="button" data-act="pause">Pause</button>
       </div>
-      <p class="demo-readout" data-readout aria-live="polite"></p>
     </div>
-  </div>
-</section>
-<section class="ghero-notes">
-  <div class="wrap">
-    <ul class="legend"><li><i class="k dot teal"></i>Group A</li><li><i class="k dot coral"></i>Group B</li><li><i class="k line"></i>The gate: closed below the threshold</li></ul>
-    <p class="demo-shows">The scores here are simulated. One threshold lets the two groups through at different rates because their scores are spread differently. A gap like that shows the rule affects the groups unequally. It does not tell you why the scores differ, or which approval rate is the right one. Those are the questions this group works on.</p>
   </div>
 </section>
 

@@ -180,49 +180,42 @@ GROUP_BY_KEY = {g["key"]: g for g in GROUPS}
 DEMOS = {
     "data-science": {
         "title": "A classifier drawing its boundary",
-        "how": "Move your pointer across the screen. It counts as a data point, and the line bends to keep the two kinds apart. Click to leave the point there.",
+        "text": "Move your pointer across the screen. It counts as a data point, and the line bends to keep the two kinds apart. Click to leave the point there. This is a real classifier, a support vector machine, refit on every frame.",
         "controls": '<fieldset class="seg"><legend>New points are</legend>'
                     '<label><input type="radio" name="cls" value="1" data-act="class" checked> teal</label>'
                     '<label><input type="radio" name="cls" value="-1" data-act="class"> orange</label></fieldset>'
-                    '<button type="button" data-act="random">Add a random point</button>',
-        "legend": [("dot teal", "One kind of data"), ("ring coral", "The other kind"), ("dot white", "Your pointer"), ("line", "Where the model switches its answer"), ("dash", "Its margin of doubt")],
-        "shows": "This is a real classifier, a support vector machine with an RBF kernel, refit on every frame. The faint colors show which kind the model would predict at each spot.",
+                    '<button type="button" data-act="reset">Reset</button>',
+        "pause": False,
     },
     "vision": {
-        "title": "Watch a convolution",
-        "how": "A small filter slides over the digit. Each position produces one pixel of the output.",
-        "controls": '<label>Filter <select data-act="filter"><option value="0">Vertical edges</option><option value="1">Horizontal edges</option><option value="2">Sharpen</option></select></label>'
-                    '<button type="button" data-act="step">Step once</button>',
-        "legend": [("box", "The 3 by 3 filter"), ("sw ink", "Input: a handwritten digit from MNIST"), ("sw teal", "Output: positive response"), ("sw coral", "Output: negative response")],
-        "shows": "Convolutional networks stack thousands of filters like these, and learn the numbers inside them from data.",
+        "title": "Object detection, running live",
+        "text": "This is real footage of a city intersection, and a real detector (COCO-SSD, running in your browser) is labeling what it sees a few times a second. Watch for its mistakes. Finding where a model breaks is a lot of what this group does.",
+        "controls": "",
+        "pause": True,
     },
     "nlp": {
         "title": "Illustrative attention weights",
-        "how": "Pick a word. The arcs show how much it looks at every other word.",
+        "text": "Hover over a word. The arcs show how much it looks at every other word, which is the core idea inside a transformer. These weights are made up for the picture. A trained model learns them.",
         "controls": '<button type="button" data-act="prev">Previous word</button><button type="button" data-act="next">Next word</button>',
-        "legend": [("line teal", "Thicker arc, more attention")],
-        "shows": "These weights are made up for the picture and do not come from a trained model. In a real transformer every word computes weights like these for every other word, and training sets their values.",
+        "pause": True,
     },
     "neural-networks": {
         "title": "Gradient descent on a loss surface",
-        "how": "Click anywhere on the surface to start training from that point.",
-        "controls": '<button type="button" data-act="restart">Random start</button><button type="button" data-act="step">Step once</button>',
-        "legend": [("cross", "Starting point"), ("dot white", "Current point"), ("line coral", "Path so far"), ("line", "Lines of equal loss")],
-        "shows": "Training a network means rolling downhill on a surface like this one, except in millions of dimensions. Different starts can end in different valleys.",
+        "text": "Click anywhere to start training from that point. Training a network means rolling downhill on a surface like this one, except in millions of dimensions, and different starts can end in different valleys.",
+        "controls": '<button type="button" data-act="restart">Random start</button>',
+        "pause": True,
     },
     "agents": {
-        "title": "Agents learning the way to a goal",
-        "how": "Click anywhere to move the goal, and watch the light find its way back to it.",
-        "controls": '<button type="button" data-act="goal">Move the goal</button>',
-        "legend": [("dot white", "An agent"), ("dot coral", "The goal"), ("sw dim", "Obstacle"), ("dot teal", "What the agents have learned: brighter means closer to the goal")],
-        "shows": "This is Q-learning. The agents start out wandering at random and share one table of what they learn. A reward at the goal spreads backward, step by step, until the whole field knows which way to go.",
+        "title": "Learning by trial and error",
+        "text": "Each round, a crowd of agents tries to fly to the goal. The attempts that end closest are copied, with small random changes, into the next round, so the crowd gets better over time. Click anywhere to move the goal and make them learn it again.",
+        "controls": '<button type="button" data-act="goal">Move the goal</button><button type="button" data-act="reset">Start over</button>',
+        "pause": True,
     },
     "society": {
-        "title": "One rule, two groups",
-        "how": "Move your pointer up and down to set the threshold. Everyone scoring above it gets through the gate.",
-        "controls": '<label>Threshold <input type="range" min="5" max="95" value="55" data-act="threshold"></label>',
-        "legend": [("dot teal", "Group A"), ("dot coral", "Group B"), ("line", "The gate: closed below the threshold")],
-        "shows": "The scores here are simulated. One threshold lets the two groups through at different rates because their scores are spread differently. A gap like that shows the rule affects the groups unequally. It does not tell you why the scores differ, or which approval rate is the right one. Those are the questions this group works on.",
+        "title": "A feed that learns what you like",
+        "text": "Each dot is a person, placed from left to right by opinion. Everyone keeps seeing posts and drifting toward them. Turn up how often the feed picks posts that match what a person already thinks, and watch the crowd split in two. This is a simulation of a feedback loop, not data from a real platform.",
+        "controls": '<label>Feed matches your views <input type="range" min="0" max="95" value="15" data-act="feed"></label>',
+        "pause": True,
     },
 }
 
@@ -705,8 +698,11 @@ def page_group(g):
     flag = '<p class="flag" style="margin-left:0">Good first group</p>' if g["first"] else ""
 
     sub = f'<p class="sub">{g["sub"]}</p>' if g["sub"] else ""
+    video = ('<video src="assets/video/street.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>'
+             if g["key"] == "vision" else "")
+    pause = '<button type="button" data-act="pause">Pause</button>' if d["pause"] else ""
     return f'''<section class="ghero" data-demo="{g["key"]}">
-  <canvas aria-hidden="true"></canvas>
+  {video}<canvas aria-hidden="true"></canvas>
   <div class="wrap ghero-in">
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>{g["name"]}</h1>
@@ -715,20 +711,12 @@ def page_group(g):
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
-      <p class="how"><strong>{d["title"]}.</strong> {d["how"]}</p>
+      <p class="how"><strong>{d["title"]}.</strong> {d["text"]} <span data-status></span></p>
       <div class="demo-controls">
         {d["controls"]}
-        <button type="button" data-act="reset">Reset</button>
-        <button type="button" data-act="pause">Pause</button>
+        {pause}
       </div>
-      <p class="demo-readout" data-readout aria-live="polite"></p>
     </div>
-  </div>
-</section>
-<section class="ghero-notes">
-  <div class="wrap">
-    {legend_html(d["legend"])}
-    <p class="demo-shows">{d["shows"]}</p>
   </div>
 </section>
 
