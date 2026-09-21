@@ -2,7 +2,7 @@
    1. navigation
    2. join form (builds an email, preselects a group from the URL)
    3. learning path progress (saved in this browser)
-   4. hero flow field */
+   4. home hero: plasma */
 
 (function () {
   "use strict";
@@ -167,12 +167,11 @@
     refresh();
   }
 
-  /* ---------------- 4. hero flow field ----------------
-     Particles are carried through a slowly changing vector field. Each one
-     remembers where it has been for the last few seconds, and that history is
-     drawn as a tapered line, so the streamlines of the field become visible.
-     The pointer adds a local swirl; when it leaves, the flow settles back.
-     A click sends out a ring that pushes particles outward as it passes. */
+  /* ---------------- 4. home hero: plasma ----------------
+     Glowing orbs drift across the screen. Each one throws out slow filaments,
+     and when two orbs come near each other, or near your pointer, the filaments
+     jump across and brighten, the way they do inside a plasma ball.
+     Filaments writhe smoothly; nothing flashes. */
   function hero() {
     var host = document.querySelector("[data-hero]");
     var canvas = document.querySelector("[data-field]");
@@ -180,142 +179,121 @@
     var ctx = canvas.getContext("2d");
     var pauseBtn = document.querySelector("[data-pause]");
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    var TONES = ["152,188,234", "104,148,210", "222,134,96"];
-    var WIDTHS = [1.1, 1.0, 1.5];
-    var BANDS = [0.04, 0.09, 0.17, 0.30];      // opacity from tail to head
-    var HIST = 40, SAMPLE = 0.085;             // 40 samples, one every 85 ms: about 3.4 s of trail
-    var W = 0, H = 0, dpr = 1, t = 0, sinceSample = 0;
-    var parts = [], pulses = [];
+    var W = 0, H = 0, dpr = 1, t = 0, orbs = [], sprite = null;
     var mouse = { x: 0, y: 0, tx: 0, ty: 0, on: false, k: 0 };
-    var running = !reduced, offscreen = false, last = 0, slow = 0;
+    var running = !reduced, offscreen = false, last = 0, slow = 0, strands = 2;
 
-    function angle(x, y) {
-      return 0.62 * Math.sin(x * 0.0042 + t * 0.13) * Math.cos(y * 0.0057 - t * 0.09) +
-             0.36 * Math.sin((x + y) * 0.0026 + t * 0.07);
-    }
-
-    function spawn(p, anywhere) {
-      p.x = anywhere ? Math.random() * W : -8;
-      p.y = Math.random() * H;
-      p.n = 0; p.head = 0;                     // empty history, so no line is drawn across the jump
-      p.dying = false;
-      p.life = 7 + Math.random() * 10;
-      return p;
+    function makeSprite() {
+      var s = document.createElement("canvas"); s.width = s.height = 256;
+      var g = s.getContext("2d"), grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+      grad.addColorStop(0, "rgba(255,245,255,1)");
+      grad.addColorStop(0.08, "rgba(255,190,250,0.95)");
+      grad.addColorStop(0.22, "rgba(196,110,255,0.55)");
+      grad.addColorStop(0.5, "rgba(96,70,255,0.18)");
+      grad.addColorStop(1, "rgba(40,30,160,0)");
+      g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
+      return s;
     }
 
     function build() {
       var rect = host.getBoundingClientRect();
-      if (rect.width < 2 || rect.height < 2) return false;   // not laid out yet; the observer will call again
+      if (rect.width < 2 || rect.height < 2) return false;
       dpr = Math.min(window.devicePixelRatio || 1, rect.width > 900 ? 1.25 : 2);
       W = rect.width; H = rect.height;
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.lineCap = "round"; ctx.lineJoin = "round";
-      var n = Math.round(Math.min(360, Math.max(70, (W * H) / 3600)));
-      parts = [];
+      if (!sprite) sprite = makeSprite();
+      var n = W < 700 ? 5 : 8, unit = Math.min(W, H);
+      orbs = [];
       for (var i = 0; i < n; i++) {
-        var r = Math.random();
-        parts.push(spawn({
-          hx: new Float32Array(HIST), hy: new Float32Array(HIST),
-          speed: 46 + Math.random() * 44, tone: r < 0.07 ? 2 : (r < 0.52 ? 1 : 0)
-        }, true));
+        var o = { x: W * (0.08 + 0.84 * Math.random()), y: H * (0.1 + 0.8 * Math.random()),
+                  vx: (Math.random() - 0.5) * 34, vy: (Math.random() - 0.5) * 26,
+                  r: unit * (0.035 + Math.random() * 0.03), ph: Math.random() * 100, arms: [] };
+        for (var a = 0; a < 6; a++) o.arms.push({ ang: a / 6 * 6.2832 + Math.random(), len: unit * (0.16 + Math.random() * 0.14), ph: Math.random() * 100 });
+        orbs.push(o);
       }
-      for (var s = 0; s < 260; s++) advance(1 / 60);   // fill the trails before the first frame
       draw();
       return true;
     }
 
     function advance(dt) {
       t += dt;
-      if (mouse.on) {
-        mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 9);
-        mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 9);
-      }
-      mouse.k += ((mouse.on ? 1 : 0) - mouse.k) * Math.min(1, dt * (mouse.on ? 6 : 1.5));
-      for (var q = pulses.length - 1; q >= 0; q--) {
-        pulses[q].age += dt;
-        if (pulses[q].age > 1.2) pulses.splice(q, 1);
-      }
-      sinceSample += dt;
-      var record = sinceSample >= SAMPLE;
-      if (record) sinceSample = 0;
-
-      var R = 210;
-      for (var i = 0; i < parts.length; i++) {
-        var p = parts[i];
-        if (p.dying) {                           // let the tail shrink away before the particle comes back
-          if (record && --p.n < 2) spawn(p, Math.random() < 0.3);
-          continue;
+      if (mouse.on) { mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 10); mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 10); }
+      mouse.k += ((mouse.on ? 1 : 0) - mouse.k) * Math.min(1, dt * 4);
+      for (var i = 0; i < orbs.length; i++) {
+        var o = orbs[i];
+        o.vx += Math.sin(t * 0.21 + o.ph) * 4 * dt; o.vy += Math.cos(t * 0.17 + o.ph * 1.3) * 4 * dt;
+        for (var j = 0; j < orbs.length; j++) {
+          if (j === i) continue;
+          var dx = o.x - orbs[j].x, dy = o.y - orbs[j].y, d = Math.sqrt(dx * dx + dy * dy) || 1, min = (o.r + orbs[j].r) * 2.4;
+          if (d < min) { o.vx += dx / d * (min - d) * 1.6 * dt; o.vy += dy / d * (min - d) * 1.6 * dt; }
         }
-        var a = angle(p.x, p.y);
-        var vx = Math.cos(a) * p.speed, vy = Math.sin(a) * p.speed;
-
-        if (mouse.k > 0.01) {
-          var dx = p.x - mouse.x, dy = p.y - mouse.y;
-          var d = Math.sqrt(dx * dx + dy * dy) || 1;
-          if (d < R) {
-            var f = 1 - d / R; f = f * f * mouse.k;
-            vx += (-dy / d) * 190 * f + (dx / d) * 85 * f;
-            vy += (dx / d) * 190 * f + (dy / d) * 85 * f;
-          }
+        if (mouse.k > 0.05) {
+          var mx = mouse.x - o.x, my = mouse.y - o.y, md = Math.sqrt(mx * mx + my * my) || 1;
+          if (md < 420 && md > 90) { o.vx += mx / md * 22 * mouse.k * dt; o.vy += my / md * 22 * mouse.k * dt; }
         }
-        for (var k = 0; k < pulses.length; k++) {
-          var pu = pulses[k];
-          var ex = p.x - pu.x, ey = p.y - pu.y;
-          var ed = Math.sqrt(ex * ex + ey * ey) || 1;
-          var off = Math.abs(ed - pu.age * 430);
-          if (off < 85) {
-            var g = (1 - off / 85) * (1 - pu.age / 1.2) * 320;
-            vx += (ex / ed) * g; vy += (ey / ed) * g;
-          }
-        }
-
-        p.x += vx * dt; p.y += vy * dt;
-        p.life -= dt;
-        if (record) {
-          p.hx[p.head] = p.x; p.hy[p.head] = p.y;
-          p.head = (p.head + 1) % HIST;
-          if (p.n < HIST) p.n++;
-        }
-        if (p.life <= 0 || p.x > W + 60 || p.x < -60 || p.y < -60 || p.y > H + 60) {
-          p.dying = true;
-        }
+        var sp = Math.sqrt(o.vx * o.vx + o.vy * o.vy);
+        if (sp > 46) { o.vx *= 46 / sp; o.vy *= 46 / sp; }
+        o.x += o.vx * dt; o.y += o.vy * dt;
+        if (o.x < o.r) { o.x = o.r; o.vx = Math.abs(o.vx); } if (o.x > W - o.r) { o.x = W - o.r; o.vx = -Math.abs(o.vx); }
+        if (o.y < o.r) { o.y = o.r; o.vy = Math.abs(o.vy); } if (o.y > H - o.r) { o.y = H - o.r; o.vy = -Math.abs(o.vy); }
       }
     }
 
-    // Trails are drawn in four opacity bands, oldest to newest. Sample index 0 is
-    // the oldest point a particle still remembers; a young particle has fewer
-    // samples, and they are treated as the newest ones.
+    // one filament from a to b: a smooth writhing curve, drawn three times for the glow
+    function bolt(ax, ay, bx, by, alpha, seed, fork) {
+      var dx = bx - ax, dy = by - ay, d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 4 || alpha < 0.02) return;
+      var nx = -dy / d, ny = dx / d, N = Math.max(10, Math.min(30, Math.round(d / 22))), amp = Math.min(70, d * 0.13), pts = [];
+      for (var i = 0; i <= N; i++) {
+        var u = i / N, env = Math.sin(Math.PI * u);
+        var off = env * amp * (Math.sin(u * 7 + t * 1.7 + seed) * 0.6 + Math.sin(u * 15 - t * 2.6 + seed * 2.1) * 0.3 + Math.sin(u * 31 + t * 4.1 + seed * 0.7) * 0.12);
+        pts.push([ax + dx * u + nx * off, ay + dy * u + ny * off]);
+      }
+      var passes = [[16, "96,84,255", 0.10], [5, "208,128,255", 0.32], [1.5, "255,238,255", 1]];
+      for (var p = 0; p < 3; p++) {
+        ctx.lineWidth = passes[p][0]; ctx.strokeStyle = "rgba(" + passes[p][1] + "," + (passes[p][2] * alpha).toFixed(3) + ")";
+        ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+        for (var k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
+        ctx.stroke();
+      }
+      if (fork) {
+        var m = pts[Math.round(N * 0.58)], ang = Math.atan2(dy, dx) + Math.sin(t * 0.9 + seed) * 0.9 + 0.6, L = d * 0.22;
+        bolt(m[0], m[1], m[0] + Math.cos(ang) * L, m[1] + Math.sin(ang) * L, alpha * 0.55, seed + 9, false);
+      }
+    }
+
     function draw() {
-      ctx.clearRect(0, 0, W, H);
-      var per = HIST / BANDS.length;
-      for (var tone = 0; tone < 3; tone++) {
-        ctx.lineWidth = WIDTHS[tone];
-        for (var b = 0; b < BANDS.length; b++) {
-          var lastBand = b === BANDS.length - 1;
-          ctx.strokeStyle = "rgba(" + TONES[tone] + "," + BANDS[b] + ")";
-          ctx.beginPath();
-          for (var i = 0; i < parts.length; i++) {
-            var p = parts[i];
-            if (p.tone !== tone || p.n < 2) continue;
-            var missing = HIST - p.n;
-            var from = Math.max(0, Math.floor(b * per) - missing);
-            var to = Math.min(p.n - 1, Math.floor((b + 1) * per) - missing);
-            if (to < 0 || (to <= from && !lastBand)) continue;
-            var base = (p.head - p.n + HIST) % HIST;
-            var j0 = (base + from) % HIST;
-            ctx.moveTo(p.hx[j0], p.hy[j0]);
-            for (var s = from + 1; s <= to; s++) {
-              var j = (base + s) % HIST;
-              ctx.lineTo(p.hx[j], p.hy[j]);
-            }
-            if (lastBand) ctx.lineTo(p.x, p.y);
-          }
-          ctx.stroke();
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "#04020c"; ctx.fillRect(0, 0, W, H);
+      var bg = ctx.createRadialGradient(W / 2, H * 0.55, 0, W / 2, H * 0.55, Math.max(W, H) * 0.75);
+      bg.addColorStop(0, "rgba(72,28,150,0.6)"); bg.addColorStop(0.55, "rgba(24,12,80,0.4)"); bg.addColorStop(1, "rgba(4,2,12,0)");
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+      ctx.globalCompositeOperation = "lighter";
+
+      var reach = Math.min(W, H) * 0.62, i, j;
+      for (i = 0; i < orbs.length; i++) {
+        var o = orbs[i];
+        for (var a = 0; a < o.arms.length; a++) {
+          var arm = o.arms[a], ang = arm.ang + t * 0.05 + Math.sin(t * 0.31 + arm.ph) * 0.7, len = arm.len * (0.75 + 0.25 * Math.sin(t * 0.5 + arm.ph));
+          bolt(o.x, o.y, o.x + Math.cos(ang) * len, o.y + Math.sin(ang) * len, 0.30, arm.ph, false);
+        }
+        for (j = i + 1; j < orbs.length; j++) {
+          var q = orbs[j], d = Math.hypot(o.x - q.x, o.y - q.y);
+          if (d < reach) { var al = Math.pow(1 - d / reach, 1.35); for (var s = 0; s < strands; s++) bolt(o.x, o.y, q.x, q.y, al, i * 7 + j * 3 + s * 11, s === 0); }
+        }
+        if (mouse.k > 0.03) {
+          var md = Math.hypot(o.x - mouse.x, o.y - mouse.y), mr = Math.min(W, H) * 0.7;
+          if (md < mr) { var ma = Math.pow(1 - md / mr, 1.1) * mouse.k; bolt(o.x, o.y, mouse.x, mouse.y, ma * 1.15, i * 5 + 40, true); bolt(o.x, o.y, mouse.x, mouse.y, ma * 0.7, i * 5 + 71, false); }
         }
       }
+      for (i = 0; i < orbs.length; i++) {
+        var ob = orbs[i], size = ob.r * (12 + Math.sin(t * 1.3 + ob.ph) * 1.4);
+        ctx.globalAlpha = 0.95; ctx.drawImage(sprite, ob.x - size / 2, ob.y - size / 2, size, size);
+      }
+      if (mouse.k > 0.03) { var ms = 150 * mouse.k; ctx.globalAlpha = 0.9 * mouse.k; ctx.drawImage(sprite, mouse.x - ms / 2, mouse.y - ms / 2, ms, ms); }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
     }
 
     function frame(ts) {
@@ -323,40 +301,27 @@
       if (!last) last = ts;
       var dt = Math.min((ts - last) / 1000, 0.05);
       last = ts;
-      // on a machine that can't keep up, carry fewer particles
       slow = dt > 0.04 ? slow + 1 : Math.max(0, slow - 2);
-      if (slow > 40 && parts.length > 120) { parts.length = Math.round(parts.length * 0.7); slow = 0; }
+      if (slow > 40 && strands > 1) { strands = 1; slow = 0; }      // slower machines get one strand per pair
       if (dt > 0) { advance(dt); draw(); }
       window.requestAnimationFrame(frame);
     }
-
     function setRunning(on) {
       running = on;
-      if (pauseBtn) {
-        pauseBtn.textContent = on ? "Pause animation" : "Play animation";
-      }
+      if (pauseBtn) pauseBtn.textContent = on ? "Pause animation" : "Play animation";
       if (on) { last = 0; window.requestAnimationFrame(frame); }
     }
 
     host.addEventListener("pointermove", function (ev) {
-      if (ev.pointerType === "touch") return;
       var rect = host.getBoundingClientRect();
       mouse.tx = ev.clientX - rect.left; mouse.ty = ev.clientY - rect.top;
       if (!mouse.on) { mouse.x = mouse.tx; mouse.y = mouse.ty; }
       mouse.on = true;
+      if (!running) { mouse.k = 1; mouse.x = mouse.tx; mouse.y = mouse.ty; draw(); }
     });
     host.addEventListener("pointerleave", function () { mouse.on = false; });
-    host.addEventListener("pointerdown", function (ev) {
-      if (ev.target.closest("a,button,summary")) return;
-      var rect = host.getBoundingClientRect();
-      pulses.push({ x: ev.clientX - rect.left, y: ev.clientY - rect.top, age: 0 });
-      if (pulses.length > 4) pulses.shift();
-    });
-
     if (pauseBtn) pauseBtn.addEventListener("click", function () { setRunning(!running); });
 
-    // Rebuild whenever the hero itself changes size: window resizes, a late
-    // layout, or the web font arriving and changing the height of the heading.
     var timer;
     function fit() {
       window.clearTimeout(timer);
@@ -369,12 +334,10 @@
     else window.addEventListener("resize", fit);
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (entries) {
-        var was = offscreen;
-        offscreen = !entries[0].isIntersecting;
+        var was = offscreen; offscreen = !entries[0].isIntersecting;
         if (was && !offscreen && running) { last = 0; window.requestAnimationFrame(frame); }
       }).observe(host);
     }
-
     build();
     setRunning(running);
   }

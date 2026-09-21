@@ -45,30 +45,30 @@
   </nav>
 </header>
 <main id="main">
-<section class="pagetop">
-  <div class="wrap">
+<section class="ghero" data-demo="nlp">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap ghero-in">
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>Natural Language Processing</h1>
-    <p class="lede">Members work with text: deciding if a review is positive, finding the topic of an article, answering questions. The group starts with word-counting methods you can check by hand and moves up to the transformer models behind chatbots.</p>
+    <p class="desc">Members work with text: deciding if a review is positive, finding the topic of an article, answering questions. The group starts with word-counting methods you can check by hand and moves up to the transformer models behind chatbots.</p>
+    <p><a class="btn btn--light" href="join.html#join-nlp">Sign up and pick this group</a></p>
   </div>
-</section>
-<section class="section section--demo">
-  <div class="wrap">
-    <div class="demo" data-demo="nlp">
-      <div class="demo-head">
-        <h2>Illustrative attention weights</h2>
-        <p>Pick a word. The arcs show how much it looks at every other word.</p>
-      </div>
-      <div class="demo-stage"><canvas aria-hidden="true"></canvas></div>
+  <div class="ghero-bar">
+    <div class="wrap ghero-bar-in">
+      <p class="how"><strong>Illustrative attention weights.</strong> Pick a word. The arcs show how much it looks at every other word.</p>
       <div class="demo-controls">
         <button type="button" data-act="prev">Previous word</button><button type="button" data-act="next">Next word</button>
         <button type="button" data-act="reset">Reset</button>
         <button type="button" data-act="pause">Pause</button>
       </div>
       <p class="demo-readout" data-readout aria-live="polite"></p>
-      <ul class="legend"><li><i class="k line teal"></i>Thicker arc, more attention</li></ul>
-      <p class="demo-shows">These weights are made up for the picture and do not come from a trained model. In a real transformer every word computes weights like these for every other word, and training sets their values.</p>
     </div>
+  </div>
+</section>
+<section class="ghero-notes">
+  <div class="wrap">
+    <ul class="legend"><li><i class="k line teal"></i>Thicker arc, more attention</li></ul>
+    <p class="demo-shows">These weights are made up for the picture and do not come from a trained model. In a real transformer every word computes weights like these for every other word, and training sets their values.</p>
   </div>
 </section>
 

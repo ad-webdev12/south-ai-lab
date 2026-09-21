@@ -54,55 +54,61 @@
 </section>
 <section class="section">
   <div class="wrap">
-    <h2>2026-27 officers</h2>
-    <ul class="people">
-      <li>
-        <img src="assets/img/people/aarav-dey.jpg" alt="Aarav Dey" width="240" height="240">
-        <div><h3>Aarav Dey</h3><p class="role">Co-President</p><p>Treasurer in 2025-26. Built AI Hub, the club's resource site, in 2025.</p></div>
-      </li>
-      <li>
-        <img src="assets/img/people/henna-patel.jpg" alt="Henna Patel" width="240" height="240">
-        <div><h3>Henna Patel</h3><p class="role">Co-President</p><p>Co-Vice President in 2025-26.</p></div>
-      </li>
-      <li>
-        <img src="assets/img/people/maushmi-miraj.jpg" alt="Maushmi Miraj" width="240" height="240">
-        <div><h3>Maushmi Miraj</h3><p class="role">Co-President</p><p>Secretary in 2025-26.</p></div>
-      </li>
-      <li>
-        <img src="assets/img/people/maahi-mehta.jpg" alt="Maahi Mehta" width="240" height="240">
-        <div><h3>Maahi Mehta</h3><p class="role">Co-Vice President</p><p>Joined the officer team this year.</p></div>
-      </li>
-      <li>
-        <img src="assets/img/people/shriyan-kumar.jpg" alt="Shriyan Kumar" width="240" height="240">
-        <div><h3>Shriyan Kumar</h3><p class="role">Co-Vice President</p><p>Joined the officer team this year.</p></div>
-      </li>
-      <li>
-        <img src="assets/img/people/ishan-sarda.jpg" alt="Ishan Sarda" width="240" height="240">
-        <div><h3>Ishan Sarda</h3><p class="role">Secretary</p><p>Joined the officer team this year.</p></div>
-      </li>
-      <li>
-        <img src="assets/img/people/jia-arora.jpg" alt="Jia Arora" width="240" height="240">
-        <div><h3>Jia Arora</h3><p class="role">Junior Officer</p><p>Second year as Junior Officer.</p></div>
-      </li>
-    </ul>
+    <h2>Co-Presidents</h2>
+    <ul class="people people--3"><li><img src="assets/img/people/aarav-dey.jpg" alt="Aarav Dey" width="240" height="240"><h3>Aarav Dey</h3><p class="role">Co-President</p><p>Treasurer in 2025-26. Built AI Hub, the club's resource site, in 2025.</p></li><li><img src="assets/img/people/henna-patel.jpg" alt="Henna Patel" width="240" height="240"><h3>Henna Patel</h3><p class="role">Co-President</p><p>Co-Vice President in 2025-26.</p></li><li><img src="assets/img/people/maushmi-miraj.jpg" alt="Maushmi Miraj" width="240" height="240"><h3>Maushmi Miraj</h3><p class="role">Co-President</p><p>Secretary in 2025-26.</p></li></ul>
+    <h2 class="gap">Officers</h2>
+    <ul class="people people--4"><li><img src="assets/img/people/maahi-mehta.jpg" alt="Maahi Mehta" width="240" height="240"><h3>Maahi Mehta</h3><p class="role">Co-Vice President</p></li><li><img src="assets/img/people/shriyan-kumar.jpg" alt="Shriyan Kumar" width="240" height="240"><h3>Shriyan Kumar</h3><p class="role">Co-Vice President</p></li><li><img src="assets/img/people/ishan-sarda.jpg" alt="Ishan Sarda" width="240" height="240"><h3>Ishan Sarda</h3><p class="role">Secretary</p></li><li><img src="assets/img/people/jia-arora.jpg" alt="Jia Arora" width="240" height="240"><h3>Jia Arora</h3><p class="role">Junior Officer</p><p>Junior Officer in 2025-26.</p></li></ul>
   </div>
 </section>
 
 <section class="section section--soft">
-  <div class="wrap two">
-    <div>
-      <h2>Becoming an officer</h2>
-      <p>The officer interest form opens in April and closes in May, and the new team is announced at the last meeting of the year. Any member can apply. Each research group also gets a group lead, named in October.</p>
-    </div>
+  <div class="wrap split split--code">
     <div>
       <h2>Past officers</h2>
-      <ul class="dated dated--tight">
-      <li><span class="when">2025-26</span><div><p>Eric Zou, President. Helen Chen and Henna Patel, Co-Vice Presidents. Maushmi Miraj, Secretary. Aarav Dey, Treasurer. Syam Paladugu and Jia Arora, Junior Officers.</p></div></li>
-      <li><span class="when">2024-25</span><div><p>Atin Mathur, President. Eric Zou, Vice President. Simran Cheema, Secretary. Prajwal Bhat and Vivek Raghuram, Co-Treasurers.</p></div></li>
-      <li><span class="when">2023-24</span><div><p>Mahitha Thippireddy, President. Saumya Muthukumar, Vice President. Nimai Ponna, Secretary. Akshay Sharma, Treasurer. Eric Zou, Junior Officer.</p></div></li>
-      <li><span class="when">2022-23</span><div><p>Founding year, led by Mahitha Thippireddy, Saumya Muthukumar, and Ramya Gouraiah.</p></div></li>
-      </ul>
+      <pre class="code" tabindex="0" aria-label="Past officers by year"><code><span class="c"># past officers, newest first</span>
+<span class="n">officers</span> <span class="o">=</span> {
+    <span class="k">"2025-26"</span>: {
+        <span class="s">"President"</span>: <b><span class="nm">"Eric Zou"</span></b>,
+        <span class="s">"Co-Vice Presidents"</span>: [
+            <b><span class="nm">"Helen Chen"</span></b>,
+            <b><span class="nm">"Henna Patel"</span></b>,
+        ],
+        <span class="s">"Secretary"</span>: <b><span class="nm">"Maushmi Miraj"</span></b>,
+        <span class="s">"Treasurer"</span>: <b><span class="nm">"Aarav Dey"</span></b>,
+        <span class="s">"Junior Officers"</span>: [
+            <b><span class="nm">"Syam Paladugu"</span></b>,
+            <b><span class="nm">"Jia Arora"</span></b>,
+        ],
+    },
+    <span class="k">"2024-25"</span>: {
+        <span class="s">"President"</span>: <b><span class="nm">"Atin Mathur"</span></b>,
+        <span class="s">"Vice President"</span>: <b><span class="nm">"Eric Zou"</span></b>,
+        <span class="s">"Secretary"</span>: <b><span class="nm">"Simran Cheema"</span></b>,
+        <span class="s">"Co-Treasurers"</span>: [
+            <b><span class="nm">"Prajwal Bhat"</span></b>,
+            <b><span class="nm">"Vivek Raghuram"</span></b>,
+        ],
+    },
+    <span class="k">"2023-24"</span>: {
+        <span class="s">"President"</span>: <b><span class="nm">"Mahitha Thippireddy"</span></b>,
+        <span class="s">"Vice President"</span>: <b><span class="nm">"Saumya Muthukumar"</span></b>,
+        <span class="s">"Secretary"</span>: <b><span class="nm">"Nimai Ponna"</span></b>,
+        <span class="s">"Treasurer"</span>: <b><span class="nm">"Akshay Sharma"</span></b>,
+        <span class="s">"Junior Officer"</span>: <b><span class="nm">"Eric Zou"</span></b>,
+    },
+    <span class="k">"2022-23"</span>: {  <span class="c"># founding year</span>
+        <span class="s">"Founders"</span>: [
+            <b><span class="nm">"Mahitha Thippireddy"</span></b>,
+            <b><span class="nm">"Saumya Muthukumar"</span></b>,
+            <b><span class="nm">"Ramya Gouraiah"</span></b>,
+        ],
+    },
+}</code></pre>
     </div>
+    <aside class="side">
+      <h2>Becoming an officer</h2>
+      <p class="sidep">The officer interest form opens in April and closes in May, and the new team is announced at the last meeting of the year. Any member can apply. Each research group also gets a group lead, named in October.</p>
+    </aside>
   </div>
 </section>
 </main>

@@ -83,23 +83,20 @@ check each one:
 7. **AI Hub** has no link yet. Add its URL to the `links` list in `FEATURED`.
 8. Names on the People page: spelling, and that everyone is fine being listed publicly.
 
-## The hero animation
+## The home hero
 
-Particles are carried through a slowly changing vector field, and each one keeps a few seconds of
-position history that is drawn as a tapered line, so the streamlines of the field become visible.
-Moving the pointer adds a local swirl that fades when the pointer leaves. A click sends out a ring.
-
-It pauses when the hero is off screen or the tab is hidden, has a visible pause button, starts
-paused for visitors who ask for reduced motion, and rebuilds itself when the hero changes size.
-Tuning lives at the top of `hero()` in `site.js`: particle count in `build()`, trail length in
-`HIST` and `SAMPLE`, pointer strength in `advance()`.
+A full-screen plasma field in `hero()` in `assets/js/site.js`. Glowing orbs drift around; each one
+throws out slow filaments, and when two orbs come near each other, or near the pointer, filaments
+jump across and brighten. Filaments are smooth curves that writhe over time, so nothing flashes.
+It pauses off screen, has a pause button, starts still for reduced-motion visitors, and drops to
+one strand per pair on slow machines.
 
 ## Research group demos
 
-Each group page has one demo in its own block below the page title, in `assets/js/demos.js`.
-Every demo has a visible instruction, real buttons or a slider (so it works with a keyboard or a
-finger), Reset and Pause, a legend, and a text readout under the plot, because the canvas itself
-is hidden from screen readers. The copy for each demo is in `DEMOS` in `build.py`.
+Each group page opens with a full-screen hero that is the demo itself, in `assets/js/demos.js`.
+The title sits on top of it, and a bar along the bottom holds the instruction, real buttons or a
+slider (so it works with a keyboard or a finger), Reset and Pause, and a text readout, because
+the canvas itself is hidden from screen readers. The legend sits in a strip directly below. The copy for each demo is in `DEMOS` in `build.py`.
 
 | Group | What runs |
 | --- | --- |
@@ -107,8 +104,8 @@ is hidden from screen readers. The copy for each demo is in `DEMOS` in `build.py
 | Computer Vision | A 3 by 3 convolution over three real MNIST digits, with a filter picker and a step button. |
 | Natural Language Processing | Attention arcs. The weights are illustrative and the block says so in its title. |
 | Neural Networks | Gradient descent with momentum on a loss surface, with a loss history chart. |
-| Agents and RL | Tabular Q-learning in a gridworld. |
-| AI, Ethics and Society | One approval threshold on two simulated groups, with a slider and a note on what the gap does and does not show. |
+| Agents and RL | A swarm of agents sharing one Q-table. What they learn shows as light spreading from the goal. |
+| AI, Ethics and Society | Two simulated groups stream toward one gate with one threshold, with a slider and a note on what the gap does and does not show. |
 
 ## People page
 

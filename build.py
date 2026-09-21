@@ -180,13 +180,13 @@ GROUP_BY_KEY = {g["key"]: g for g in GROUPS}
 DEMOS = {
     "data-science": {
         "title": "A classifier drawing its boundary",
-        "how": "Click the plot to add a point, and the line moves to keep the two kinds apart.",
+        "how": "Move your pointer across the screen. It counts as a data point, and the line bends to keep the two kinds apart. Click to leave the point there.",
         "controls": '<fieldset class="seg"><legend>New points are</legend>'
                     '<label><input type="radio" name="cls" value="1" data-act="class" checked> teal</label>'
                     '<label><input type="radio" name="cls" value="-1" data-act="class"> orange</label></fieldset>'
                     '<button type="button" data-act="random">Add a random point</button>',
-        "legend": [("dot teal", "One kind of data"), ("ring coral", "The other kind"), ("line", "Where the model switches its answer"), ("dash", "Its margin of doubt")],
-        "shows": "This is a real classifier (a support vector machine with an RBF kernel), refit each time a point is added. Moving the pointer over the plot shows which kind the model would call that spot.",
+        "legend": [("dot teal", "One kind of data"), ("ring coral", "The other kind"), ("dot white", "Your pointer"), ("line", "Where the model switches its answer"), ("dash", "Its margin of doubt")],
+        "shows": "This is a real classifier, a support vector machine with an RBF kernel, refit on every frame. The faint colors show which kind the model would predict at each spot.",
     },
     "vision": {
         "title": "Watch a convolution",
@@ -211,18 +211,18 @@ DEMOS = {
         "shows": "Training a network means rolling downhill on a surface like this one, except in millions of dimensions. Different starts can end in different valleys.",
     },
     "agents": {
-        "title": "An agent learning a maze",
-        "how": "Click a square to move the goal, and the agent has to learn the way again.",
-        "controls": '<button type="button" data-act="goal">Move goal to a random square</button>',
-        "legend": [("dot white", "The agent"), ("dot coral", "The goal"), ("sw dim", "Wall"), ("sw teal", "Brighter squares are worth more"), ("arrow", "Best move learned so far")],
-        "shows": "This is tabular Q-learning. The agent starts at the bottom left knowing nothing, and gets a reward only when it reaches the goal.",
+        "title": "Agents learning the way to a goal",
+        "how": "Click anywhere to move the goal, and watch the light find its way back to it.",
+        "controls": '<button type="button" data-act="goal">Move the goal</button>',
+        "legend": [("dot white", "An agent"), ("dot coral", "The goal"), ("sw dim", "Obstacle"), ("dot teal", "What the agents have learned: brighter means closer to the goal")],
+        "shows": "This is Q-learning. The agents start out wandering at random and share one table of what they learn. A reward at the goal spreads backward, step by step, until the whole field knows which way to go.",
     },
     "society": {
-        "title": "One threshold, two groups",
-        "how": "Move the threshold. Everyone scoring above it is approved.",
+        "title": "One rule, two groups",
+        "how": "Move your pointer up and down to set the threshold. Everyone scoring above it gets through the gate.",
         "controls": '<label>Threshold <input type="range" min="5" max="95" value="55" data-act="threshold"></label>',
-        "legend": [("dot teal", "Group A, approved"), ("ring teal", "Group A, not approved"), ("dot coral", "Group B, approved"), ("ring coral", "Group B, not approved")],
-        "shows": "The scores here are simulated. With one threshold, the two groups are approved at different rates because their scores are spread differently. A gap like that shows the rule affects the groups unequally. It does not tell you why the scores differ, or which approval rate is the right one. Those are the questions this group works on.",
+        "legend": [("dot teal", "Group A"), ("dot coral", "Group B"), ("line", "The gate: closed below the threshold")],
+        "shows": "The scores here are simulated. One threshold lets the two groups through at different rates because their scores are spread differently. A gap like that shows the rule affects the groups unequally. It does not tell you why the scores differ, or which approval rate is the right one. Those are the questions this group works on.",
     },
 }
 
@@ -234,17 +234,21 @@ TEAM = [
     ("Aarav Dey", "Co-President", "aarav-dey", "Treasurer in 2025-26. Built AI Hub, the club's resource site, in 2025."),
     ("Henna Patel", "Co-President", "henna-patel", "Co-Vice President in 2025-26."),
     ("Maushmi Miraj", "Co-President", "maushmi-miraj", "Secretary in 2025-26."),
-    ("Maahi Mehta", "Co-Vice President", "maahi-mehta", "Joined the officer team this year."),
-    ("Shriyan Kumar", "Co-Vice President", "shriyan-kumar", "Joined the officer team this year."),
-    ("Ishan Sarda", "Secretary", "ishan-sarda", "Joined the officer team this year."),
-    ("Jia Arora", "Junior Officer", "jia-arora", "Second year as Junior Officer."),
+    ("Maahi Mehta", "Co-Vice President", "maahi-mehta", ""),
+    ("Shriyan Kumar", "Co-Vice President", "shriyan-kumar", ""),
+    ("Ishan Sarda", "Secretary", "ishan-sarda", ""),
+    ("Jia Arora", "Junior Officer", "jia-arora", "Junior Officer in 2025-26."),
 ]
 
+# year -> list of (role, [names]); rendered as a block of Python on the People page
 PAST_OFFICERS = [
-    ("2025-26", "Eric Zou, President. Helen Chen and Henna Patel, Co-Vice Presidents. Maushmi Miraj, Secretary. Aarav Dey, Treasurer. Syam Paladugu and Jia Arora, Junior Officers."),
-    ("2024-25", "Atin Mathur, President. Eric Zou, Vice President. Simran Cheema, Secretary. Prajwal Bhat and Vivek Raghuram, Co-Treasurers."),
-    ("2023-24", "Mahitha Thippireddy, President. Saumya Muthukumar, Vice President. Nimai Ponna, Secretary. Akshay Sharma, Treasurer. Eric Zou, Junior Officer."),
-    ("2022-23", "Founding year, led by Mahitha Thippireddy, Saumya Muthukumar, and Ramya Gouraiah."),
+    ("2025-26", "", [("President", ["Eric Zou"]), ("Co-Vice Presidents", ["Helen Chen", "Henna Patel"]), ("Secretary", ["Maushmi Miraj"]),
+                     ("Treasurer", ["Aarav Dey"]), ("Junior Officers", ["Syam Paladugu", "Jia Arora"])]),
+    ("2024-25", "", [("President", ["Atin Mathur"]), ("Vice President", ["Eric Zou"]), ("Secretary", ["Simran Cheema"]),
+                     ("Co-Treasurers", ["Prajwal Bhat", "Vivek Raghuram"])]),
+    ("2023-24", "", [("President", ["Mahitha Thippireddy"]), ("Vice President", ["Saumya Muthukumar"]), ("Secretary", ["Nimai Ponna"]),
+                     ("Treasurer", ["Akshay Sharma"]), ("Junior Officer", ["Eric Zou"])]),
+    ("2022-23", "founding year", [("Founders", ["Mahitha Thippireddy", "Saumya Muthukumar", "Ramya Gouraiah"])]),
 ]
 
 # ---------------------------------------------------------------- projects
@@ -700,23 +704,31 @@ def page_group(g):
     related = "".join(f'<li><a href="{GROUP_BY_KEY[k]["slug"]}">{GROUP_BY_KEY[k]["name"]}</a></li>' for k in g["related"])
     flag = '<p class="flag" style="margin-left:0">Good first group</p>' if g["first"] else ""
 
-    return pagetop(['<a href="research.html">Research</a>'], g["name"], g["desc"], g["sub"]) + f'''<section class="section section--demo">
-  <div class="wrap">
-    <div class="demo" data-demo="{g["key"]}">
-      <div class="demo-head">
-        <h2>{d["title"]}</h2>
-        <p>{d["how"]}</p>
-      </div>
-      <div class="demo-stage"><canvas aria-hidden="true"></canvas></div>
+    sub = f'<p class="sub">{g["sub"]}</p>' if g["sub"] else ""
+    return f'''<section class="ghero" data-demo="{g["key"]}">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap ghero-in">
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
+    <h1>{g["name"]}</h1>
+    {sub}<p class="desc">{g["desc"]}</p>
+    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Sign up and pick this group</a></p>
+  </div>
+  <div class="ghero-bar">
+    <div class="wrap ghero-bar-in">
+      <p class="how"><strong>{d["title"]}.</strong> {d["how"]}</p>
       <div class="demo-controls">
         {d["controls"]}
         <button type="button" data-act="reset">Reset</button>
         <button type="button" data-act="pause">Pause</button>
       </div>
       <p class="demo-readout" data-readout aria-live="polite"></p>
-      {legend_html(d["legend"])}
-      <p class="demo-shows">{d["shows"]}</p>
     </div>
+  </div>
+</section>
+<section class="ghero-notes">
+  <div class="wrap">
+    {legend_html(d["legend"])}
+    <p class="demo-shows">{d["shows"]}</p>
   </div>
 </section>
 
@@ -789,34 +801,55 @@ def page_projects():
 '''
 
 
+def person(p):
+    name, role, slug, bio = p
+    bio_html = f"<p>{bio}</p>" if bio else ""
+    return (f'<li><img src="assets/img/people/{slug}.jpg" alt="{name}" width="240" height="240">'
+            f'<h3>{name}</h3><p class="role">{role}</p>{bio_html}</li>')
+
+
+def officers_code():
+    """Past officers, written out as a Python dict with syntax colors."""
+    def s(text, cls="s"):
+        return f'<span class="{cls}">"{text}"</span>'
+    lines = ['<span class="c"># past officers, newest first</span>', '<span class="n">officers</span> <span class="o">=</span> {']
+    for year, note, roles in PAST_OFFICERS:
+        comment = f'  <span class="c"># {note}</span>' if note else ""
+        lines.append(f'    {s(year, "k")}: {{{comment}')
+        for role, names in roles:
+            if len(names) == 1:
+                lines.append(f'        {s(role)}: <b>{s(names[0], "nm")}</b>,')
+            else:
+                lines.append(f'        {s(role)}: [')
+                lines.extend(f'            <b>{s(n, "nm")}</b>,' for n in names)
+                lines.append("        ],")
+        lines.append("    },")
+    lines.append("}")
+    return '<pre class="code" tabindex="0" aria-label="Past officers by year"><code>' + "\n".join(lines) + "</code></pre>"
+
+
 def page_people():
-    people = "\n      ".join(
-        f'''<li>
-        <img src="assets/img/people/{slug}.jpg" alt="{name}" width="240" height="240">
-        <div><h3>{name}</h3><p class="role">{role}</p><p>{bio}</p></div>
-      </li>''' for name, role, slug, bio in TEAM)
-    past = "\n      ".join(f'<li><span class="when">{y}</span><div><p>{w}</p></div></li>' for y, w in PAST_OFFICERS)
+    presidents = "".join(person(p) for p in TEAM[:3])
+    others = "".join(person(p) for p in TEAM[3:])
     return pagetop(["People"], "People") + f'''<section class="section">
   <div class="wrap">
-    <h2>{YEAR} officers</h2>
-    <ul class="people">
-      {people}
-    </ul>
+    <h2>Co-Presidents</h2>
+    <ul class="people people--3">{presidents}</ul>
+    <h2 class="gap">Officers</h2>
+    <ul class="people people--4">{others}</ul>
   </div>
 </section>
 
 <section class="section section--soft">
-  <div class="wrap two">
-    <div>
-      <h2>Becoming an officer</h2>
-      <p>The officer interest form opens in April and closes in May, and the new team is announced at the last meeting of the year. Any member can apply. Each research group also gets a group lead, named in October.</p>
-    </div>
+  <div class="wrap split split--code">
     <div>
       <h2>Past officers</h2>
-      <ul class="dated dated--tight">
-      {past}
-      </ul>
+      {officers_code()}
     </div>
+    <aside class="side">
+      <h2>Becoming an officer</h2>
+      <p class="sidep">The officer interest form opens in April and closes in May, and the new team is announced at the last meeting of the year. Any member can apply. Each research group also gets a group lead, named in October.</p>
+    </aside>
   </div>
 </section>
 '''
@@ -1102,6 +1135,7 @@ CONTRAST_PAIRS = [
     ("nav link on masthead", "#c9d6e8", "#0b1b33"), ("brand subtitle on masthead", "#a3b6d1", "#0b1b33"),
     ("footer text", "#c3d1e4", "#0b1b33"), ("footer heading", "#a3b6d1", "#0b1b33"),
     ("demo text on navy", "#c9d6e8", "#0b1b33"), ("demo readout on navy", "#ffffff", "#0b1b33"),
+    ("code comment", "#8fa1b8", "#0b1524"), ("code string", "#9ad4a0", "#0b1524"), ("code key", "#f0b26b", "#0b1524"), ("code punctuation", "#9fb0c6", "#0b1524"),
     ("start label", "#14502f", "#ffffff"),
 ]
 
