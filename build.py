@@ -87,7 +87,7 @@ GROUPS = [
         "stages": ["vision", "deep-learning"], "related": ["neural-networks", "data-science", "nlp"],
     },
     {
-        "key": "nlp", "slug": "nlp.html", "name": "Natural Language Processing", "sub": "",
+        "key": "nlp", "slug": "nlp.html", "name": "Natural Language Processing", "sub": "How does a machine know what you mean?",
         "first": False,
         "line": "Build programs that read, sort, and write text, from spam filters to chatbots.",
         "desc": "Members work with text: deciding if a review is positive, finding the topic of an article, answering questions. The group starts with word-counting methods you can check by hand and moves up to the transformer models behind chatbots.",
@@ -133,7 +133,7 @@ GROUPS = [
         "stages": ["deep-learning"], "related": ["vision", "nlp", "agents"],
     },
     {
-        "key": "agents", "slug": "agents.html", "name": "Agents and Reinforcement Learning", "sub": "",
+        "key": "agents", "slug": "agents.html", "name": "Agents and Reinforcement Learning", "sub": "This one is paying attention to you.",
         "first": False,
         "line": "Programs that learn by trial and error, and LLM-based assistants that use tools.",
         "desc": "Two topics share this group. Reinforcement learning is how a program learns by trial and error, the way game-playing AIs do. LLM-based agents are language models that can take actions, such as searching the web or running code, to finish a task.",
@@ -153,7 +153,7 @@ GROUPS = [
         "stages": ["agents-rl"], "related": ["nlp", "neural-networks", "society"],
     },
     {
-        "key": "society", "slug": "society.html", "name": "AI, Ethics and Society", "sub": "",
+        "key": "society", "slug": "society.html", "name": "AI, Ethics and Society", "sub": "I made a profile of you.",
         "first": False,
         "line": "Test models for fairness, study privacy and safety, and discuss how AI should be used.",
         "desc": "Members test models for fairness, study privacy and safety, write the documentation that should come with a model, and discuss how AI is changing school and work.",
@@ -194,10 +194,17 @@ DEMOS = {
         "pause": True,
     },
     "nlp": {
-        "title": "Illustrative attention weights",
-        "text": "Hover over a word. The arcs show how much it looks at every other word, which is the core idea inside a transformer. These weights are made up for the picture. A trained model learns them.",
-        "controls": '<button type="button" data-act="prev">Previous word</button><button type="button" data-act="next">Next word</button>',
-        "pause": True,
+        "title": "One sentence, four ways a model reads it",
+        "text": "Type a sentence or step through the examples, then switch views: tokens, attention, how the meaning of a word like bank moves with its context, and what comes next. The word vectors are a small toy written by hand. A real model learns its own.",
+        "controls": '<label class="sent">Sentence <input type="text" data-act="sentence" maxlength="90" value="The robot thought I meant something else." spellcheck="false" autocomplete="off"></label>'
+                    '<button type="button" data-act="example">Next example</button>'
+                    '<span class="modes" role="group" aria-label="View">'
+                    '<button type="button" data-act="mode-tokens" aria-pressed="false">Tokens</button>'
+                    '<button type="button" data-act="mode-attention" aria-pressed="false">Attention</button>'
+                    '<button type="button" data-act="mode-meaning" aria-pressed="true">Meaning</button>'
+                    '<button type="button" data-act="mode-predict" aria-pressed="false">Prediction</button></span>'
+                    '<label data-temp hidden>Temperature <input type="range" min="10" max="200" value="70" data-act="temp"></label>',
+        "pause": False,
     },
     "neural-networks": {
         "title": "Gradient descent on a loss surface",
@@ -206,16 +213,19 @@ DEMOS = {
         "pause": True,
     },
     "agents": {
-        "title": "An agent at work",
-        "text": "The robot runs the loop every agent runs: look at the world, pick a goal, act, check the result. Its goal is a complete title, so it finds the fallen letters, picks each one up and puts it back where it belongs. Click any letter in the title to knock it down.",
-        "controls": '<button type="button" data-act="knock">Knock some down</button>',
+        "title": "A robot that learns from you",
+        "text": "It keeps the title in order and it watches what you do. Click letters, move around it, and answer when it asks whether a move was good. Your answers are its only reward, and they change what it does next. Everything it learns stays in this browser.",
+        "controls": '<button type="button" data-act="knock">Knock letters down</button>'
+                    '<button type="button" data-act="typo">Scramble a word</button>'
+                    '<button type="button" data-act="battery">Give it a battery</button>'
+                    '<button type="button" data-act="learned">What it learned</button>',
         "pause": True,
     },
     "society": {
-        "title": "A feed that learns what you like",
-        "text": "Each dot is a person, placed from left to right by opinion. Everyone keeps seeing posts and drifting toward them. Turn up how often the feed picks posts that match what a person already thinks, and watch the crowd split in two. This is a simulation of a feedback loop, not data from a real platform.",
-        "controls": '<label>Feed matches your views <input type="range" min="0" max="95" value="15" data-act="feed"></label>',
-        "pause": True,
+        "title": "A profile built from your clicks",
+        "text": "The card is what this site's robot worked out about you from pages opened, time spent and clicks. It is kept in this browser and nowhere else. Ask for the evidence, tell it when it is wrong, read everything it stored, or make it forget. The camera is optional: a face model runs in this tab, no frame is stored or sent, and the labels marked guess are invented on purpose.",
+        "controls": '<button type="button" data-act="camera">Turn on camera</button>',
+        "pause": False,
     },
 }
 
@@ -421,7 +431,7 @@ def head(title, desc):
 <meta property="og:title" content="{full}">
 <meta property="og:description" content="{desc}">
 <meta property="og:type" content="website">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
@@ -433,8 +443,9 @@ def head(title, desc):
 
 
 def brand():
-    return (f'<a class="brand" href="index.html" aria-label="{SITE["name"]}, home">{LOGO}'
-            f'<span class="brand-text"><b>{SITE["short"]}</b><span>South AI Lab</span></span></a>')
+    return (f'<a class="brand" href="index.html" aria-label="{SITE["name"]}, home">'
+            f'<img src="assets/img/logo.png" alt="" width="42" height="42">'
+            f'<span class="brand-text"><b>{SITE["short"]}</b><span>at WWP High School South</span></span></a>')
 
 
 def masthead(active):
@@ -497,18 +508,33 @@ def pagetop(crumbs, title, lede="", sub=""):
 
 
 def footer(extra_script=""):
+    groups = "".join(f'<li><a href="{g["slug"]}">{g["name"]}</a></li>' for g in GROUPS)
     return f'''</main>
 <footer class="foot">
+  <svg class="foot-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <path class="w1" d="M0 52c120-30 240-30 360 0s240 30 360 0 240-30 360 0 240 30 360 0v38H0z"/>
+    <path class="w2" d="M0 62c180-26 300-22 480 2s300 24 480 0 300-26 480 0v26H0z"/>
+    <path class="w3" d="M0 74c160-16 320-16 480 0s320 16 480 0 320-16 480 0v16H0z"/>
+  </svg>
+  <div class="foot-bg" aria-hidden="true"><i></i><i></i><i></i><b>SAIL</b></div>
   <div class="wrap">
+    <div class="foot-top">
+      <p class="foot-call">Build something with us.</p>
+      <p class="foot-meet">{SITE["meets"]} · {SITE["room"]} · no experience needed</p>
+      <a class="btn btn--glow" href="join.html">Join SAIL</a>
+    </div>
     <div class="foot-grid">
       <div>
         {brand()}
         <p>{SITE["name"]}, the AI and machine learning club at {SITE["school"]}.</p>
       </div>
       <div>
+        <h2>Research</h2>
+        <ul>{groups}</ul>
+      </div>
+      <div>
         <h2>Explore</h2>
         <ul>
-          <li><a href="research.html">Research groups</a></li>
           <li><a href="projects.html">Projects</a></li>
           <li><a href="resources.html">Resources</a></li>
           <li><a href="people.html">People</a></li>
@@ -521,13 +547,14 @@ def footer(extra_script=""):
           <li><a href="join.html">Join SAIL</a></li>
           <li><a href="#" data-email>Email us</a></li>
           <li><a href="https://www.instagram.com/{SITE["instagram"]}/" rel="noopener">Instagram</a></li>
-          <li>Google Classroom: {SITE["code"]}</li>
+          <li><span class="foot-code">Classroom code <b>{SITE["code"]}</b></span></li>
         </ul>
       </div>
     </div>
     <p class="foot-bot">&copy; <span data-year>2026</span> {SITE["name"]}. Run by students.</p>
   </div>
 </footer>
+<script src="assets/js/memory.js"></script>
 <script src="assets/js/site.js"></script>
 {extra_script}</body>
 </html>
@@ -700,6 +727,7 @@ def page_group(g):
     pause = '<button type="button" data-act="pause">Pause</button>' if d["pause"] else ""
     return f'''<section class="ghero" data-demo="{g["key"]}">
   {video}<canvas aria-hidden="true"></canvas>
+  <div class="ghero-ui" data-ui></div>
   <div class="wrap ghero-in">
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>{g["name"]}</h1>
@@ -1189,7 +1217,8 @@ def build():
 
     written = []
     for filename, title, desc, active, body in pages:
-        extra = '<script src="assets/js/demos.js"></script>\n' if active == "group" else ""
+        scenes = {"nlp.html": ["bot", "scene-nlp"], "agents.html": ["bot", "scene-agents"], "society.html": ["bot", "scene-agents", "scene-ethics"]}
+        extra = "".join(f'<script src="assets/js/{s}.js"></script>\n' for s in ["demos"] + scenes.get(filename, [])) if active == "group" else ""
         html = head(title, desc) + masthead(active) + body + footer(extra)
         with open(os.path.join(HERE, filename), "w", encoding="utf-8") as fh:
             fh.write(html)

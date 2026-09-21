@@ -8,7 +8,7 @@
 <meta property="og:title" content="Natural Language Processing | SAIL">
 <meta property="og:description" content="Build programs that read, sort, and write text, from spam filters to chatbots.">
 <meta property="og:type" content="website">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="masthead on-dark" data-masthead>
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html" aria-label="South Artificial Intelligence Laboratory, home"><svg viewBox="0 0 34 30" fill="none" aria-hidden="true"><path d="M18.2 0c6.9 5.4 10.8 12.1 11.4 20.2H18.2V0z" fill="currentColor"/><path d="M15.4 4.9v15.3H4.7C6.7 14 10.3 8.9 15.4 4.9z" fill="var(--logo-accent,#8fb4ff)"/><path d="M2 23.2h30c-1.1 3.5-4.2 5.3-8.4 5.3H10.4c-4.2 0-7.3-1.8-8.4-5.3z" fill="currentColor"/></svg><span class="brand-text"><b>SAIL</b><span>South AI Lab</span></span></a>
+    <a class="brand" href="index.html" aria-label="South Artificial Intelligence Laboratory, home"><img src="assets/img/logo.png" alt="" width="42" height="42"><span class="brand-text"><b>SAIL</b><span>at WWP High School South</span></span></a>
     <nav class="mainnav" aria-label="Main">
       <a href="index.html">Home</a>
       <div class="navgroup on" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research <svg viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul id="nav-research"><li><a href="research.html">Compare all groups</a></li><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul></div>
@@ -47,18 +47,19 @@
 <main id="main">
 <section class="ghero" data-demo="nlp">
   <canvas aria-hidden="true"></canvas>
+  <div class="ghero-ui" data-ui></div>
   <div class="wrap ghero-in">
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>Natural Language Processing</h1>
-    <p class="desc">Members work with text: deciding if a review is positive, finding the topic of an article, answering questions. The group starts with word-counting methods you can check by hand and moves up to the transformer models behind chatbots.</p>
+    <p class="sub">How does a machine know what you mean?</p><p class="desc">Members work with text: deciding if a review is positive, finding the topic of an article, answering questions. The group starts with word-counting methods you can check by hand and moves up to the transformer models behind chatbots.</p>
     <p><a class="btn btn--light" href="join.html#join-nlp">Sign up and pick this group</a></p>
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
-      <p class="how"><strong>Illustrative attention weights.</strong> Hover over a word. The arcs show how much it looks at every other word, which is the core idea inside a transformer. These weights are made up for the picture. A trained model learns them. <span data-status></span></p>
+      <p class="how"><strong>One sentence, four ways a model reads it.</strong> Type a sentence or step through the examples, then switch views: tokens, attention, how the meaning of a word like bank moves with its context, and what comes next. The word vectors are a small toy written by hand. A real model learns its own. <span data-status></span></p>
       <div class="demo-controls">
-        <button type="button" data-act="prev">Previous word</button><button type="button" data-act="next">Next word</button>
-        <button type="button" data-act="pause">Pause</button>
+        <label class="sent">Sentence <input type="text" data-act="sentence" maxlength="90" value="The robot thought I meant something else." spellcheck="false" autocomplete="off"></label><button type="button" data-act="example">Next example</button><span class="modes" role="group" aria-label="View"><button type="button" data-act="mode-tokens" aria-pressed="false">Tokens</button><button type="button" data-act="mode-attention" aria-pressed="false">Attention</button><button type="button" data-act="mode-meaning" aria-pressed="true">Meaning</button><button type="button" data-act="mode-predict" aria-pressed="false">Prediction</button></span><label data-temp hidden>Temperature <input type="range" min="10" max="200" value="70" data-act="temp"></label>
+        
       </div>
     </div>
   </div>
@@ -101,16 +102,30 @@
 </section>
 </main>
 <footer class="foot">
+  <svg class="foot-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <path class="w1" d="M0 52c120-30 240-30 360 0s240 30 360 0 240-30 360 0 240 30 360 0v38H0z"/>
+    <path class="w2" d="M0 62c180-26 300-22 480 2s300 24 480 0 300-26 480 0v26H0z"/>
+    <path class="w3" d="M0 74c160-16 320-16 480 0s320 16 480 0 320-16 480 0v16H0z"/>
+  </svg>
+  <div class="foot-bg" aria-hidden="true"><i></i><i></i><i></i><b>SAIL</b></div>
   <div class="wrap">
+    <div class="foot-top">
+      <p class="foot-call">Build something with us.</p>
+      <p class="foot-meet">Every other Tuesday, 3:00 to 4:00 PM · Room 700F · no experience needed</p>
+      <a class="btn btn--glow" href="join.html">Join SAIL</a>
+    </div>
     <div class="foot-grid">
       <div>
-        <a class="brand" href="index.html" aria-label="South Artificial Intelligence Laboratory, home"><svg viewBox="0 0 34 30" fill="none" aria-hidden="true"><path d="M18.2 0c6.9 5.4 10.8 12.1 11.4 20.2H18.2V0z" fill="currentColor"/><path d="M15.4 4.9v15.3H4.7C6.7 14 10.3 8.9 15.4 4.9z" fill="var(--logo-accent,#8fb4ff)"/><path d="M2 23.2h30c-1.1 3.5-4.2 5.3-8.4 5.3H10.4c-4.2 0-7.3-1.8-8.4-5.3z" fill="currentColor"/></svg><span class="brand-text"><b>SAIL</b><span>South AI Lab</span></span></a>
+        <a class="brand" href="index.html" aria-label="South Artificial Intelligence Laboratory, home"><img src="assets/img/logo.png" alt="" width="42" height="42"><span class="brand-text"><b>SAIL</b><span>at WWP High School South</span></span></a>
         <p>South Artificial Intelligence Laboratory, the AI and machine learning club at West Windsor-Plainsboro High School South.</p>
+      </div>
+      <div>
+        <h2>Research</h2>
+        <ul><li><a href="data-science.html">Applied Data Science</a></li><li><a href="vision.html">Computer Vision</a></li><li><a href="nlp.html">Natural Language Processing</a></li><li><a href="neural-networks.html">Neural Networks</a></li><li><a href="agents.html">Agents and Reinforcement Learning</a></li><li><a href="society.html">AI, Ethics and Society</a></li></ul>
       </div>
       <div>
         <h2>Explore</h2>
         <ul>
-          <li><a href="research.html">Research groups</a></li>
           <li><a href="projects.html">Projects</a></li>
           <li><a href="resources.html">Resources</a></li>
           <li><a href="people.html">People</a></li>
@@ -123,14 +138,17 @@
           <li><a href="join.html">Join SAIL</a></li>
           <li><a href="#" data-email>Email us</a></li>
           <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
-          <li>Google Classroom: selpcao</li>
+          <li><span class="foot-code">Classroom code <b>selpcao</b></span></li>
         </ul>
       </div>
     </div>
     <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
   </div>
 </footer>
+<script src="assets/js/memory.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/demos.js"></script>
+<script src="assets/js/bot.js"></script>
+<script src="assets/js/scene-nlp.js"></script>
 </body>
 </html>

@@ -12,7 +12,10 @@ resources_data.py    everything on the Resources page: plan, learning planner, r
 *.html               generated output (committed, so GitHub Pages serves it directly)
 assets/css/site.css  styles
 assets/js/site.js    navigation, join form, planner progress, home hero animation
-assets/js/demos.js   one teaching demo per research group page
+assets/js/demos.js   hero demos for data science, vision, neural networks, and the shared mount code
+assets/js/bot.js     the robot character: drawing, arms, expressions, speech chips
+assets/js/scene-*.js the Language, Agents and Ethics heroes
+assets/js/memory.js  what the robot remembers, in this browser only
 assets/img/          figures and project photos
 assets/docs/         the project README template that Resources links to
 ```
@@ -102,16 +105,29 @@ appears where something can be paused. The copy for each demo is in `DEMOS` in `
 | --- | --- |
 | Applied Data Science | A support vector classifier (RBF kernel), refit on every frame with the pointer as a data point. |
 | Computer Vision | Real street footage (`assets/video/street.mp4`) with object boxes drawn from `assets/data/street-tracks.json`. The boxes were computed ahead of time (Faster R-CNN on every frame, then a motion tracker), so nothing heavy runs in the browser. |
-| Natural Language Processing | Attention arcs. The weights are illustrative and the text says so. |
+| Natural Language Processing | One sentence seen four ways (`scene-nlp.js`): tokens, attention, a semantic map where a word like bank moves with its context, and next-word prediction with a temperature slider. The word vectors are a hand-written toy and the page says so. The robot reads the sentence and gets negation wrong for a second. |
 | Neural Networks | Gradient descent with momentum on a loss surface. Click to pick the starting point. |
-| Agents and RL | Letters of the page title fall to the floor and a hovering robot (drawn on canvas, two-link arm IK) picks each one up and puts it back. Clicking a letter knocks it down. The letters are the real `h1` text split into spans. |
-| AI, Ethics and Society | A simulated feed. A slider sets how often people see posts that match their views, and the crowd splits in two. |
+| Agents and RL | The robot (`bot.js`, `scene-agents.js`) keeps the title in order and adapts to the visitor: moods, pointer and click prediction, escalating reactions, spelling fixes it can get wrong, and a real tabular reward learner fed by the visitor's yes or no. Type `debug` on the page to see its internal state. |
+| AI, Ethics and Society | A profile card built from what `memory.js` stored in this browser, with the evidence, a way to say it is wrong, a raw dump, and delete. Optional camera: MediaPipe face landmarks run in the tab; labels marked guess are invented on purpose. |
 
 The street clip is Mixkit video 4000, used under the Mixkit free license. It is sped-up footage, so
 people move a long way between frames; the tracker matches on predicted motion, not box overlap.
 The scripts that made the track file are not in the repo. To redo it for a new clip: run a detector
 over every frame, link detections into tracks, and write `{w, h, dt, n, tracks: [{c, id, s, p, b}]}`
 where `b` is one `[x, y, w, h]` per frame starting at frame `s`.
+
+## What the robot remembers
+
+`assets/js/memory.js` runs on every page and keeps a small record in `localStorage` under
+`sail-bot-v1`: pages opened, seconds spent, click counts, which research links were hovered, the last
+three sentences typed on the Language page, and what the robot learned on the Agents page. Nothing is
+sent anywhere and there is no analytics script. The Ethics page shows all of it and deletes it on
+request. The camera on that page is off until the visitor turns it on; frames go to a model running
+in the tab (loaded from jsdelivr and Google's MediaPipe model storage) and are never stored or sent.
+If the club would prefer no local record at all, remove the `memory.js` script tag in `footer()`;
+the three robot pages still work, they just start from zero every time.
+
+The logo is `assets/img/logo.png` (transparent PNG) and `assets/favicon.png`.
 
 The navigation bar is clear over the top of each page and turns to frosted glass once the page
 scrolls under it (`nav()` in `assets/js/site.js`, `.masthead` in the stylesheet).
