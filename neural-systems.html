@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neural Systems | SAIL</title>
+<meta name="description" content="What a network is doing underneath the framework call: gradients, optimizers, and the mathematics each of them needs.">
+<meta property="og:title" content="Neural Systems | South Artificial Intelligence Laboratory">
+<meta property="og:description" content="What a network is doing underneath the framework call: gradients, optimizers, and the mathematics each of them needs.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap masthead-in">
+    <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.6"/><path d="M6 16.5c3.4 0 4.2-9 7-9 2.2 0 2.6 5 5 5" stroke="#b4532a" stroke-width="1.7"/></svg><b>SAIL</b><span>High School South</span></a>
+    <nav class="mainnav">
+      <a href="index.html">Home</a>
+      <div class="navgroup on"><button aria-haspopup="true">Research <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8"/></svg></button><ul><li><a href="research.html">Overview of all groups</a></li><li><a href="nlp.html">G-01 &nbsp; Natural Language Processing</a></li><li><a href="vision.html">G-02 &nbsp; Computer Vision</a></li><li><a href="neural-systems.html">G-03 &nbsp; Neural Systems</a></li><li><a href="agents.html">G-04 &nbsp; Agents and RL</a></li><li><a href="data-science.html">G-05 &nbsp; Applied Data Science</a></li><li><a href="society.html">G-06 &nbsp; AI, Ethics and Society</a></li></ul></div>
+      <a href="projects.html">Projects</a>
+      <a href="people.html">People</a>
+      <a href="resources.html">Resources</a>
+      <a href="news.html">News</a>
+      <a href="join.html">Join</a>
+    </nav>
+    <button class="navtoggle" data-navtoggle aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="drawer" data-drawer>
+    <div class="wrap">
+      <a href="index.html">Home</a>
+      <a href="research.html">Research overview</a>
+      <p class="lbl">Groups</p>
+      <a class="sub" href="nlp.html">G-01 &nbsp; Natural Language Processing</a>
+      <a class="sub" href="vision.html">G-02 &nbsp; Computer Vision</a>
+      <a class="sub" href="neural-systems.html">G-03 &nbsp; Neural Systems</a>
+      <a class="sub" href="agents.html">G-04 &nbsp; Agents and RL</a>
+      <a class="sub" href="data-science.html">G-05 &nbsp; Applied Data Science</a>
+      <a class="sub" href="society.html">G-06 &nbsp; AI, Ethics and Society</a>
+      <p class="lbl">More</p>
+      <a href="projects.html">Projects</a>
+      <a href="people.html">People</a>
+      <a href="resources.html">Resources</a>
+      <a href="news.html">News</a>
+      <a href="join.html">Join</a>
+    </div>
+  </div>
+</header>
+<main>
+<section class="pagetop">
+  <div class="wrap">
+    <p class="crumb"><a href="index.html">SAIL</a> / <a href="research.html">Research</a> / G-03</p>
+    <h1>Neural Systems</h1>
+    <p class="lede">What a network is doing underneath the framework call: gradients, optimizers, and the mathematics each of them needs.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap split">
+    <div class="prose">
+      <p>This group covers the foundations that the other groups rely on. Sessions in December 2025 introduced neural networks and convolutional networks, and earlier years covered the perceptron and backpropagation alongside demonstrations such as Google Quick, Draw!.</p><p>The aim is that members can explain what happens between calling fit and getting a number back. Alongside the implementation work, the group runs a mathematics track that covers the linear algebra, derivatives, and probability each unit actually needs, at the point in the sequence where it comes up.</p>
+
+      <h3>What the group covers</h3>
+      <ul><li>The perceptron and the forward pass</li><li>Loss functions and gradient descent</li><li>Backpropagation worked through by hand</li><li>Momentum, learning rates, and schedules</li><li>Overfitting, regularization, and early stopping</li><li>Supporting mathematics: vectors, matrices, partial derivatives, probability</li></ul>
+
+      <h3>Sessions and work so far</h3>
+      <ul class="itemlist">
+      <li><span class="when">December 2025</span><div><p>Sessions on deep learning, neural networks, and convolutional networks.</p></div></li>
+      <li><span class="when">Since 2023</span><div><p>Recurring neural network lessons, introduced through Quick, Draw! and similar demonstrations.</p></div></li>
+      <li><span class="when">March 2026</span><div><p>Python sessions covering the programming background the implementation work assumes.</p></div></li>
+      </ul>
+
+      <h3>Planned for this year</h3>
+      <ul><li>A two-layer network written in NumPy with gradients checked numerically.</li><li>Optimizers compared on one dataset under the same budget.</li><li>A short set of notes on the mathematics, maintained by members.</li></ul>
+
+      <h3>Reading</h3>
+      <ol class="refs"><li>Nielsen, <i>Neural Networks and Deep Learning</i>, chapters 1 and 2 (free online).</li><li>3Blue1Brown, neural network video series, used as a companion to the derivation.</li><li>Kingma and Ba, <i>Adam: A Method for Stochastic Optimization</i> (2014).</li></ol>
+    </div>
+    <aside>
+      <div class="factbox">
+        <h4>G-03</h4>
+        <dl>
+          <dt>Open to</dt><dd>Both tracks</dd>
+          <dt>Group lead</dt><dd>Appointed each fall from the Applied Research Division</dd>
+          <dt>Starting point</dt><dd>Algebra II is enough to start. Calculus helps for the backpropagation unit but is introduced in the session.</dd>
+          <dt>Meets</dt><dd>Tuesdays, 3:00 to 4:00 PM, Room 700F</dd>
+        </dl>
+        <div class="act">
+          <p class="tags" style="margin:0 0 12px"><span>NumPy</span><span>Matplotlib</span><span>Keras</span><span>Jupyter</span><span>Google Colab</span></p>
+          <a class="btn btn--wide" href="join.html#apply">Apply and name this group</a>
+        </div>
+      </div>
+      <p class="small muted" style="margin-top:18px">Other groups: <a href="nlp.html">Natural Language Processing</a>, <a href="vision.html">Computer Vision</a>, <a href="agents.html">Agents and RL</a>, <a href="data-science.html">Applied Data Science</a>, <a href="society.html">AI, Ethics and Society</a>.</p>
+    </aside>
+  </div>
+</section>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h5>SAIL</h5>
+        <p class="foot-about">South Artificial Intelligence Laboratory, the machine learning laboratory at High School South, running since 2022. Meetings are Tuesdays, 3:00 to 4:00 PM in Room 700F.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Research</h5>
+        <a href="nlp.html">Natural Language Processing</a>
+        <a href="vision.html">Computer Vision</a>
+        <a href="neural-systems.html">Neural Systems</a>
+        <a href="agents.html">Agents and RL</a>
+        <a href="data-science.html">Applied Data Science</a>
+        <a href="society.html">AI, Ethics and Society</a>
+      </div>
+      <div class="foot-col">
+        <h5>Lab</h5>
+        <a href="projects.html">Projects</a>
+        <a href="people.html">People</a>
+        <a href="resources.html">Resources</a>
+        <a href="news.html">News</a>
+      </div>
+      <div class="foot-col">
+        <h5>Contact</h5>
+        <a href="join.html">Join the lab</a>
+        <a href="#" data-email>contact</a>
+        <a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory</span>
+      <span>Google Classroom code: selpcao</span>
+      <span>Room 700F &middot; Tuesdays, 3:00 to 4:00 PM</span>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
