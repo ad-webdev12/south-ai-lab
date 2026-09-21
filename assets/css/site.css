@@ -283,8 +283,18 @@ img,svg{max-width:100%}
 .ghero-ui{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 .ghero-ui > *{pointer-events:auto}
 .ghero[data-demo="agents"]::after{display:none}
-.ghero[data-demo="agents"] canvas.ghero-top{z-index:3;pointer-events:none}
-.ghero[data-demo="agents"] canvas,.ghero[data-demo="agents"] h1,.navwreck{translate:var(--shx,0) var(--shy,0)}
+.ghero[data-demo="agents"] .ghero-in{justify-content:flex-start;padding-bottom:6px}
+.ghero[data-demo="agents"] h1{margin-bottom:auto;padding-bottom:clamp(118px,17.5vh,240px)}
+.ghero[data-demo="agents"] .desc{margin-bottom:12px}
+.ghero[data-demo="agents"] .sub{margin-top:0}
+.ghero[data-demo="agents"] canvas.ghero-mid{z-index:3;pointer-events:none}
+.ghero[data-demo="agents"] canvas.ghero-top{z-index:5;pointer-events:none}
+.ghero[data-demo="agents"] .ghero-in{z-index:auto}
+.ghero[data-demo="agents"] .ghero-in > *:not(h1){position:relative;z-index:4}
+.ghero[data-demo="agents"] h1 .l{position:relative;z-index:2}
+.ghero[data-demo="agents"] h1 .l.out{z-index:4}
+.ghero[data-demo="agents"] .ghero-bar{z-index:6}
+.ghero[data-demo="agents"] canvas,.navwreck{translate:var(--shx,0) var(--shy,0)}
 .ghero[data-demo="agents"] h1{color:#ebe7de;font-size:clamp(2.4rem,5vw,4rem);letter-spacing:-.01em;line-height:1.08;
   text-shadow:0 1px 0 #cfcbc2,0 2px 0 #b3afa7,0 3px 0 #97948d,0 4px 0 #7b7872,0 5px 0 #5f5d58,0 9px 12px rgba(0,0,0,.75),0 0 1px rgba(255,255,255,.9)}
 .ghero[data-demo="agents"] h1 .l{cursor:pointer}
@@ -292,7 +302,7 @@ img,svg{max-width:100%}
 @keyframes lock{0%{translate:0 -3px}60%{translate:0 1px}100%{translate:0 0}}
 .ghero[data-demo="agents"] .desc,.ghero[data-demo="agents"] .sub,.ghero[data-demo="agents"] .crumb{text-shadow:0 1px 10px #05070b,0 0 22px #05070b}
 .ghero[data-demo="agents"] .ghero-bar{background:linear-gradient(180deg,rgba(5,7,11,0) 0%,rgba(5,7,11,.92) 50%)}
-.navwreck{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;transform-origin:50% 36px}
+.navwreck{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden;transform-origin:50% 36px}
 .navwreck span,.navwreck i{position:absolute;display:block;white-space:pre;text-align:center;will-change:transform;font-style:normal}
 .masthead.wrecked:not(.scrolled):not(.sunk) .brand-text,.masthead.wrecked:not(.scrolled):not(.sunk) .mainnav > a,.masthead.wrecked:not(.scrolled):not(.sunk) .navgroup > button,.masthead.wrecked:not(.scrolled):not(.sunk) .mast-join{color:transparent!important;border-color:transparent!important;background-image:none!important}
 .masthead.wrecked:not(.scrolled):not(.sunk) .mainnav > a::after,.masthead.wrecked:not(.scrolled):not(.sunk) .navgroup > button::after{opacity:0}
@@ -452,6 +462,8 @@ img,svg{max-width:100%}
   .ghero::after{background:linear-gradient(180deg, rgba(4,10,22,.94) 0%, rgba(4,10,22,.8) 38%, rgba(4,10,22,.1) 52%, rgba(4,10,22,0) 60%)}
   .ghero-in{justify-content:flex-start;padding-bottom:46vh}
   .ghero-in > *,.ghero .sub{max-width:none}
+  .ghero[data-demo="agents"] .ghero-in{padding-bottom:10px}
+  .ghero[data-demo="agents"] h1{padding-bottom:300px}
   .ghero-bar-in{grid-template-columns:1fr}
   .demo-controls{justify-content:flex-start;max-width:none}
   .groups{grid-template-columns:1fr 1fr}
