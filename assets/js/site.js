@@ -28,6 +28,17 @@
         gbtn.setAttribute("aria-expanded", String(open));
       };
       gbtn.addEventListener("click", function () { setOpen(!group.classList.contains("open")); });
+      // the menu is a child of the group, so moving from the button into the
+      // menu never leaves it; the short delay forgives a diagonal mouse path
+      var closeTimer;
+      group.addEventListener("pointerenter", function (ev) {
+        if (ev.pointerType === "touch") return;
+        window.clearTimeout(closeTimer); setOpen(true);
+      });
+      group.addEventListener("pointerleave", function (ev) {
+        if (ev.pointerType === "touch") return;
+        closeTimer = window.setTimeout(function () { setOpen(false); }, 220);
+      });
       group.addEventListener("keydown", function (ev) {
         if (ev.key === "Escape" && group.classList.contains("open")) { setOpen(false); gbtn.focus(); }
       });

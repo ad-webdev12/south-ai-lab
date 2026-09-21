@@ -11,7 +11,8 @@ build.py             page copy, templates, and the build checks
 resources_data.py    everything on the Resources page: plan, learning planner, reading group, decks
 *.html               generated output (committed, so GitHub Pages serves it directly)
 assets/css/site.css  styles
-assets/js/site.js    navigation, join form, planner progress, hero animation
+assets/js/site.js    navigation, join form, planner progress, home hero animation
+assets/js/heroes.js  one live animation per research group page
 assets/img/          figures and project photos
 assets/docs/         the project README template that Resources links to
 ```
@@ -70,8 +71,8 @@ check each one:
 
 1. **Contact email** in `assets/js/site.js` is a placeholder.
 2. **School name** in `SITE["school"]`.
-3. **Meeting rhythm.** The site says every other Tuesday, 3:00 to 4:00 PM, Room 700F, which is what
-   the 2025-26 announcements show.
+3. **Meeting rhythm.** The site says every Tuesday, 3:00 to 4:00 PM, Room 700F. "Every Tuesday" and the
+   room come from the August 2026 officers post on Instagram. The time comes from last year's announcements.
 4. **First meeting date.** The top news item says it will be posted. Put the real date in.
 5. **Group timing.** The site says Applied Research teams work with their group from October and
    Foundations members join group activities in the second semester. That is a policy decision,
@@ -92,6 +93,26 @@ It pauses when the hero is off screen or the tab is hidden, has a visible pause 
 paused for visitors who ask for reduced motion, and rebuilds itself when the hero changes size.
 Tuning lives at the top of `hero()` in `site.js`: particle count in `build()`, trail length in
 `HIST` and `SAMPLE`, pointer strength in `advance()`.
+
+## Research group heroes
+
+Each group page opens with an animation that runs the method the group studies. They live in
+`assets/js/heroes.js` and share one harness for sizing, the pointer, pausing, and reduced motion.
+
+| Group | What runs |
+| --- | --- |
+| Applied Data Science | A kernel classifier (RBF) refit every frame. The pointer is an extra training point, so the boundary bends around it. Click to leave a point. |
+| Computer Vision | A 3 by 3 convolution sliding over three real MNIST digits. |
+| Natural Language Processing | Attention weights between the words of a sentence, drawn as arcs. The weights are illustrative, and the page says so. |
+| Neural Networks | Gradient descent with momentum on a loss surface. Click to restart from a point. |
+| Agents and RL | Tabular Q-learning in a gridworld. Click a square to move the goal. |
+| AI, Ethics and Society | One approval threshold applied to two groups with different score distributions. |
+
+## Officer photos
+
+The portraits in `assets/img/people/` are cropped from the club's own officers post on Instagram
+(August 24, 2026), and the favorite food, hobbies, and favorite LLM lines come from the same post.
+To replace one, drop a square JPG with the same file name.
 
 ## Where the learning resources came from
 

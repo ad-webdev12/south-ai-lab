@@ -26,8 +26,8 @@ SITE = {
     "short": "SAIL",
     "school": "High School South",
     "room": "Room 700F",
-    "meets": "Every other Tuesday, 3:00 to 4:00 PM",
-    "meets_short": "Every other Tuesday, 3 to 4 PM",
+    "meets": "Every Tuesday, 3:00 to 4:00 PM",
+    "meets_short": "Every Tuesday, 3 to 4 PM",
     "code": "selpcao",
     "instagram": "hss_aiclub",
 }
@@ -229,15 +229,36 @@ GROUP_BY_KEY = {g["key"]: g for g in GROUPS}
 
 # ---------------------------------------------------------------- people
 
+BADGE = ' <span class="badge">Start here</span>'
+
+LOGO = (
+    '<svg viewBox="0 0 40 40" fill="none" aria-hidden="true">'
+    '<rect width="40" height="40" rx="10" fill="#1f56d8"/>'
+    '<path d="M21.4 6.5c6.6 5.2 10.3 11.6 10.9 19.3H21.4V6.5z" fill="#fff"/>'
+    '<path d="M18.6 11.2v14.6H8.4c1.9-5.9 5.3-10.8 10.2-14.6z" fill="#4fd1c5"/>'
+    '<path d="M6.5 28.6h27c-1 3.3-3.8 5-7.6 5H14.1c-3.8 0-6.6-1.7-7.6-5z" fill="#fff"/>'
+    "</svg>"
+)
+
+GROUP_EXTRA = {
+    "data-science": {"color": "#4f9dff", "about": "A kernel classifier with an RBF kernel, refit on every frame. The solid line is its decision boundary and the dashed lines are the margins. Your pointer counts as one more training point, labeled as the class it is not standing in, so the boundary has to bend around it. Click to leave a point behind."},
+    "vision": {"color": "#4fd1c5", "about": "A 3 by 3 convolution sliding over real handwritten digits from MNIST. Each position of the kernel produces one pixel of the output on the right. Hover over the input to move the kernel yourself. The kernel changes after every pass."},
+    "nlp": {"color": "#b79bff", "about": "Attention, drawn as arcs. The highlighted word looks at every other word, and the thickness of each arc is how much weight it gives. These weights come from small made-up vectors to show the mechanism. A trained model learns them."},
+    "neural-networks": {"color": "#ffb454", "about": "Gradient descent with momentum on a loss surface. The contour lines mark equal loss, and the path is the optimizer finding its way downhill. Different starting points end in different valleys. Click anywhere to start from there."},
+    "agents": {"color": "#ff8a5c", "about": "Tabular Q-learning, running live. The white dot explores the grid and earns a reward at the orange goal. Arrows show the best move it has learned for each square, and brighter squares have higher value. Click a square to move the goal and watch it relearn."},
+    "society": {"color": "#7fd38a", "about": "One approval threshold applied to two groups whose scores are spread differently. Filled dots are approved. Move your pointer to slide the threshold and compare the two approval rates, which rarely match."},
+}
+
 TEAM = [
-    ("Aarav Dey", "Co-President"),
-    ("Henna Patel", "Co-President"),
-    ("Maushmi Miraj", "Co-President"),
-    ("Maahi Mehta", "Co-Vice President"),
-    ("Shriyan Kumar", "Co-Vice President"),
-    ("Ishan Sarda", "Secretary"),
-    ("Jia Arora", "Junior Officer"),
+    ("Aarav Dey", "Co-President", "aarav-dey", "Pizza", "Photography", "Claude Fable 5"),
+    ("Henna Patel", "Co-President", "henna-patel", "Pesto pasta", "Road trips and watching sunsets", "Gemini"),
+    ("Maushmi Miraj", "Co-President", "maushmi-miraj", "Garlic naan and palak paneer", "Crocheting", "Gemini"),
+    ("Maahi Mehta", "Co-Vice President", "maahi-mehta", "Playa Bowls", "Running and reading", "Claude Opus 5"),
+    ("Shriyan Kumar", "Co-Vice President", "shriyan-kumar", "Sushi", "Playing tennis", "Claude Opus 5"),
+    ("Ishan Sarda", "Secretary", "ishan-sarda", "Maggi", "Camping", "Claude Sonnet 5"),
+    ("Jia Arora", "Junior Officer", "jia-arora", "Panini", "Biking and reading", "Gemini"),
 ]
+
 
 PAST_OFFICERS = [
     ("2025-26", "<strong>Eric Zou</strong>, President. <strong>Helen Chen</strong> and <strong>Henna Patel</strong>, Co-Vice Presidents. <strong>Maushmi Miraj</strong>, Secretary. <strong>Aarav Dey</strong>, Treasurer. <strong>Syam Paladugu</strong> and <strong>Jia Arora</strong>, Junior Officers."),
@@ -460,12 +481,18 @@ def head(title, desc):
 '''
 
 
+def brand():
+    return (f'<a class="brand" href="index.html" aria-label="{SITE["name"]}, home">{LOGO}'
+            f'<span class="brand-text"><b>{SITE["short"]}</b><span>South AI Lab</span></span></a>')
+
+
 def masthead(active):
     links = []
-    for href, label in NAV:
-        key = href.replace(".html", "")
+    for href, label in [("index.html", "Home")] + NAV:
+        key = "home" if href == "index.html" else href.replace(".html", "")
         if label == "Research":
-            items = "".join(f'<li><a href="{g["slug"]}">{g["name"]}</a></li>' for g in GROUPS)
+            items = "".join(
+                f'<li><a href="{g["slug"]}" style="--c:{GROUP_EXTRA[g["key"]]["color"]}"><i></i>{g["name"]}</a></li>' for g in GROUPS)
             on = " on" if active in ("research", "group") else ""
             links.append(
                 f'<div class="navgroup{on}" data-navgroup><button type="button" aria-expanded="false" aria-controls="nav-research">Research '
@@ -480,11 +507,11 @@ def masthead(active):
 
     return f'''<header class="masthead">
   <div class="wrap masthead-in">
-    <a class="brand" href="index.html"><b>{SITE["short"]}</b><span>{SITE["school"]}</span></a>
+    {brand()}
     <nav class="mainnav" aria-label="Main">
       {nav_html}
     </nav>
-    <a class="btn btn--light btn--sm mast-join" href="join.html">Join</a>
+    <a class="btn btn--sm mast-join" href="join.html">Join SAIL</a>
     <button class="navtoggle" type="button" data-navtoggle aria-label="Menu" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
@@ -518,14 +545,14 @@ def pagetop(crumbs, title, lede, sub=""):
 '''
 
 
-def footer():
+def footer(extra_script=""):
     return f'''</main>
 <footer class="foot">
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <p class="foot-name">{SITE["name"]}</p>
-        <p>The AI and machine learning club at {SITE["school"]}. {SITE["meets_short"]}, {SITE["room"]}.</p>
+        {brand()}
+        <p>{SITE["name"]}, the AI and machine learning club at {SITE["school"]}. {SITE["meets_short"]}, {SITE["room"]}.</p>
       </div>
       <div>
         <h2>Explore</h2>
@@ -551,7 +578,7 @@ def footer():
   </div>
 </footer>
 <script src="assets/js/site.js"></script>
-</body>
+{extra_script}</body>
 </html>
 '''
 
@@ -559,13 +586,15 @@ def footer():
 def tracks_block():
     return '''<div class="tracks">
       <div class="track">
+        <p class="step">Track 1</p>
         <h3>Foundations Program</h3>
         <p class="who">For anyone new to AI or coding</p>
         <p>Learn Python, work with real data, enter a Kaggle competition with a team, and train your first neural network by December. In the spring you build a project of your own.</p>
         <p>Most ninth and tenth graders start here. So do juniors and seniors who haven't programmed before.</p>
         <a class="more" href="join.html#tracks">How Foundations works</a>
       </div>
-      <div class="track">
+      <div class="track track--two">
+        <p class="step">Track 2</p>
         <h3>Applied Research Division</h3>
         <p class="who">For members ready to run their own project</p>
         <p>Work in a team of two to four on a project you choose, with one of our six research groups behind you. Teams present what they built at the end of each semester.</p>
@@ -579,7 +608,8 @@ def tracks_block():
 
 def page_index():
     groups = "\n      ".join(
-        f'<li><h3><a href="{g["slug"]}">{g["name"]}</a>{" <span class=\"badge\">Start here</span>" if g["first"] else ""}</h3><p>{g["line"]}</p></li>'
+        f'<li><a href="{g["slug"]}" style="--c:{GROUP_EXTRA[g["key"]]["color"]}"><h3>{g["name"]}{BADGE if g["first"] else ""}</h3>'
+        f'<p>{g["line"]}</p><span class="go">Open group</span></a></li>'
         for g in GROUPS
     )
     feats = "\n      ".join(
@@ -602,7 +632,7 @@ def page_index():
     <p class="hero-sub">We're students at {SITE["school"]} who learn how AI works and build our own projects with it.</p>
     <div class="hero-actions">
       <a class="btn btn--light" href="join.html">Join SAIL</a>
-      <a class="textlink" href="projects.html">Explore our work</a>
+      <a class="btn btn--line" href="projects.html">Explore our work</a>
     </div>
     <p class="hero-when">{SITE["meets"]} &middot; {SITE["room"]}</p>
   </div>
@@ -615,37 +645,39 @@ def page_index():
   </div>
 </section>
 
-<section class="section center">
-  <div class="narrow about">
-    <h2>About SAIL</h2>
-    <p>SAIL is {SITE["school"]}'s AI and machine learning club. We started in 2022 with after-school Python lessons. Now members teach each other Python and machine learning, and then build projects of their own.</p>
-    <p>You don't need any experience to join. Everything we use is free and runs in a browser, and the slides and notebooks from every meeting are posted for anyone who misses one.</p>
-  </div>
-  <div class="wrap">
+<section class="section">
+  <div class="wrap about">
+    <div>
+      <div class="shead"><h2>About SAIL</h2></div>
+      <p>SAIL is {SITE["school"]}'s AI and machine learning club. We started in 2022 with after-school Python lessons. Now members teach each other Python and machine learning, and then build projects of their own.</p>
+      <p>You don't need any experience to join. Everything we use is free and runs in a browser, and the slides and notebooks from every meeting are posted for anyone who misses one.</p>
+      <p><a class="more" href="people.html">Meet the officers</a></p>
+    </div>
     <dl class="facts">
       <div><dt>When</dt><dd>{SITE["meets_short"]}</dd></div>
       <div><dt>Where</dt><dd>{SITE["room"]}</dd></div>
       <div><dt>Cost</dt><dd>Free</dd></div>
+      <div><dt>Experience needed</dt><dd>None</dd></div>
       <div><dt>Google Classroom</dt><dd>{SITE["code"]}</dd></div>
     </dl>
   </div>
 </section>
 
-<section class="section section--soft center">
+<section class="section section--soft">
   <div class="wrap">
-    <div class="section-head">
-      <h2>Two ways to join</h2>
-      <p>Pick the one that fits where you are now. You can move from the first to the second whenever you're ready.</p>
+    <div class="shead">
+      <div><h2>Two ways to join</h2><p>Pick the one that fits where you are now. You can move from the first to the second whenever you're ready.</p></div>
+      <a class="more" href="join.html">How to join</a>
     </div>
     {tracks_block()}
   </div>
 </section>
 
-<section class="section center">
+<section class="section">
   <div class="wrap">
-    <div class="section-head">
-      <h2>Research groups</h2>
-      <p>Six groups, each focused on one area of AI. <a href="research.html">Compare them side by side.</a></p>
+    <div class="shead">
+      <div><h2>Research groups</h2><p>Six groups, each focused on one area of AI. Every group page opens with a live demo of what it studies.</p></div>
+      <a class="more" href="research.html">Compare all six</a>
     </div>
     <ul class="groups">
       {groups}
@@ -653,27 +685,36 @@ def page_index():
   </div>
 </section>
 
-<section class="section section--soft center">
+<section class="section section--soft">
   <div class="wrap">
-    <div class="section-head">
-      <h2>What members have built</h2>
+    <div class="shead">
+      <div><h2>What members have built</h2></div>
+      <a class="more" href="projects.html">See all projects</a>
     </div>
     <div class="features">
       {feats}
     </div>
-    <p style="margin:34px 0 0"><a class="btn btn--ghost" href="projects.html">See all projects</a></p>
   </div>
 </section>
 
 <section class="section">
-  <div class="narrow">
-    <div class="section-head center">
-      <h2>Latest</h2>
+  <div class="wrap">
+    <div class="shead">
+      <div><h2>Latest</h2></div>
+      <a class="more" href="news.html">All news</a>
     </div>
     <ul class="ann">
       {news}
     </ul>
-    <p class="center" style="margin:26px 0 0"><a class="more" href="news.html">All news</a></p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="cta">
+      <div><h2>Come to a meeting</h2><p>{SITE["meets"]} in {SITE["room"]}. You don't need to sign up first, and you can bring a friend.</p></div>
+      <a class="btn btn--light" href="join.html">Join SAIL</a>
+    </div>
   </div>
 </section>
 '''
@@ -682,7 +723,7 @@ def page_index():
 def page_research():
     rows = "\n        ".join(
         f'''<tr>
-          <th scope="row"><a href="{g["slug"]}">{g["name"]}</a>{" <span class=\"badge\">Start here</span>" if g["first"] else ""}</th>
+          <th scope="row"><a href="{g["slug"]}" style="--c:{GROUP_EXTRA[g["key"]]["color"]}"><i></i>{g["name"]}</a>{" <span class=\"badge\">Start here</span>" if g["first"] else ""}</th>
           <td data-l="What members make">{g["make_short"]}</td>
           <td data-l="Experience needed">{g["level"]}</td>
         </tr>''' for g in GROUPS
@@ -729,7 +770,7 @@ def page_research():
 
 <section class="section">
   <div class="wrap">
-    <div class="section-head"><h2>Guest speakers</h2></div>
+    <div class="shead"><div><h2>Guest speakers</h2></div></div>
     <ul class="dated">
       {speakers}
     </ul>
@@ -739,6 +780,7 @@ def page_research():
 
 
 def page_group(g):
+    extra = GROUP_EXTRA[g["key"]]
     make = "".join(f"<li>{m}</li>" for m in g["make"])
     planned = "".join(f"<li>{p}</li>" for p in g["planned"])
     past = "\n        ".join(
@@ -760,8 +802,29 @@ def page_group(g):
     anchor = "safety" if "safety" in g["stages"] else "planner"
     related = "".join(f'<li><a href="{GROUP_BY_KEY[k]["slug"]}">{GROUP_BY_KEY[k]["name"]}</a></li>' for k in g["related"])
     first = '<p><span class="badge" style="margin-left:0">Good first group</span></p>' if g["first"] else ""
+    sub = f'<p class="sub">{g["sub"]}</p>' if g["sub"] else ""
 
-    return pagetop(['<a href="research.html">Research</a>'], g["name"], g["desc"], g["sub"]) + f'''<section class="section">
+    return f'''<section class="ghero" data-grouphero="{g["key"]}" style="--c:{extra["color"]}">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap ghero-in">
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
+    <h1>{g["name"]}</h1>
+    {sub}<p class="desc">{g["desc"]}</p>
+    <div class="ghero-actions">
+      <a class="btn btn--light" href="join.html#join-{g["key"]}">Express interest</a>
+      <a class="btn btn--line" href="#learn">What you'll build</a>
+    </div>
+  </div>
+  <div class="wrap hero-tools">
+    <details class="hero-about">
+      <summary>About this animation</summary>
+      <p>{extra["about"]}</p>
+    </details>
+    <button type="button" data-pause>Pause animation</button>
+  </div>
+</section>
+
+<section class="section" id="learn">
   <div class="wrap split">
     <div class="prose">
       {first}
@@ -834,17 +897,17 @@ def page_projects():
                    "Projects and activities by SAIL members. Featured projects come first, followed by an archive of workshops."
                    ) + f'''<section class="section">
   <div class="wrap showcase">
-    <div class="section-head"><h2>Featured projects</h2></div>
+    <div class="shead"><div><h2>Featured projects</h2></div></div>
     {"".join(feats)}
   </div>
 </section>
 
 <section class="section section--soft">
   <div class="wrap">
-    <div class="section-head">
+    <div class="shead"><div>
       <h2>Workshops and sessions</h2>
       <p>Slides and notebooks from past meetings. Some slide decks only open with a school account.</p>
-    </div>
+    </div></div>
     <ul class="dated">
       {sessions}
     </ul>
@@ -860,31 +923,66 @@ def page_projects():
 '''
 
 
+def person_card(p):
+    name, role, slug, food, hobby, llm = p
+    return f'''<li class="person">
+        <img src="assets/img/people/{slug}.jpg" alt="{name}" width="240" height="240">
+        <h3>{name}</h3>
+        <span class="role">{role}</span>
+        <dl>
+          <dt>Favorite food</dt><dd>{food}</dd>
+          <dt>Hobbies</dt><dd>{hobby}</dd>
+          <dt>Favorite LLM</dt><dd>{llm}</dd>
+        </dl>
+      </li>'''
+
+
 def page_people():
-    team = "\n      ".join(f'<li><span class="name">{n}</span><span class="role">{r}</span></li>' for n, r in TEAM)
-    past = "\n      ".join(f'<li><strong>{y}</strong><span>{w}</span></li>' for y, w in PAST_OFFICERS)
-    return pagetop(["People"], "People", f"The officers who run SAIL in {YEAR}.") + f'''<section class="section">
+    presidents = "\n      ".join(person_card(p) for p in TEAM[:3])
+    others = "\n      ".join(person_card(p) for p in TEAM[3:])
+    past = "\n      ".join(f'<li><span class="yr">{y}</span>{w}</li>' for y, w in PAST_OFFICERS)
+    return pagetop(["People"], "People", f"Meet the seven officers who run SAIL in {YEAR}.") + f'''<section class="section">
   <div class="wrap">
-    <div class="section-head"><h2>{YEAR} officers</h2></div>
+    <div class="shead"><div><h2>Co-Presidents</h2></div></div>
     <ul class="team">
-      {team}
+      {presidents}
     </ul>
   </div>
 </section>
 
 <section class="section section--soft">
-  <div class="narrow">
-    <h2>Becoming an officer</h2>
-    <p style="color:var(--ink-2)">Officer applications open in April and close in May, and the new team is announced at the last meeting of the year. Any member can apply. Each research group also gets a group lead, named in October.</p>
+  <div class="wrap">
+    <div class="shead"><div><h2>Officers</h2></div></div>
+    <ul class="team team--four">
+      {others}
+    </ul>
+  </div>
+</section>
+
+<section class="section section--navy">
+  <div class="wrap">
+    <div class="shead"><div><h2>Becoming an officer</h2><p style="color:#c3d1e4">Any member can apply. Each research group also gets a group lead, named in October.</p></div></div>
+    <ol class="steps3">
+      <li><h3>April</h3><p>The officer interest form opens on Google Classroom.</p></li>
+      <li><h3>May</h3><p>Applications close and the current officers meet with applicants.</p></li>
+      <li><h3>June</h3><p>The new team is announced at the last meeting of the year.</p></li>
+    </ol>
   </div>
 </section>
 
 <section class="section">
-  <div class="narrow">
-    <h2>Past officers</h2>
-    <ul class="past">
+  <div class="wrap split">
+    <div>
+      <div class="shead"><div><h2>Past officers</h2></div></div>
+      <ul class="past">
       {past}
-    </ul>
+      </ul>
+    </div>
+    <aside class="side">
+      <h2>Follow along</h2>
+      <p class="small" style="color:var(--ink-2)">Officer introductions and meeting photos go up on our Instagram.</p>
+      <a class="btn btn--sm" href="https://www.instagram.com/{SITE["instagram"]}/" rel="noopener">@{SITE["instagram"]}</a>
+    </aside>
   </div>
 </section>
 '''
@@ -1143,7 +1241,7 @@ def page_join():
     <div class="faq">
       <details open><summary>Do I need to know how to code?</summary><div class="ans"><p>No. Foundations starts from the first line of Python. The Applied Research Division does expect you to be able to write and fix your own code.</p></div></details>
       <details><summary>I'm a junior or senior, but I'm new to this. Can I still join?</summary><div class="ans"><p>Yes. Start in Foundations. The tracks are about experience, not grade, and you can move to the Applied Research Division as soon as you're ready.</p></div></details>
-      <details><summary>How much time does it take?</summary><div class="ans"><p>Meetings are an hour every other week. Foundations members should plan on about an hour of practice between meetings. Applied Research teams spend about two hours a week while a project is running.</p></div></details>
+      <details><summary>How much time does it take?</summary><div class="ans"><p>Meetings are an hour every week. Foundations members should plan on about an hour of practice between meetings. Applied Research teams spend about two hours a week while a project is running.</p></div></details>
       <details><summary>When do I pick a research group?</summary><div class="ans"><p>You can name one on the form, and you can change it at any time. Applied Research teams work with their group from October. Foundations members join group activities in the second semester.</p></div></details>
       <details><summary>Do I need my own laptop?</summary><div class="ans"><p>It helps, but it isn't required. Everything runs in a browser, and free tools such as Google Colab and Kaggle provide the computing power.</p></div></details>
       <details><summary>What if I miss a meeting?</summary><div class="ans"><p>Slides and notebooks are posted on Google Classroom, and the main decks are also linked on the Resources page, so you can catch up.</p></div></details>
@@ -1168,14 +1266,18 @@ def contrast(a, b):
 
 
 CONTRAST_PAIRS = [
-    ("body text on white", "#141d27", "#ffffff"), ("secondary text on white", "#3f4a56", "#ffffff"),
-    ("muted text on white", "#5a6571", "#ffffff"), ("muted text on soft", "#5a6571", "#f4f6f9"),
-    ("secondary text on soft", "#3f4a56", "#f4f6f9"), ("link on white", "#14498c", "#ffffff"),
-    ("link on soft", "#14498c", "#f4f6f9"), ("rust label on white", "#9c4522", "#ffffff"),
-    ("hero subtitle on navy", "#cbd8e8", "#081426"), ("hero meta on navy", "#a9bdd6", "#081426"),
-    ("footer text on navy", "#c9d6e6", "#0e2340"), ("footer heading on navy", "#a9bdd6", "#0e2340"),
-    ("nav link on navy", "#dbe5f1", "#0e2340"), ("badge text", "#1d5a35", "#e3f3e8"),
-    ("planned tag", "#7a5506", "#fdf7e8"),
+    ("body text on white", "#0f1a2a", "#ffffff"), ("secondary text on white", "#3a4759", "#ffffff"),
+    ("muted text on white", "#586477", "#ffffff"), ("muted text on soft", "#586477", "#f2f5fa"),
+    ("secondary text on soft", "#3a4759", "#f2f5fa"), ("link on white", "#1f56d8", "#ffffff"),
+    ("link on soft", "#1f56d8", "#f2f5fa"), ("link on tint", "#173fa3", "#e8eefb"),
+    ("white on button blue", "#ffffff", "#1f56d8"), ("coral label on white", "#a8431a", "#ffffff"),
+    ("teal label on its chip", "#0b6b63", "#dff6f3"), ("date label on white", "#173fa3", "#ffffff"),
+    ("hero subtitle on navy", "#cdd9ea", "#060f1e"), ("hero meta on navy", "#a9bdd6", "#060f1e"),
+    ("nav link on masthead", "#c9d6e8", "#060f1e"), ("brand subtitle on masthead", "#9fb3cf", "#060f1e"),
+    ("page top lede on navy", "#cdd9ea", "#0b1b33"), ("crumb on navy", "#9fb3cf", "#0b1b33"),
+    ("facts label on navy", "#9fb3cf", "#0b1b33"), ("steps text on navy", "#c3d1e4", "#0b1b33"),
+    ("footer text", "#c3d1e4", "#060f1e"), ("footer heading", "#9fb3cf", "#060f1e"),
+    ("badge text", "#14502f", "#dcf3e4"), ("planned tag", "#7a5506", "#fdf7e8"),
 ]
 
 BANNED = [
@@ -1234,7 +1336,8 @@ def build():
 
     written = []
     for filename, title, desc, active, body in pages:
-        html = head(title, desc) + masthead(active) + body + footer()
+        heroes = '<script src="assets/js/heroes.js"></script>\n' if active == "group" else ""
+        html = head(title, desc) + masthead(active) + body + footer(heroes)
         with open(os.path.join(HERE, filename), "w", encoding="utf-8") as fh:
             fh.write(html)
         written.append(filename)
