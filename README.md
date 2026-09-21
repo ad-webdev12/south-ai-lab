@@ -13,9 +13,8 @@ resources_data.py    everything on the Resources page: plan, learning planner, r
 assets/css/site.css  styles
 assets/js/site.js    navigation, join form, planner progress, home hero animation
 assets/js/demos.js   hero demos for data science, vision, neural networks, and the shared mount code
-assets/js/bot.js     the robot character: drawing, arms, expressions, speech chips
-assets/js/scene-*.js the Language, Agents and Ethics heroes
-assets/js/memory.js  what the robot remembers, in this browser only
+assets/js/scene-*.js the Language, Agents and Ethics heroes (one idea each)
+
 assets/img/          figures and project photos
 assets/docs/         the project README template that Resources links to
 ```
@@ -88,11 +87,13 @@ check each one:
 
 ## The home hero
 
-A full-screen plasma field in `hero()` in `assets/js/site.js`. Glowing orbs drift around; each one
-throws out slow filaments, and when two orbs come near each other, or near the pointer, filaments
-jump across and brighten. Filaments are smooth curves that writhe over time, so nothing flashes.
-It pauses off screen, has a pause button, starts still for reduced-motion visitors, and drops to
-one strand per pair on slow machines.
+`heroWall()` in `assets/js/site.js`: six pieces of real SAIL work (the Titanic chart, MNIST samples, a
+labelled review, a first notebook cell, a model card, a detection frame) drift slowly behind the name,
+joined by thin paths. Hover or tap a piece to bring it forward. Phones get three pieces and one drift.
+The earlier plasma hero is kept as a backup: set `"hero": "plasma"` in `SITE`, or open
+`index.html#plasma` to look at it without changing anything.
+
+Every other page opens on a dark band with slow wave lines (`.pagetop`), and sections ease in on scroll.
 
 ## Research group demos
 
@@ -105,10 +106,10 @@ appears where something can be paused. The copy for each demo is in `DEMOS` in `
 | --- | --- |
 | Applied Data Science | A support vector classifier (RBF kernel), refit on every frame with the pointer as a data point. |
 | Computer Vision | Real street footage (`assets/video/street.mp4`) with object boxes drawn from `assets/data/street-tracks.json`. The boxes were computed ahead of time (Faster R-CNN on every frame, then a motion tracker), so nothing heavy runs in the browser. |
-| Natural Language Processing | One sentence seen four ways (`scene-nlp.js`): tokens, attention, a semantic map where a word like bank moves with its context, and next-word prediction with a temperature slider. The word vectors are a hand-written toy and the page says so. The robot reads the sentence and gets negation wrong for a second. |
+| Natural Language Processing | Words arranged by meaning (`scene-nlp.js`): about sixty words in a fixed, seeded map. Choosing or searching a word brings its nearest neighbors forward. The vectors are hand-written and the page says so. |
 | Neural Networks | Gradient descent with momentum on a loss surface. Click to pick the starting point. |
-| Agents and RL | The robot (`bot.js`, `scene-agents.js`) keeps the title in order and adapts to the visitor: moods, pointer and click prediction, escalating reactions, spelling fixes it can get wrong, and a real tabular reward learner fed by the visitor's yes or no. Type `debug` on the page to see its internal state. |
-| AI, Ethics and Society | A profile card built from what `memory.js` stored in this browser, with the evidence, a way to say it is wrong, a raw dump, and delete. Optional camera: MediaPipe face landmarks run in the tab; labels marked guess are invented on purpose. |
+| Agents and RL | A workstation (`scene-agents.js`): the monitor plans a shortest safe route (breadth-first search) through observe, plan, act, check; an arm files each step as queued, checking or complete; an added obstacle fails the plan in the open and a new one comes in. A small second screen learns the same map by tabular Q-learning. |
+| AI, Ethics and Society | Two phone feeds (`scene-ethics.js`). A slider sets how often new posts are chosen to match past clicks, and a counter shows how many of the twelve posts the two feeds still share. An illustration, not platform data. |
 
 The street clip is Mixkit video 4000, used under the Mixkit free license. It is sped-up footage, so
 people move a long way between frames; the tracker matches on predicted motion, not box overlap.
@@ -116,18 +117,8 @@ The scripts that made the track file are not in the repo. To redo it for a new c
 over every frame, link detections into tracks, and write `{w, h, dt, n, tracks: [{c, id, s, p, b}]}`
 where `b` is one `[x, y, w, h]` per frame starting at frame `s`.
 
-## What the robot remembers
-
-`assets/js/memory.js` runs on every page and keeps a small record in `localStorage` under
-`sail-bot-v1`: pages opened, seconds spent, click counts, which research links were hovered, the last
-three sentences typed on the Language page, and what the robot learned on the Agents page. Nothing is
-sent anywhere and there is no analytics script. The Ethics page shows all of it and deletes it on
-request. The camera on that page is off until the visitor turns it on; frames go to a model running
-in the tab (loaded from jsdelivr and Google's MediaPipe model storage) and are never stored or sent.
-If the club would prefer no local record at all, remove the `memory.js` script tag in `footer()`;
-the three robot pages still work, they just start from zero every time.
-
-The logo is `assets/img/logo.png` (transparent PNG) and `assets/favicon.png`.
+The logo is `assets/img/logo.png` (transparent PNG) and `assets/favicon.png`. The site stores nothing about visitors except
+the learning-path checkboxes, which stay in the browser.
 
 The navigation bar is clear over the top of each page and turns to frosted glass once the page
 scrolls under it (`nav()` in `assets/js/site.js`, `.masthead` in the stylesheet).

@@ -45,14 +45,14 @@
   </nav>
 </header>
 <main id="main">
-<section class="hero" data-hero>
+<section class="hero" data-hero="wall">
   <canvas data-field aria-hidden="true"></canvas>
   <div class="wrap hero-in">
     <h1>South Artificial Intelligence Laboratory</h1>
-    <p class="hero-sub">We're students at West Windsor-Plainsboro High School South who learn how AI works and build our own projects with it.</p>
+    <p class="hero-sub">Students at High School South learning AI and building projects together.</p>
     <div class="hero-actions">
       <a class="btn btn--light" href="join.html">Join SAIL</a>
-      <a class="btn btn--line" href="projects.html">Explore our work</a>
+      <a class="btn btn--line" href="projects.html">See projects</a>
     </div>
   </div>
   <div class="wrap hero-tools"><button type="button" data-pause>Pause animation</button></div>
@@ -112,7 +112,7 @@
       <article class="feature">
         <figure><div class="pad"><div class="chart-legend"><span><i style="background:#1f5fae"></i>Women</span><span><i style="background:#b4532a"></i>Men</span></div><svg class="chart" viewBox="0 0 540 201" role="img" aria-label="Bar chart of Titanic survival rates by sex and ticket class. Women: 96.8 percent in first class, 92.1 in second, 50 in third. Men: 36.9 percent in first class, 15.7 in second, 13.5 in third."><line class="grid" x1="104.0" y1="6" x2="104.0" y2="175"/><text x="104.0" y="193" text-anchor="middle">0%</text><line class="grid" x1="196.5" y1="6" x2="196.5" y2="175"/><text x="196.5" y="193" text-anchor="middle">25%</text><line class="grid" x1="289.0" y1="6" x2="289.0" y2="175"/><text x="289.0" y="193" text-anchor="middle">50%</text><line class="grid" x1="381.5" y1="6" x2="381.5" y2="175"/><text x="381.5" y="193" text-anchor="middle">75%</text><line class="grid" x1="474.0" y1="6" x2="474.0" y2="175"/><text x="474.0" y="193" text-anchor="middle">100%</text><text class="grp" x="92" y="33" text-anchor="end">First class</text><g class="b"><title>Women, first class: 96.8% survived</title><rect class="bar" x="104" y="10" width="358.2" height="17" fill="#1f5fae"/><text class="val" x="469.2" y="23">96.8%</text></g><g class="b"><title>Men, first class: 36.9% survived</title><rect class="bar" x="104" y="30" width="136.5" height="17" fill="#b4532a"/><text class="val" x="247.5" y="43">36.9%</text></g><text class="grp" x="92" y="92" text-anchor="end">Second class</text><g class="b"><title>Women, second class: 92.1% survived</title><rect class="bar" x="104" y="69" width="340.8" height="17" fill="#1f5fae"/><text class="val" x="451.8" y="82">92.1%</text></g><g class="b"><title>Men, second class: 15.7% survived</title><rect class="bar" x="104" y="89" width="58.1" height="17" fill="#b4532a"/><text class="val" x="169.1" y="102">15.7%</text></g><text class="grp" x="92" y="151" text-anchor="end">Third class</text><g class="b"><title>Women, third class: 50.0% survived</title><rect class="bar" x="104" y="128" width="185.0" height="17" fill="#1f5fae"/><text class="val" x="296.0" y="141">50%</text></g><g class="b"><title>Men, third class: 13.5% survived</title><rect class="bar" x="104" y="148" width="50.0" height="17" fill="#b4532a"/><text class="val" x="160.9" y="161">13.5%</text></g></svg></div><figcaption>Survival rates in the 891-passenger training set. This is the data teams started from, not a team's result.</figcaption></figure>
         <h3><a href="projects.html#titanic">Titanic survival prediction</a></h3>
-        <p>Teams cleaned the passenger data, chose which details to feed the model, trained classifiers with scikit-learn, and submitted predictions to Kaggle's public leaderboard..</p>
+        <p>Teams cleaned the passenger data, chose which details to feed the model, trained classifiers with scikit-learn, and submitted predictions to Kaggle's public leaderboard.</p>
       </article>
       <article class="feature">
         <figure><img src="assets/img/mnist-fashion-samples.png" alt="Sample images: two rows of handwritten digits zero through nine from MNIST, and two rows of clothing items from Fashion-MNIST." loading="lazy" width="912" height="374"><figcaption>Samples from MNIST (top) and Fashion-MNIST (bottom), two of the datasets members trained on.</figcaption></figure>
@@ -141,13 +141,8 @@
     <path class="w2" d="M0 62c180-26 300-22 480 2s300 24 480 0 300-26 480 0v26H0z"/>
     <path class="w3" d="M0 74c160-16 320-16 480 0s320 16 480 0 320-16 480 0v16H0z"/>
   </svg>
-  <div class="foot-bg" aria-hidden="true"><i></i><i></i><i></i><b>SAIL</b></div>
+  <div class="foot-bg" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="wrap">
-    <div class="foot-top">
-      <p class="foot-call">Build something with us.</p>
-      <p class="foot-meet">Every other Tuesday, 3:00 to 4:00 PM · Room 700F · no experience needed</p>
-      <a class="btn btn--glow" href="join.html">Join SAIL</a>
-    </div>
     <div class="foot-grid">
       <div>
         <a class="brand" href="index.html" aria-label="South Artificial Intelligence Laboratory, home"><img src="assets/img/logo.png" alt="" width="42" height="42"><span class="brand-text"><b>SAIL</b><span>at WWP High School South</span></span></a>
@@ -170,7 +165,6 @@
         <h2>Contact</h2>
         <ul>
           <li><a href="join.html">Join SAIL</a></li>
-          <li><a href="#" data-email>Email us</a></li>
           <li><a href="https://www.instagram.com/hss_aiclub/" rel="noopener">Instagram</a></li>
           <li><span class="foot-code">Classroom code <b>selpcao</b></span></li>
         </ul>
@@ -179,7 +173,6 @@
     <p class="foot-bot">&copy; <span data-year>2026</span> South Artificial Intelligence Laboratory. Run by students.</p>
   </div>
 </footer>
-<script src="assets/js/memory.js"></script>
 <script src="assets/js/site.js"></script>
 </body>
 </html>

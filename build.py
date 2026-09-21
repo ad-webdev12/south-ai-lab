@@ -25,6 +25,7 @@ SITE = {
     "school": "West Windsor-Plainsboro High School South",
     "room": "Room 700F",
     "meets": "Every other Tuesday, 3:00 to 4:00 PM",
+    "hero": "wall",   # home hero: "wall" (project wall) or "plasma" (the earlier one, kept as a backup; also at index.html#plasma)
     "code": "selpcao",
     "instagram": "hss_aiclub",
 }
@@ -87,10 +88,10 @@ GROUPS = [
         "stages": ["vision", "deep-learning"], "related": ["neural-networks", "data-science", "nlp"],
     },
     {
-        "key": "nlp", "slug": "nlp.html", "name": "Natural Language Processing", "sub": "How does a machine know what you mean?",
+        "key": "nlp", "slug": "nlp.html", "name": "Natural Language Processing", "sub": "",
         "first": False,
         "line": "Build programs that read, sort, and write text, from spam filters to chatbots.",
-        "desc": "Members work with text: deciding if a review is positive, finding the topic of an article, answering questions. The group starts with word-counting methods you can check by hand and moves up to the transformer models behind chatbots.",
+        "desc": "Teach computers to find patterns in language, from simple classifiers to modern language models.",
         "make_short": "Text classifiers, similarity search, small chatbots",
         "level": "Can use functions, lists, and dictionaries",
         "experience": "You can use functions, lists, and dictionaries, and you can load and modify a notebook.",
@@ -133,10 +134,10 @@ GROUPS = [
         "stages": ["deep-learning"], "related": ["vision", "nlp", "agents"],
     },
     {
-        "key": "agents", "slug": "agents.html", "name": "Agents and Reinforcement Learning", "sub": "This one is paying attention to you.",
+        "key": "agents", "slug": "agents.html", "name": "Agents and Reinforcement Learning", "sub": "Build systems that learn from feedback and use tools to complete tasks.",
         "first": False,
         "line": "Programs that learn by trial and error, and LLM-based assistants that use tools.",
-        "desc": "Two topics share this group. Reinforcement learning is how a program learns by trial and error, the way game-playing AIs do. LLM-based agents are language models that can take actions, such as searching the web or running code, to finish a task.",
+        "desc": "Members build agents that plan, use tools, check their work, and revise when a step fails.",
         "make_short": "Game-playing agents, tool-using assistants",
         "level": "Can debug a small Python program independently",
         "experience": "You can write and debug a small Python program without help.",
@@ -153,10 +154,10 @@ GROUPS = [
         "stages": ["agents-rl"], "related": ["nlp", "neural-networks", "society"],
     },
     {
-        "key": "society", "slug": "society.html", "name": "AI, Ethics and Society", "sub": "I made a profile of you.",
+        "key": "society", "slug": "society.html", "name": "AI, Ethics and Society", "sub": "",
         "first": False,
         "line": "Test models for fairness, study privacy and safety, and discuss how AI should be used.",
-        "desc": "Members test models for fairness, study privacy and safety, write the documentation that should come with a model, and discuss how AI is changing school and work.",
+        "desc": "Study how AI systems affect people, and how to test, explain, and challenge them.",
         "make_short": "Fairness checks, model cards, discussions",
         "level": "None",
         "experience": "None. Writing and discussion matter as much as code here.",
@@ -164,7 +165,7 @@ GROUPS = [
             "A fairness check of a model built by another group",
             "A one-page model card for each project presented this year",
             "A reading group, using the plan on our Resources pages",
-            "A discussion that a member plans and leads",
+            "A member-led discussion connecting an AI system to a real decision",
         ],
         "past": [
             ("November 12, 2024", "Moral Machine activity and discussion about automated decisions.",
@@ -194,16 +195,10 @@ DEMOS = {
         "pause": True,
     },
     "nlp": {
-        "title": "One sentence, four ways a model reads it",
-        "text": "Type a sentence or step through the examples, then switch views: tokens, attention, how the meaning of a word like bank moves with its context, and what comes next. The word vectors are a small toy written by hand. A real model learns its own.",
-        "controls": '<label class="sent">Sentence <input type="text" data-act="sentence" maxlength="90" value="The robot thought I meant something else." spellcheck="false" autocomplete="off"></label>'
-                    '<button type="button" data-act="example">Next example</button>'
-                    '<span class="modes" role="group" aria-label="View">'
-                    '<button type="button" data-act="mode-tokens" aria-pressed="false">Tokens</button>'
-                    '<button type="button" data-act="mode-attention" aria-pressed="false">Attention</button>'
-                    '<button type="button" data-act="mode-meaning" aria-pressed="true">Meaning</button>'
-                    '<button type="button" data-act="mode-predict" aria-pressed="false">Prediction</button></span>'
-                    '<label data-temp hidden>Temperature <input type="range" min="10" max="200" value="70" data-act="temp"></label>',
+        "title": "Words arranged by meaning",
+        "text": "Choose a word to explore its neighbors. The map is a small hand-made word list, not a trained model, but a real one organizes language the same way: by distance.",
+        "controls": '<label class="sent">Find a word <input type="text" data-act="word" maxlength="20" placeholder="camera" spellcheck="false" autocomplete="off" list="nlp-words"></label>'
+                    '<button type="button" data-act="shuffle">Shuffle example</button>',
         "pause": False,
     },
     "neural-networks": {
@@ -213,19 +208,20 @@ DEMOS = {
         "pause": True,
     },
     "agents": {
-        "title": "A robot that learns from you",
-        "text": "It keeps the title in order and it watches what you do. Click letters, move around it, and answer when it asks whether a move was good. Your answers are its only reward, and they change what it does next. Everything it learns stays in this browser.",
-        "controls": '<button type="button" data-act="knock">Knock letters down</button>'
-                    '<button type="button" data-act="typo">Scramble a word</button>'
-                    '<button type="button" data-act="battery">Give it a battery</button>'
-                    '<button type="button" data-act="learned">What it learned</button>',
+        "title": "Plan, act, check, replan",
+        "text": "Change the target or add an obstacle. Watch the agent revise its plan. The small screen learns the same route a different way, by trial and error.",
+        "controls": '<button type="button" data-act="target">Change target</button>'
+                    '<button type="button" data-act="obstacle">Add obstacle</button>'
+                    '<button type="button" data-act="step">Step</button>'
+                    '<button type="button" data-act="run">Run</button>'
+                    '<button type="button" data-act="reset">Restart</button>',
         "pause": True,
     },
     "society": {
-        "title": "A profile built from your clicks",
-        "text": "The card is what this site's robot worked out about you from pages opened, time spent and clicks. It is kept in this browser and nowhere else. Ask for the evidence, tell it when it is wrong, read everything it stored, or make it forget. The camera is optional: a face model runs in this tab, no frame is stored or sent, and the labels marked guess are invented on purpose.",
-        "controls": '<button type="button" data-act="camera">Turn on camera</button>',
-        "pause": False,
+        "title": "A feed that reinforces past choices",
+        "text": "Two people start with the same broad mix of posts. Raise the slider and each feed narrows around what that person already clicked. Illustration, not data from a real platform.",
+        "controls": '<label>How often does the feed reinforce past choices? <input type="range" min="0" max="95" value="20" data-act="feed"></label>',
+        "pause": True,
     },
 }
 
@@ -465,7 +461,7 @@ def masthead(active):
             links.append(f'<a{cur} href="{href}">{label}</a>')
     nav_html = "\n      ".join(links)
     drawer_groups = "".join(f'<a href="{g["slug"]}">{g["name"]}</a>' for g in GROUPS)
-    dark = " on-dark" if active in ("home", "group") else ""
+    dark = " on-dark"      # every page opens on a dark band now
     return f'''<header class="masthead{dark}" data-masthead>
   <div class="wrap masthead-in">
     {brand()}
@@ -516,13 +512,8 @@ def footer(extra_script=""):
     <path class="w2" d="M0 62c180-26 300-22 480 2s300 24 480 0 300-26 480 0v26H0z"/>
     <path class="w3" d="M0 74c160-16 320-16 480 0s320 16 480 0 320-16 480 0v16H0z"/>
   </svg>
-  <div class="foot-bg" aria-hidden="true"><i></i><i></i><i></i><b>SAIL</b></div>
+  <div class="foot-bg" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="wrap">
-    <div class="foot-top">
-      <p class="foot-call">Build something with us.</p>
-      <p class="foot-meet">{SITE["meets"]} · {SITE["room"]} · no experience needed</p>
-      <a class="btn btn--glow" href="join.html">Join SAIL</a>
-    </div>
     <div class="foot-grid">
       <div>
         {brand()}
@@ -545,7 +536,6 @@ def footer(extra_script=""):
         <h2>Contact</h2>
         <ul>
           <li><a href="join.html">Join SAIL</a></li>
-          <li><a href="#" data-email>Email us</a></li>
           <li><a href="https://www.instagram.com/{SITE["instagram"]}/" rel="noopener">Instagram</a></li>
           <li><span class="foot-code">Classroom code <b>{SITE["code"]}</b></span></li>
         </ul>
@@ -554,7 +544,6 @@ def footer(extra_script=""):
     <p class="foot-bot">&copy; <span data-year>2026</span> {SITE["name"]}. Run by students.</p>
   </div>
 </footer>
-<script src="assets/js/memory.js"></script>
 <script src="assets/js/site.js"></script>
 {extra_script}</body>
 </html>
@@ -582,20 +571,20 @@ def page_index():
         f'''<article class="feature">
         {figure_html(f)}
         <h3><a href="projects.html#{f["id"]}">{f["title"]}</a></h3>
-        <p>{f["text"].split(". ")[0]}.</p>
+        <p>{f["text"].split(". ")[0].rstrip(".")}.</p>
       </article>''' for f in FEATURED[:2])
     news = "\n      ".join(
         f'''<li><time datetime="{n["iso"]}">{n["date"]}</time>
         <div><h3><a href="news.html#{n["id"]}">{n["title"]}</a></h3><p>{n["short"] or n["body"]}</p></div></li>'''
         for n in NEWS[:2])
-    return f'''<section class="hero" data-hero>
+    return f'''<section class="hero" data-hero="{SITE["hero"]}">
   <canvas data-field aria-hidden="true"></canvas>
   <div class="wrap hero-in">
     <h1>{SITE["name"]}</h1>
-    <p class="hero-sub">We're students at {SITE["school"]} who learn how AI works and build our own projects with it.</p>
+    <p class="hero-sub">Students at High School South learning AI and building projects together.</p>
     <div class="hero-actions">
       <a class="btn btn--light" href="join.html">Join SAIL</a>
-      <a class="btn btn--line" href="projects.html">Explore our work</a>
+      <a class="btn btn--line" href="projects.html">See projects</a>
     </div>
   </div>
   <div class="wrap hero-tools"><button type="button" data-pause>Pause animation</button></div>
@@ -732,7 +721,7 @@ def page_group(g):
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>{g["name"]}</h1>
     {sub}<p class="desc">{g["desc"]}</p>
-    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Sign up and pick this group</a></p>
+    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
@@ -749,27 +738,26 @@ def page_group(g):
   <div class="wrap split">
     <div class="prose">
       {flag}
-      <h2>Plans for {YEAR}</h2>
-      <p>The group is new this year, so these are plans and none of them is finished work yet.</p>
+      <h2>This year</h2>
+      <p>This group begins in {YEAR}. These are its first projects.</p>
       <ul>{work}</ul>
 
       <h2>Experience needed</h2>
       <p>{g["experience"]}</p>
 
-      <h2>Past club sessions on this topic</h2>
+      <h2>Earlier SAIL sessions</h2>
       <ul class="dated">
         {past}
       </ul>
 
-      <h2>Where to start learning</h2>
+      <h2>Start here</h2>
       <ul class="res">
         {res_list(res_items)}
       </ul>
       <p><a class="more" href="{more[0]}">{more[1]}</a></p>
     </div>
     <aside class="side">
-      <p><a class="btn" href="join.html#join-{g["key"]}">Sign up and pick this group</a></p>
-      <p class="meta">Group leads will be named in October.</p>
+      <p><a class="btn" href="join.html#join-{g["key"]}">Join this group</a></p>
       <h2>Related groups</h2>
       <ul>{related}</ul>
     </aside>
@@ -1217,7 +1205,7 @@ def build():
 
     written = []
     for filename, title, desc, active, body in pages:
-        scenes = {"nlp.html": ["bot", "scene-nlp"], "agents.html": ["bot", "scene-agents"], "society.html": ["bot", "scene-agents", "scene-ethics"]}
+        scenes = {"nlp.html": ["scene-nlp"], "agents.html": ["scene-agents"], "society.html": ["scene-ethics"]}
         extra = "".join(f'<script src="assets/js/{s}.js"></script>\n' for s in ["demos"] + scenes.get(filename, [])) if active == "group" else ""
         html = head(title, desc) + masthead(active) + body + footer(extra)
         with open(os.path.join(HERE, filename), "w", encoding="utf-8") as fh:

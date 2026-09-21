@@ -14,10 +14,11 @@
     // the bar is clear over the top of the page and turns to frosted glass once content scrolls under it
     var mast = document.querySelector("[data-masthead]");
     if (mast) {
-      var hero = document.querySelector(".hero, .ghero");
+      var hero = document.querySelector(".hero, .ghero, .pagetop");
       var onScroll = function () {
         var limit = hero ? hero.offsetHeight - mast.offsetHeight - 4 : 6;
         mast.classList.toggle("scrolled", window.scrollY > limit);
+        mast.classList.toggle("sunk", window.scrollY > 8 && window.scrollY <= limit);
       };
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
@@ -185,6 +186,84 @@
      and when two orbs come near each other, or near your pointer, the filaments
      jump across and brighten, the way they do inside a plasma ball.
      Filaments writhe smoothly; nothing flashes. */
+  /* Home hero, the project wall: pieces of real SAIL work drifting slowly behind the name,
+     joined by thin paths from learning to projects. Hover or tap a piece to bring it forward.
+     The earlier plasma hero is kept as a backup: set SITE["hero"] = "plasma" in build.py, or
+     open index.html#plasma to look at it. */
+  // sections ease in as they are scrolled to; nothing is hidden unless this script is running
+  function reveal() {
+    if (!("IntersectionObserver" in window) || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    var io = new IntersectionObserver(function (entries) { entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
+    [].forEach.call(document.querySelectorAll("main > section.section > .wrap > *, main > section.section > .narrow > *"), function (el) {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return;
+      el.classList.add("rv"); io.observe(el);
+    });
+  }
+
+  function heroWall() {
+    var host = document.querySelector("[data-hero]"), canvas = document.querySelector("[data-field]");
+    if (!host || !canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext("2d"), pauseBtn = document.querySelector("[data-pause]");
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var W = 0, H = 0, dpr = 1, t = 0, last = 0, running = !reduced, mx = -1, my = -1, frags = [];
+    var PAPER = "#ece5d6", INKC = "#1b2333", LINE = "143,180,255";
+    var thumb = new Image(); thumb.src = "assets/img/street-thumb.jpg"; var digits = new Image(); digits.src = "assets/img/mnist-fashion-samples.png";
+    thumb.onload = digits.onload = function () { if (!running) paint(); };
+
+    var KINDS = [
+      { title: "Titanic prediction", w: 190, h: 120, draw: function (c, w, h) {
+          c.fillStyle = INKC; c.font = "600 10px 'Libre Franklin', sans-serif"; c.textBaseline = "alphabetic"; c.textAlign = "left"; c.fillText("Survival rate, training set", 12, 20);
+          [["women", 0.742], ["men", 0.189], ["1st class", 0.63], ["3rd class", 0.242]].forEach(function (b, i) { var y = 34 + i * 20; c.fillStyle = "#5b6577"; c.font = "500 9px 'Libre Franklin', sans-serif"; c.fillText(b[0], 12, y + 9); c.fillStyle = "#d9d0bd"; c.fillRect(64, y, w - 104, 11); c.fillStyle = i < 2 ? "#1a4fc4" : "#2f8f86"; c.fillRect(64, y, (w - 104) * b[1], 11); c.fillStyle = INKC; c.fillText(Math.round(b[1] * 100) + "%", w - 34, y + 9); }); } },
+      { title: "MNIST classifier", w: 170, h: 112, draw: function (c, w, h) { if (digits.naturalWidth) { var sw = digits.naturalWidth, sh = digits.naturalHeight; c.drawImage(digits, sw * 0.02, sh * 0.06, sw * 0.5, sh * 0.42, 10, 10, w - 20, h - 34); } c.fillStyle = INKC; c.font = "600 10px ui-monospace, Consolas, monospace"; c.textAlign = "left"; c.textBaseline = "alphabetic"; c.fillText("28 x 28 pixels, 10 classes", 10, h - 10); } },
+      { title: "NLP workshop", w: 200, h: 84, draw: function (c, w, h) { c.fillStyle = INKC; c.font = "italic 500 12px 'Source Serif 4', Georgia, serif"; c.textAlign = "left"; c.textBaseline = "alphabetic"; c.fillText("“great acting, slow ending”", 12, 26); c.font = "600 9px 'Libre Franklin', sans-serif"; c.fillStyle = "#5b6577"; c.fillText("LABEL", 12, 54); c.fillStyle = "#2f8f86"; c.fillRect(52, 43, 64, 16); c.fillStyle = "#fff"; c.font = "700 9px 'Libre Franklin', sans-serif"; c.fillText("POSITIVE", 58, 54.5); c.fillStyle = "#c9bfa9"; c.fillRect(124, 43, 64, 16); c.fillStyle = "#5b6577"; c.fillText("NEGATIVE", 130, 54.5); } },
+      { title: "A first notebook", w: 236, h: 92, dark: true, draw: function (c, w, h) { c.font = "500 11px ui-monospace, Consolas, monospace"; c.textAlign = "left"; c.textBaseline = "alphabetic"; c.fillStyle = "#7f93b3"; c.fillText("In [3]:", 10, 24); c.fillStyle = "#e6edf7"; var a = "df = pd.read_csv(", b = "\"train.csv\""; c.fillText(a, 62, 24); c.fillStyle = "#9ad4a0"; c.fillText(b, 62 + c.measureText(a).width, 24); c.fillStyle = "#e6edf7"; c.fillText(")", 62 + c.measureText(a + b).width, 24); c.fillText("df.shape", 62, 44); c.fillStyle = "#ff8a8a"; c.fillText("Out[3]:", 10, 70); c.fillStyle = "#e6edf7"; c.fillText("(891, 12)", 62, 70); } },
+      { title: "Model cards", w: 186, h: 104, draw: function (c, w, h) { c.fillStyle = INKC; c.font = "700 11px 'Libre Franklin', sans-serif"; c.textAlign = "left"; c.textBaseline = "alphabetic"; c.fillText("Model card", 12, 22); ["Intended use", "Trained on", "Known limits"].forEach(function (f, i) { var y = 42 + i * 20; c.font = "600 9px 'Libre Franklin', sans-serif"; c.fillStyle = "#5b6577"; c.fillText(f.toUpperCase(), 12, y); c.fillStyle = "#c9bfa9"; c.fillRect(92, y - 7, w - 106 - i * 14, 2); c.fillRect(92, y - 2, w - 130 + i * 8, 2); }); } },
+      { title: "Object detection", w: 200, h: 124, dark: true, draw: function (c, w, h) { if (thumb.naturalWidth) c.drawImage(thumb, 0, 0, 320, 180, 6, 6, w - 12, h - 12); var sx = (w - 12) / 320, sy = (h - 12) / 180; [[147.5, 58.5, 77.5, 67.5, "car 99%"], [59.5, 34.5, 81, 84, "car 96%"]].forEach(function (b) { var x = 6 + b[0] * sx, y = 6 + b[1] * sy, bw = b[2] * sx, bh = b[3] * sy; c.lineWidth = 1.5; c.strokeStyle = "#4fd1c5"; c.strokeRect(x, y, bw, bh); c.fillStyle = "#4fd1c5"; c.fillRect(x, y - 11, 44, 11); c.fillStyle = "#04101c"; c.font = "700 8px 'Libre Franklin', sans-serif"; c.textAlign = "left"; c.textBaseline = "alphabetic"; c.fillText(b[4], x + 3, y - 3); }); } }
+    ];
+    // a loose ring around the name, fixed so the wall looks the same on every visit
+    var SPOTS = [[0.13, 0.27, -4], [0.84, 0.22, 3], [0.1, 0.7, 3], [0.87, 0.64, -3], [0.3, 0.86, -2], [0.68, 0.87, 2]], ORDER = [3, 0, 1, 2, 5, 4];
+
+    function build() {
+      var rect = host.getBoundingClientRect(); if (rect.width < 2 || rect.height < 2) return false;
+      dpr = Math.min(window.devicePixelRatio || 1, 2); W = rect.width; H = rect.height; canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var small = W < 760, use = small ? [0, 5, 3] : [0, 1, 2, 3, 4, 5], spots = small ? [[0.27, 0.15, -4], [0.74, 0.19, 3], [0.5, 0.91, -2]] : SPOTS, k = small ? 0.7 : Math.min(1.2, Math.max(0.85, W / 1400));
+      frags = use.map(function (ki, i) { var s = spots[small ? i : ki]; return { kind: KINDS[ki], x: s[0] * W, y: s[1] * H, rot: s[2] * Math.PI / 180, k: k, grow: 0, ph: i * 1.7, drift: small ? (i === 0 ? 1 : 0) : 1, order: small ? i : ORDER.indexOf(ki) }; });
+      return true;
+    }
+    function pos(f) { return { x: f.x + Math.sin(t * 0.11 + f.ph) * 10 * f.drift, y: f.y + Math.cos(t * 0.09 + f.ph * 1.3) * 8 * f.drift }; }
+    function paint() {
+      ctx.clearRect(0, 0, W, H);
+      var bg = ctx.createRadialGradient(W / 2, H * 0.46, 40, W / 2, H * 0.46, Math.max(W, H) * 0.7); bg.addColorStop(0, "#0c1a33"); bg.addColorStop(0.55, "#07101f"); bg.addColorStop(1, "#03070e"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+      var seq = frags.slice().sort(function (a, b) { return a.order - b.order; });
+      for (var i = 0; i + 1 < seq.length; i++) {      // thin paths, in the order a member meets this work
+        var a = pos(seq[i]), b = pos(seq[i + 1]), cx = (a.x + b.x) / 2 + (W / 2 - (a.x + b.x) / 2) * 0.35, cy = (a.y + b.y) / 2 + (H / 2 - (a.y + b.y) / 2) * 0.35;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(cx, cy, b.x, b.y); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(" + LINE + ",.16)"; ctx.stroke();
+        var u = (t * 0.035 + i * 0.37) % 1, qx = (1 - u) * (1 - u) * a.x + 2 * (1 - u) * u * cx + u * u * b.x, qy = (1 - u) * (1 - u) * a.y + 2 * (1 - u) * u * cy + u * u * b.y; ctx.fillStyle = "rgba(" + LINE + ",.7)"; ctx.fillRect(qx - 1.5, qy - 1.5, 3, 3);
+      }
+      frags.slice().sort(function (a, b) { return a.grow - b.grow; }).forEach(function (f) {
+        var p = pos(f), w = f.kind.w, h = f.kind.h, s = f.k * (1 + f.grow * 0.32);
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(f.rot * (1 - f.grow)); ctx.scale(s, s); ctx.translate(-w / 2, -h / 2); ctx.globalAlpha = 0.8 + f.grow * 0.2;
+        ctx.fillStyle = f.kind.dark ? "#0b1524" : PAPER; ctx.fillRect(0, 0, w, h); ctx.lineWidth = 1; ctx.strokeStyle = f.kind.dark ? "rgba(143,180,255,.35)" : "rgba(255,255,255,.5)"; ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
+        f.kind.draw(ctx, w, h); ctx.restore();
+        if (f.grow > 0.05) { ctx.globalAlpha = f.grow; ctx.font = "600 13px 'Libre Franklin', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = "#fff"; ctx.fillText(f.kind.title, p.x, p.y + h * s / 2 + 22); ctx.globalAlpha = 1; }
+      });
+    }
+    function over(f) { var p = pos(f); return Math.abs(mx - p.x) < f.kind.w * f.k / 2 + 6 && Math.abs(my - p.y) < f.kind.h * f.k / 2 + 6; }
+    function tick(dt) { var hit = null; frags.forEach(function (f) { if (!hit && over(f)) hit = f; }); frags.forEach(function (f) { f.grow += ((f === hit ? 1 : 0) - f.grow) * Math.min(1, dt * 6); }); }
+    function frame(ts) {
+      if (!running) { last = 0; return; }
+      if (!last) last = ts; var dt = Math.min((ts - last) / 1000, 0.05); last = ts; t += dt; tick(dt); paint(); window.requestAnimationFrame(frame);
+    }
+    function point(ev) { var r = host.getBoundingClientRect(); mx = ev.clientX - r.left; my = ev.clientY - r.top; if (!running) { tick(1); paint(); } }
+    host.addEventListener("pointermove", point);
+    host.addEventListener("pointerdown", function (ev) { point(ev); if (ev.pointerType === "touch") window.setTimeout(function () { mx = my = -1; if (!running) { tick(1); paint(); } }, 2400); });
+    host.addEventListener("pointerleave", function () { mx = my = -1; if (!running) { tick(1); paint(); } });
+    if (pauseBtn) { if (reduced) pauseBtn.textContent = "Play animation"; pauseBtn.addEventListener("click", function () { running = !running; pauseBtn.textContent = running ? "Pause animation" : "Play animation"; if (running) window.requestAnimationFrame(frame); }); }
+    var timer; function fit() { window.clearTimeout(timer); timer = window.setTimeout(function () { var r = host.getBoundingClientRect(); if (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1) { build(); paint(); } }, 160); }
+    if ("ResizeObserver" in window) new ResizeObserver(fit).observe(host); else window.addEventListener("resize", fit);
+    build(); paint(); if (running) window.requestAnimationFrame(frame);
+  }
+
   function hero() {
     var host = document.querySelector("[data-hero]");
     var canvas = document.querySelector("[data-field]");
@@ -359,7 +438,9 @@
     nav();
     joinForm();
     planner();
-    hero();
+    var heroEl = document.querySelector("[data-hero]");
+    if (heroEl && (heroEl.getAttribute("data-hero") === "plasma" || location.hash === "#plasma")) { heroEl.setAttribute("data-hero", "plasma"); hero(); } else heroWall();
+    reveal();
     document.querySelectorAll("[data-email]").forEach(function (el) {
       el.textContent = LAB_EMAIL;
       if (el.tagName === "A") el.setAttribute("href", "mailto:" + LAB_EMAIL);
