@@ -19,7 +19,7 @@
   function load() {
     if (loading) return loading;
     loading = Promise.all([fetch("assets/data/words.txt").then(function (r) { return r.text(); }), fetch("assets/data/words-xy.bin").then(function (r) { return r.arrayBuffer(); }), fetch("assets/data/words-vec.bin").then(function (r) { return r.arrayBuffer(); })])
-      .then(function (r) { var words = r[0].split("\n"), xy = new Int16Array(r[1]), vec = new Int8Array(r[2]), index = {}; words.forEach(function (w, i) { index[w] = i; }); DATA = { words: words, xy: xy, vec: vec, index: index, n: words.length }; return DATA; });
+      .then(function (r) { var words = r[0].replace(/\r/g, "").split("\n"), xy = new Int16Array(r[1]), vec = new Int8Array(r[2]), index = {}; words.forEach(function (w, i) { index[w] = i; }); DATA = { words: words, xy: xy, vec: vec, index: index, n: words.length }; return DATA; });
     return loading;
   }
   function nearest(i, k) {
