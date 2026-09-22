@@ -195,9 +195,9 @@ DEMOS = {
         "pause": True,
     },
     "nlp": {
-        "title": "Words arranged by meaning",
-        "text": "Choose a word to explore its neighbors. The map is a small hand-made word list, not a trained model, but a real one organizes language the same way: by distance.",
-        "controls": '<label class="sent">Find a word <input type="text" data-act="word" maxlength="20" placeholder="camera" spellcheck="false" autocomplete="off" list="nlp-words"></label>'
+        "title": "Twenty thousand words, arranged by meaning",
+        "text": "Drag to move through the space, scroll to zoom, click any word, or search for one. Each word is placed by a real embedding (GloVe, 50 dimensions, trained on Wikipedia and news), so words used in similar ways sit near each other. Nearest words are computed here, on your device.",
+        "controls": '<label class="sent">Find a word <input type="text" data-act="word" maxlength="20" placeholder="any word" spellcheck="false" autocomplete="off"></label>'
                     '<button type="button" data-act="shuffle">Shuffle example</button>',
         "pause": False,
     },
@@ -583,7 +583,6 @@ def page_index():
       <a class="btn btn--line" href="projects.html">See projects</a>
     </div>
   </div>
-  <div class="wrap hero-tools"><button type="button" data-pause>Pause animation</button></div>
 </section>
 
 <section class="section">
@@ -742,7 +741,7 @@ def page_group(g):
     sub = f'<p class="sub">{g["sub"]}</p>' if g["sub"] else ""
     video = ('<video src="assets/video/street.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>'
              if g["key"] == "vision" else "")
-    pause = '<button type="button" data-act="pause">Pause</button>' if d["pause"] else ""
+    pause = ""
     rest = group_rest(g, work, past, res_items, more, related, flag)
     if g["key"] == "agents":
         return f'''<section class="ghero" data-demo="agents" data-state="calm">
@@ -753,20 +752,17 @@ def page_group(g):
     <h1>{g["name"]}</h1>
     <p class="hint" data-hint>Tap a letter to knock it loose.</p>
     <p class="vh" aria-live="polite" data-live></p>
-    <div class="ghero-copy">
-      {sub}<p class="desc">{g["desc"]}</p>
-      <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
-    </div>
+    <p class="desc">{g["desc"]}</p>
+    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
     <div class="panel" data-panel hidden>
       <p><span>TITLE SYSTEM</span> OFFLINE</p>
-      <p><span>NAVIGATION SURFACE</span> DAMAGED</p>
-      <button type="button" data-act="restore">Restore interface</button>
+      <p><span>NAV SURFACE</span> DAMAGED</p>
+      <button type="button" data-act="restore">Restart title system &rarr;</button>
     </div>
   </div>
   <div class="ghero-bar">
     <div class="wrap ghero-bar-in">
       <p class="how"><strong>Observe, act, verify, adapt.</strong> The agent watches the title, picks up what fell, checks that every letter is back, and rebuilds after an interruption. Knock letters loose faster than it can cope and see what it does. <span data-status></span></p>
-      <div class="demo-controls">{pause}</div>
     </div>
   </div>
 </section>

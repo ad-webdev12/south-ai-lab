@@ -1,96 +1,103 @@
 /* South Artificial Intelligence Laboratory: the Language hero.
-   One idea: words arranged by meaning. About sixty words sit in a fixed map. Each word has
-   a small hand-written vector (which topics it belongs to, and how strongly), its place on
-   the map comes from that vector, and "nearest" means cosine similarity between vectors.
-   A trained model does the same thing with thousands of learned dimensions. The layout is
-   seeded, so the map is the same on every visit. */
+   One idea: words arranged by meaning. Twenty thousand English words sit on one plane,
+   placed by a real embedding (GloVe, 50 dimensions, trained on Wikipedia and news), so
+   words used in similar ways end up near each other. The plane is far bigger than the
+   screen: drag to move through it, scroll to zoom, click any word, or search for one.
+   Nearest words are the highest cosine similarity in the 50-d vectors, computed here.
+   Files: assets/data/words.txt, words-xy.bin (int16 x,y), words-vec.bin (int8 x 50). */
 
 (function () {
   "use strict";
   var SAIL = window.SAIL; if (!SAIL) return;
-  var TOPICS = ["image", "text", "game", "school", "music", "food", "nature", "money"];
-  var WORDS = {
-    image: "image photo camera:music.2 lens pixel vision video:game.5 picture", text: "text article word sentence story:school.3 letter:school.4 language headline",
-    game: "game reward:school.4 agent score:music.5 player:music.4 level strategy puzzle", school: "school class homework teacher exam:text.3 grade:game.3 student notebook:text.5",
-    music: "song melody guitar rhythm singer concert:image.2 lyrics:text.6", food: "pizza recipe:text.3 kitchen flavor bread dinner menu:text.3",
-    nature: "river rain storm forest ocean cloud:image.2 shore", money: "bank:nature.5 money loan price market:food.3 coin:game.3 budget:school.2"
-  };
-  var TEAL = SAIL.TEAL, INK = SAIL.INK, DIM = SAIL.DIM;
-  function rng(seed) { return function () { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
-  function cos(a, b) { var d = 0, p = 0, q = 0; for (var i = 0; i < a.length; i++) { d += a[i] * b[i]; p += a[i] * a[i]; q += b[i] * b[i]; } return d / Math.sqrt(p * q); }
+  var TEAL = SAIL.TEAL, DIM = SAIL.DIM;
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
-  var rand = rng(20260921), list = [];
-  TOPICS.forEach(function (topic, ti) {
-    WORDS[topic].split(" ").forEach(function (spec) {
-      var parts = spec.split(":"), v = TOPICS.map(function () { return rand() * 0.14; }); v[ti] = 1;
-      if (parts[1]) { var s = parts[1].split("."); v[TOPICS.indexOf(s[0])] = +("0." + s[1]); }
-      list.push({ w: parts[0], topic: ti, v: v, jx: rand() - 0.5, jy: rand() - 0.5, z: 0.55 + rand() * 0.45 });
-    });
-  });
-  // where each topic sits, then each word at the weighted middle of its topics
-  var centers = TOPICS.map(function (t, i) { var a = i / TOPICS.length * 6.2832 + 0.4, k = i % 2 ? 0.78 : 1; return [0.5 + Math.cos(a) * 0.4 * k, 0.5 + Math.sin(a) * 0.38 * k]; });
-  list.forEach(function (o) { var sx = 0, sy = 0, sw = 0; o.v.forEach(function (wt, i) { var k = wt * wt; sx += centers[i][0] * k; sy += centers[i][1] * k; sw += k; }); o.u = sx / sw + o.jx * 0.17; o.vv = sy / sw + o.jy * 0.2; });
-  // ease overlapping labels apart, the same way every time
-  for (var pass = 0; pass < 80; pass++) list.forEach(function (a, i) { for (var k = i + 1; k < list.length; k++) { var b = list[k], dx = b.u - a.u, dy = b.vv - a.vv, ox = 0.1 - Math.abs(dx), oy = 0.062 - Math.abs(dy); if (ox > 0 && oy > 0) { if (ox / 0.1 < oy / 0.062) { var sx = (dx >= 0 ? 1 : -1) * ox * 0.5; a.u -= sx; b.u += sx; } else { var sy = (dy >= 0 ? 1 : -1) * oy * 0.5; a.vv -= sy; b.vv += sy; } } } a.u = Math.max(0.04, Math.min(0.96, a.u)); a.vv = Math.max(0.04, Math.min(0.96, a.vv)); });
-  list.forEach(function (o) { o.near = list.filter(function (p) { return p !== o; }).map(function (p) { return { o: p, s: cos(o.v, p.v) }; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 5); });
+  var DATA = null, loading = null;
+  function load() {
+    if (loading) return loading;
+    loading = Promise.all([fetch("assets/data/words.txt").then(function (r) { return r.text(); }), fetch("assets/data/words-xy.bin").then(function (r) { return r.arrayBuffer(); }), fetch("assets/data/words-vec.bin").then(function (r) { return r.arrayBuffer(); })])
+      .then(function (r) { var words = r[0].split("\n"), xy = new Int16Array(r[1]), vec = new Int8Array(r[2]), index = {}; words.forEach(function (w, i) { index[w] = i; }); DATA = { words: words, xy: xy, vec: vec, index: index, n: words.length }; return DATA; });
+    return loading;
+  }
+  function nearest(i, k) {
+    var D = DATA, v = D.vec, n = D.n, best = [], base = i * 50;
+    for (var j = 0; j < n; j++) { if (j === i) continue; var s = 0, o = j * 50; for (var d = 0; d < 50; d++) s += v[base + d] * v[o + d]; if (best.length < k || s > best[best.length - 1].s) { best.push({ i: j, s: s }); best.sort(function (a, b) { return b.s - a.s; }); if (best.length > k) best.pop(); } }
+    return best.map(function (b) { return { i: b.i, s: b.s / 16129 }; });
+  }
 
   SAIL.scenes.nlp = function (S, root) {
-    var wide = S.W >= 980, bar = root.querySelector(".ghero-bar"), floorY = bar ? bar.offsetTop : S.H - 120, input = root.querySelector('[data-act="word"]');
-    var r = wide ? { x: S.W * 0.4, y: 96, w: S.W * 0.57, h: floorY - 96 - 50 } : { x: S.W * 0.05, y: floorY - (Math.min(window.innerHeight * 0.46, 420) - 20), w: S.W * 0.9, h: Math.min(window.innerHeight * 0.46, 420) - 70 };
-    var sel = list.filter(function (o) { return o.w === "camera"; })[0], hover = null, clock = 0;
-    if (!root.querySelector("#nlp-words")) { var dl = document.createElement("datalist"); dl.id = "nlp-words"; list.forEach(function (o) { var op = document.createElement("option"); op.value = o.w; dl.appendChild(op); }); root.appendChild(dl); }
-    list.forEach(function (o) { o.x = o.hx = r.x + o.u * r.w; o.y = o.hy = r.y + o.vv * r.h; o.a = 0.6; o.k = 1; });
-
-    function isNear(o) { return sel && sel.near.some(function (n) { return n.o === o; }); }
-    function place() {
-      list.forEach(function (o) {
-        var bx = r.x + o.u * r.w, by = r.y + o.vv * r.h;
-        if (!wide && sel) { var cx = r.x + r.w / 2, cy = r.y + r.h / 2; bx = cx + (o.u - sel.u) * r.w * 2.1; by = cy + (o.vv - sel.vv) * r.h * 2.1; }
-        if (sel && isNear(o)) { var hx = wide ? r.x + sel.u * r.w : r.x + r.w / 2, hy = wide ? r.y + sel.vv * r.h : r.y + r.h / 2; bx += (hx - bx) * 0.08; by += (hy - by) * 0.08; }
-        o.hx = bx; o.hy = by;
-      });
+    var wide = S.W >= 980, input = root.querySelector('[data-act="word"]'), status = root.querySelector("[data-status]"), stat = root.querySelector("[data-selected]");
+    var cam = { x: 0, y: 0, z: wide ? 0.42 : 0.6, tx: 0, ty: 0, tz: wide ? 0.42 : 0.6 }, sel = -1, near = [], hover = -1, clock = 0, drag = null, moved = 0;
+    var textArea = wide ? { x0: 0, x1: S.W * 0.4, y0: 0, y1: S.H * 0.75 } : { x0: 0, x1: S.W, y0: 0, y1: S.H * 0.55 };     // where the page text sits; words there are drawn faint
+    var focusX = wide ? S.W * 0.66 : S.W * 0.5, focusY = wide ? S.H * 0.45 : S.H * 0.7;                                     // where a chosen word is brought to
+    var grid = null, GC = 220;
+    function note(t) { if (status) status.textContent = t; }
+    function bucket() { grid = {}; var D = DATA; for (var i = 0; i < D.n; i++) { var k = Math.floor(D.xy[i * 2] / GC) + "," + Math.floor(D.xy[i * 2 + 1] / GC); (grid[k] || (grid[k] = [])).push(i); } }
+    function toScreen(i) { var D = DATA; return { x: focusX + (D.xy[i * 2] - cam.x) * cam.z, y: focusY + (D.xy[i * 2 + 1] - cam.y) * cam.z }; }
+    function choose(i, fly) {
+      if (i < 0 || !DATA) return; sel = i; near = nearest(i, 8); var D = DATA;
+      if (fly !== false) { cam.tx = D.xy[i * 2]; cam.ty = D.xy[i * 2 + 1]; cam.tz = Math.max(cam.tz, wide ? 0.9 : 1.1); }
+      if (input && document.activeElement !== input) input.value = D.words[i];
+      if (stat) stat.innerHTML = "<b>" + D.words[i] + "</b> " + near.slice(0, 6).map(function (n) { return D.words[n.i]; }).join(" · ");
+      note("");
     }
-    function choose(o) { sel = o; place(); if (input && document.activeElement !== input) input.value = o.w; }
-    place();
+    if (!DATA) note("Loading twenty thousand words…");
+    load().then(function () { bucket(); note(""); if (sel < 0) choose(DATA.index.camera !== undefined ? DATA.index.camera : 100); }, function () { note("The word data could not load."); });
+    if (DATA) { bucket(); choose(sel >= 0 ? sel : (DATA.index.camera || 100), false); }
+
+    function pointer(ev) { var r = root.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+    function inText(p) { return p.x > textArea.x0 && p.x < textArea.x1 && p.y > textArea.y0 && p.y < textArea.y1; }
+    if (!root.__nlpWired) {
+      root.__nlpWired = true;
+      root.addEventListener("pointerdown", function (ev) { if (ev.target.closest("a,button,input,label,.ghero-bar")) return; var p = pointer(ev); if (inText(p) && ev.pointerType !== "touch") return; drag = { x: p.x, y: p.y, cx: cam.tx, cy: cam.ty, id: ev.pointerId }; moved = 0; if (root.setPointerCapture) root.setPointerCapture(ev.pointerId); });
+      root.addEventListener("pointermove", function (ev) { if (!drag || ev.pointerId !== drag.id) return; var p = pointer(ev); moved += Math.abs(p.x - drag.x) + Math.abs(p.y - drag.y); cam.tx = drag.cx - (p.x - drag.x) / cam.z; cam.ty = drag.cy - (p.y - drag.y) / cam.z; cam.x = cam.tx; cam.y = cam.ty; drag.x = p.x; drag.y = p.y; drag.cx = cam.tx; drag.cy = cam.ty; });
+      root.addEventListener("pointerup", function () { drag = null; });
+      root.addEventListener("pointercancel", function () { drag = null; });
+      root.addEventListener("wheel", function (ev) { if (ev.target.closest(".ghero-bar")) return; var p = pointer(ev); if (inText(p)) return; ev.preventDefault(); var f = Math.exp(-ev.deltaY * 0.0012), nz = clamp(cam.tz * f, 0.12, 3.2), wx = cam.tx + (p.x - focusX) / cam.tz, wy = cam.ty + (p.y - focusY) / cam.tz; cam.tx = wx - (p.x - focusX) / nz; cam.ty = wy - (p.y - focusY) / nz; cam.tz = nz; }, { passive: false });
+    }
+
+    function visible() {           // words on screen, with the densest spots thinned by frequency rank at low zoom
+      var D = DATA, out = [], x0 = cam.x - focusX / cam.z, x1 = cam.x + (S.W - focusX) / cam.z, y0 = cam.y - focusY / cam.z, y1 = cam.y + (S.H - focusY) / cam.z;
+      var budget = cam.z < 0.25 ? 2 : cam.z < 0.5 ? 6 : cam.z < 0.9 ? 16 : cam.z < 1.6 ? 40 : 200;
+      for (var gx = Math.floor(x0 / GC); gx <= Math.floor(x1 / GC); gx++) for (var gy = Math.floor(y0 / GC); gy <= Math.floor(y1 / GC); gy++) {
+        var cellWords = grid[gx + "," + gy]; if (!cellWords) continue;
+        for (var k = 0; k < cellWords.length && k < budget; k++) out.push(cellWords[k]);      // the bucket is in frequency order already
+      }
+      if (sel >= 0) { if (out.indexOf(sel) < 0) out.push(sel); near.forEach(function (n) { if (out.indexOf(n.i) < 0) out.push(n.i); }); }
+      return out;
+    }
 
     return {
       step: function (dt, S) {
-        clock += dt; hover = null; var best = 26;
-        list.forEach(function (o) {
-          var px = S.inside && wide ? (S.mx - (r.x + r.w / 2)) * 0.025 * o.z : 0, py = S.inside && wide ? (S.my - (r.y + r.h / 2)) * 0.025 * o.z : 0;
-          var tx = o.hx - px + Math.sin(clock * 0.22 + o.jx * 9) * 3 * o.z, ty = o.hy - py + Math.cos(clock * 0.19 + o.jy * 9) * 3 * o.z;
-          o.x += (tx - o.x) * Math.min(1, dt * 3); o.y += (ty - o.y) * Math.min(1, dt * 3);
-          var on = o === sel, nr = isNear(o), ta = !sel ? 0.55 * o.z : on ? 1 : nr ? 0.95 : 0.34 * o.z, tk = on ? 1.7 : nr ? 1.25 : 1;
-          o.a += (ta - o.a) * Math.min(1, dt * 4); o.k += (tk - o.k) * Math.min(1, dt * 5);
-          if (S.inside) { var d = Math.hypot(S.mx - o.x, S.my - o.y); if (d < best && (wide || on || nr || o.a > 0.3)) { best = d; hover = o; } }
-        });
-        root.style.cursor = hover ? "pointer" : "";
+        clock += dt; var k = Math.min(1, dt * 4); cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.z += (cam.tz - cam.z) * k;
+        hover = -1; if (DATA && grid && S.inside && !drag) { var best = 22 * Math.max(0.6, Math.min(1.4, cam.z)); visible().forEach(function (i) { var p = toScreen(i); var d = Math.hypot(S.mx - p.x, S.my - p.y); if (d < best && !inText(p)) { best = d; hover = i; } }); }
+        root.style.cursor = drag ? "grabbing" : hover >= 0 ? "pointer" : "grab";
       },
-      settle: function () { list.forEach(function (o) { o.x = o.hx; o.y = o.hy; o.a = o === sel ? 1 : isNear(o) ? 0.95 : 0.16; o.k = o === sel ? 1.7 : isNear(o) ? 1.25 : 1; }); },
-      click: function () { if (hover) choose(hover); },
+      settle: function () { cam.x = cam.tx; cam.y = cam.ty; cam.z = cam.tz; },
+      click: function () { if (moved > 6) return; if (hover >= 0) choose(hover); },
       act: function (name, value) {
-        if (name === "shuffle") { var o; do { o = list[(Math.random() * list.length) | 0]; } while (o === sel); choose(o); }
-        else if (name === "word") { var q = String(value || "").trim().toLowerCase(); if (!q) return; var hit = list.filter(function (o) { return o.w === q; })[0] || list.filter(function (o) { return o.w.indexOf(q) === 0; })[0]; if (hit) choose(hit); }
+        if (!DATA) return;
+        if (name === "shuffle") { var pool = Math.min(4000, DATA.n); choose((Math.random() * pool) | 0); }
+        else if (name === "word") { var q = String(value || "").trim().toLowerCase(); if (!q) return; var i = DATA.index[q]; if (i === undefined) { for (var j = 0; j < DATA.n; j++) if (DATA.words[j].indexOf(q) === 0) { i = j; break; } } if (i !== undefined) choose(i); else note("“" + q + "” is not among the twenty thousand words here."); }
       },
       draw: function (ctx, S) {
         ctx.clearRect(0, 0, S.W, S.H);
-        // the faint web: every word tied to its two closest
-        ctx.lineWidth = 1;
-        list.forEach(function (o) { if (!wide && o.a < 0.3) return; o.near.slice(0, 2).forEach(function (n) { var a = Math.min(o.a, n.o.a) * 0.22; if (a < 0.02) return; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(n.o.x, n.o.y); ctx.strokeStyle = "rgba(" + INK + "," + a.toFixed(3) + ")"; ctx.stroke(); }); });
-        if (sel) sel.near.forEach(function (n) { ctx.beginPath(); ctx.moveTo(sel.x, sel.y); ctx.lineTo(n.o.x, n.o.y); SAIL.glow(ctx, TEAL, 0.8 + n.s * 1.4, 0.25 + n.s * 0.6); });
+        if (!DATA || !grid) return;
+        var list = visible(), D = DATA, nearSet = {}; near.forEach(function (n) { nearSet[n.i] = n.s; });
+        // a faint grid so the plane reads as a surface, then the words
+        var step = GC * cam.z; if (step > 26) { ctx.strokeStyle = "rgba(" + DIM + ",.08)"; ctx.lineWidth = 1; var ox = ((focusX - cam.x * cam.z) % step + step) % step, oy = ((focusY - cam.y * cam.z) % step + step) % step; ctx.beginPath(); for (var x = ox; x < S.W; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, S.H); } for (var y = oy; y < S.H; y += step) { ctx.moveTo(0, y); ctx.lineTo(S.W, y); } ctx.stroke(); }
+        if (sel >= 0) { var sp = toScreen(sel); near.forEach(function (n) { var p = toScreen(n.i); ctx.beginPath(); ctx.moveTo(sp.x, sp.y); ctx.lineTo(p.x, p.y); SAIL.glow(ctx, TEAL, 0.6 + n.s * 1.6, 0.2 + n.s * 0.7); }); }
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        list.slice().sort(function (a, b) { return a.k - b.k; }).forEach(function (o) {
-          if (o.a < 0.03) return; var on = o === sel, size = (wide ? 13 : 12) * (0.75 + o.z * 0.4) * o.k;
-          if (on || o === hover) SAIL.dot(ctx, o.x, o.y, size * 0.55, TEAL, on ? 0.5 : 0.3);
-          ctx.font = (on ? "800 " : isNear(o) ? "600 " : "500 ") + size.toFixed(1) + "px 'Libre Franklin', sans-serif";
-          ctx.fillStyle = on ? "#fff" : isNear(o) ? "rgba(190,245,238," + o.a.toFixed(2) + ")" : "rgba(200,216,238," + o.a.toFixed(2) + ")"; ctx.fillText(o.w, o.x, o.y);
+        list.forEach(function (i) {
+          var p = toScreen(i); if (p.x < -60 || p.x > S.W + 60 || p.y < -20 || p.y > S.H + 20) return;
+          var on = i === sel, nr = nearSet[i] !== undefined, rank = 1 - i / D.n, base = (wide ? 12 : 11) * clamp(0.55 + Math.sqrt(cam.z) * 0.6, 0.6, 1.6) * (0.85 + rank * 0.35);
+          var size = on ? base * 1.9 : nr ? base * 1.3 : i === hover ? base * 1.2 : base, a = on ? 1 : nr ? 0.95 : sel >= 0 ? 0.28 + rank * 0.22 : 0.5 + rank * 0.35;
+          if (inText(p) && !on && !nr) a *= 0.25;
+          if (on || i === hover) SAIL.dot(ctx, p.x, p.y, size * 0.55, TEAL, on ? 0.5 : 0.3);
+          ctx.font = (on ? "800 " : nr ? "600 " : "500 ") + size.toFixed(1) + "px 'Libre Franklin', sans-serif";
+          ctx.fillStyle = on ? "#fff" : nr ? "rgba(190,245,238," + a.toFixed(2) + ")" : "rgba(200,216,238," + a.toFixed(2) + ")"; ctx.fillText(D.words[i], p.x, p.y);
+          if (nr && cam.z > 0.7) { ctx.font = "500 10px ui-monospace, Consolas, monospace"; ctx.fillStyle = "rgba(" + TEAL + ",.8)"; ctx.fillText(nearSet[i].toFixed(2), p.x, p.y + size * 0.85); }
         });
-        if (sel) {
-          var lx = r.x, ly = r.y + r.h + 22; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-          ctx.font = "500 12px ui-monospace, Consolas, monospace"; ctx.fillStyle = "rgba(" + DIM + ",1)"; ctx.fillText("selected", lx, ly); ctx.fillText("nearest words", lx, ly + 20);
-          ctx.font = "700 14px 'Libre Franklin', sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText(sel.w, lx + 112, ly);
-          ctx.font = "500 14px 'Libre Franklin', sans-serif"; ctx.fillStyle = "rgba(190,245,238,.95)"; ctx.fillText(sel.near.slice(0, wide ? 5 : 4).map(function (n) { return n.o.w; }).join(" · "), lx + 112, ly + 20);
-        }
       }
     };
   };
