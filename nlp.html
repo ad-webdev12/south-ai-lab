@@ -51,17 +51,18 @@
   <div class="wrap ghero-in">
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>Natural Language Processing</h1>
-    <p class="desc">Teach computers to find patterns in language, from simple classifiers to modern language models.</p>
-    <p><a class="btn btn--light" href="join.html#join-nlp">Join this group</a></p>
-  </div>
-  <div class="ghero-bar">
-    <div class="wrap ghero-bar-in">
-      <p class="how"><strong>Twenty thousand words, arranged by meaning.</strong> Drag to move through the space, scroll to zoom, click any word, or search for one. Each word is placed by a real embedding (GloVe, 50 dimensions, trained on Wikipedia and news), so words used in similar ways sit near each other. Nearest words are computed here, on your device. <span data-status></span></p>
-      <div class="demo-controls">
-        <label class="sent">Find a word <input type="text" data-act="word" maxlength="20" placeholder="any word" spellcheck="false" autocomplete="off"></label><button type="button" data-act="shuffle">Shuffle example</button>
-        
-      </div>
+    <p class="sub">Explore how words gather by meaning.</p>
+    <div class="console">
+      <p class="kicker">A map of language</p>
+      <p class="desc">Words used in similar contexts sit near one another. Choose a word to explore its neighborhood.</p>
+      <p><a class="btn btn--light" href="join.html#join-nlp">Join this group</a><span class="tiny">Placed by a GloVe word embedding, computed on your device.</span></p>
     </div>
+  </div>
+  <div class="wordfind">
+    <label>Find a word <input type="text" data-act="word" maxlength="20" placeholder="camera" spellcheck="false" autocomplete="off"></label>
+    <button type="button" data-act="shuffle">Shuffle</button><button type="button" data-act="clear" hidden>Clear</button>
+    <p class="picked" data-selected hidden></p>
+    <p class="picked-note" data-status></p>
   </div>
 </section>
 

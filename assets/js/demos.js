@@ -101,6 +101,7 @@
     }
     build();
     setRunning(running);
+    root.__kick = function () { last = 0; window.requestAnimationFrame(frame); };      // restarts the loop if a browser never delivered the first frame
   }
 
   function caption(ctx, text, x, y, align) {

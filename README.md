@@ -87,29 +87,28 @@ check each one:
 
 ## The home hero
 
-`heroWall()` in `assets/js/site.js`: six pieces of real SAIL work (the Titanic chart, MNIST samples, a
-labelled review, a first notebook cell, a model card, a detection frame) drift slowly behind the name,
-joined by thin paths. Hover or tap a piece to bring it forward. Phones get three pieces and one drift.
-The earlier plasma hero is kept as a backup: set `"hero": "plasma"` in `SITE`, or open
-`index.html#plasma` to look at it without changing anything.
+The home page opens on the plasma field (`hero()` in `assets/js/site.js`). The project wall
+(`heroWall()`: six pieces of real SAIL work drifting behind the title, joined by thin paths; hover or
+tap a piece to bring it forward) is the hero of the Projects page. To swap them, set `"hero"` in `SITE`
+to `"plasma"` or `"wall"`; `index.html#plasma` forces the plasma without changing anything.
 
 Every other page opens on a dark band with slow wave lines (`.pagetop`), and sections ease in on scroll.
 
 ## Research group demos
 
 Each group page opens with a full-screen hero that is the demo itself, in `assets/js/demos.js`.
-The title sits on top of it, and a bar along the bottom holds one short paragraph (what it is and
-how to use it) plus real buttons or a slider, so it works with a keyboard or a finger. Pause only
-appears where something can be paused. The copy for each demo is in `DEMOS` in `build.py`.
+The title sits on top of it. Data science, vision and neural networks keep a bar along the bottom
+with one short paragraph plus real buttons or a slider; Language, Agents and Ethics have their own
+small controls. There are no pause buttons. The copy for each demo is in `DEMOS` in `build.py`.
 
 | Group | What runs |
 | --- | --- |
 | Applied Data Science | A support vector classifier (RBF kernel), refit on every frame with the pointer as a data point. |
 | Computer Vision | Real street footage (`assets/video/street.mp4`) with object boxes drawn from `assets/data/street-tracks.json`. The boxes were computed ahead of time (Faster R-CNN on every frame, then a motion tracker), so nothing heavy runs in the browser. |
-| Natural Language Processing | Twenty thousand words on one plane (`scene-nlp.js`), placed by real GloVe 50-d vectors (Wikipedia and news). Drag, zoom, click or search any of them; nearest words are cosine similarity computed in the browser. Data in `assets/data/words.txt`, `words-xy.bin` (int16 x,y), `words-vec.bin` (int8, 50 per word), about 1.3 MB. To rebuild for a different vocabulary: take the vectors, PCA to 2-D, pull each word toward its neighbours, spread overlaps, quantize. |
+| Natural Language Processing | A semantic space (`scene-nlp.js`): the right 40% of the hero shows 80 to 120 words at a time out of twenty thousand, placed by real GloVe 50-d vectors (Wikipedia and news), never under the title column, header or controls (`measureMasks()`). Click or search a word: it grows, its nearest words glide into an orbit with thin strands, the rest dims. Hover shows a few connections without moving the map. Phones show one cluster at a time. Data in `assets/data/words.txt`, `words-xy.bin` (int16 x,y), `words-vec.bin` (int8, 50 per word), about 1.3 MB. To rebuild for a different vocabulary: take the vectors, PCA to 2-D, pull each word toward its neighbours, spread overlaps, quantize. |
 | Neural Networks | Gradient descent with momentum on a loss surface. Click to pick the starting point. |
-| Agents and RL | A seated robot (`scene-agents.js`) restores title letters from its chair: head turns, one arm reaches, thumb and index pinch, it lifts the letter past the monitor, reaches toward the title and the letter is drawn into its slot. Rapid knocks escalate through Recovery queue building, Repeated interruption (amber) and Manual override (red): it grips the desk, slams it, then sweeps or flicks a letter into a visual copy of the navbar, one of three variants. The monitor then shows Restart title system. Five states on `data-state`. The robot is a render cut into pieces (`assets/img/robot/`) with drawn, jointed hands. Older versions kept unused: `scene-agents-standing.js`, `scene-agents-robot.js`, `scene-agents-desk.js`. |
-| AI, Ethics and Society | Two phone feeds (`scene-ethics.js`). A slider sets how often new posts are chosen to match past clicks, and a counter shows how many of the twelve posts the two feeds still share. An illustration, not platform data. |
+| Agents and RL | A workstation (`scene-agents.js`): title block on the left, desk on the right with its top on the same line as the bottom of the title, a robot seated behind it (chair, keyboard, thin monitor, a few letter tiles) under one hard spotlight. It never leaves the chair: it checks the monitor, types (one hand at a time, two keys at a time), looks at the title, tidies a tile. Tap a title letter and it falls to the desk; in about 1.6 s the robot looks, one hand leaves the keyboard, pinches the letter, checks the slot and puts it back with a click. Three quick taps turn the monitor amber (RECOVERY QUEUE BUILDING), five stop the typing and turn the head to the visitor, seven turn the light warm red and a hand grips the desk edge, then it drops a tile, slams the desk, the letters blast across the upper hero and come down on the desk (the ones that do not fit sink behind it), and it sweeps or flicks a letter into a brief visual copy of the navbar (the real links stay usable). The monitor then shows TITLE SYSTEM OFFLINE and RESTART TITLE SYSTEM, which rebuilds in place. States on `data-state`. The robot is a render cut into pieces (`assets/img/robot/`) with drawn, jointed hands. Older versions kept unused: `scene-agents-seated1.js`, `scene-agents-standing.js`, `scene-agents-robot.js`, `scene-agents-desk.js`. |
+| AI, Ethics and Society | A face scan (`scene-ethics.js`): one large matte-gray head, not a real person, rendered from a signed-distance model by a script (ray-marched in numpy) into `assets/img/face.png` with its landmark points, mesh edges and box in `face.json`. A scan beam passes, points lock onto eyes, nose, lips, jaw and cheekbones, a mesh draws in, the box settles, then for half a second the system loses the face (one amber flicker), re-locks, and rests. Loops on its own. |
 
 The street clip is Mixkit video 4000, used under the Mixkit free license. It is sped-up footage, so
 people move a long way between frames; the tracker matches on predicted motion, not box overlap.

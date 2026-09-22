@@ -25,7 +25,7 @@ SITE = {
     "school": "West Windsor-Plainsboro High School South",
     "room": "Room 700F",
     "meets": "Every other Tuesday, 3:00 to 4:00 PM",
-    "hero": "wall",   # home hero: "wall" (project wall) or "plasma" (the earlier one, kept as a backup; also at index.html#plasma)
+    "hero": "plasma",   # home hero: "wall" (project wall) or "plasma" (the earlier one, kept as a backup; also at index.html#plasma)
     "code": "selpcao",
     "instagram": "hss_aiclub",
 }
@@ -88,7 +88,7 @@ GROUPS = [
         "stages": ["vision", "deep-learning"], "related": ["neural-networks", "data-science", "nlp"],
     },
     {
-        "key": "nlp", "slug": "nlp.html", "name": "Natural Language Processing", "sub": "",
+        "key": "nlp", "slug": "nlp.html", "name": "Natural Language Processing", "sub": "Explore how words gather by meaning.",
         "first": False,
         "line": "Build programs that read, sort, and write text, from spam filters to chatbots.",
         "desc": "Teach computers to find patterns in language, from simple classifiers to modern language models.",
@@ -195,10 +195,9 @@ DEMOS = {
         "pause": True,
     },
     "nlp": {
-        "title": "Twenty thousand words, arranged by meaning",
-        "text": "Drag to move through the space, scroll to zoom, click any word, or search for one. Each word is placed by a real embedding (GloVe, 50 dimensions, trained on Wikipedia and news), so words used in similar ways sit near each other. Nearest words are computed here, on your device.",
-        "controls": '<label class="sent">Find a word <input type="text" data-act="word" maxlength="20" placeholder="any word" spellcheck="false" autocomplete="off"></label>'
-                    '<button type="button" data-act="shuffle">Shuffle example</button>',
+        "title": "A map of language",
+        "text": "Words used in similar contexts sit near one another. Choose a word to explore its neighborhood.",
+        "controls": "",
         "pause": False,
     },
     "neural-networks": {
@@ -214,10 +213,10 @@ DEMOS = {
         "pause": True,
     },
     "society": {
-        "title": "A feed that reinforces past choices",
-        "text": "Two people start with the same broad mix of posts. Raise the slider and each feed narrows around what that person already clicked. Illustration, not data from a real platform.",
-        "controls": '<label>How often does the feed reinforce past choices? <input type="range" min="0" max="95" value="20" data-act="feed"></label>',
-        "pause": True,
+        "title": "",
+        "text": "",
+        "controls": "",
+        "pause": False,
     },
 }
 
@@ -752,18 +751,53 @@ def page_group(g):
     <h1>{g["name"]}</h1>
     <p class="hint" data-hint>Tap a letter to knock it loose.</p>
     <p class="vh" aria-live="polite" data-live></p>
-    <p class="desc">{g["desc"]}</p>
-    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
+    <div class="console" data-console>
+      <p class="kicker">Agents + Reinforcement Learning</p>
+      <p class="desc">Agents make a plan, use tools, check the result, and try again when a step fails.</p>
+      <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
+    </div>
     <div class="panel" data-panel hidden>
-      <p><span>TITLE SYSTEM</span> OFFLINE</p>
-      <p><span>NAV SURFACE</span> DAMAGED</p>
+      <p>TITLE SYSTEM OFFLINE</p>
       <button type="button" data-act="restore">Restart title system &rarr;</button>
     </div>
   </div>
-  <div class="ghero-bar">
-    <div class="wrap ghero-bar-in">
-      <p class="how"><strong>Observe, act, verify, adapt.</strong> The agent watches the title, picks up what fell, checks that every letter is back, and rebuilds after an interruption. Knock letters loose faster than it can cope and see what it does. <span data-status></span></p>
+</section>
+
+''' + rest
+    if g["key"] == "nlp":
+        return f'''<section class="ghero" data-demo="nlp">
+  <canvas aria-hidden="true"></canvas>
+  <div class="ghero-ui" data-ui></div>
+  <div class="wrap ghero-in">
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
+    <h1>{g["name"]}</h1>
+    {sub}
+    <div class="console">
+      <p class="kicker">{d["title"]}</p>
+      <p class="desc">{d["text"]}</p>
+      <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a><span class="tiny">Placed by a GloVe word embedding, computed on your device.</span></p>
     </div>
+  </div>
+  <div class="wordfind">
+    <label>Find a word <input type="text" data-act="word" maxlength="20" placeholder="camera" spellcheck="false" autocomplete="off"></label>
+    <button type="button" data-act="shuffle">Shuffle</button><button type="button" data-act="clear" hidden>Clear</button>
+    <p class="picked" data-selected hidden></p>
+    <p class="picked-note" data-status></p>
+  </div>
+</section>
+
+''' + rest
+    if g["key"] == "society":
+        return f'''<section class="ghero" data-demo="society">
+  <canvas aria-hidden="true"></canvas>
+  <div class="ghero-ui" data-ui></div>
+  <div class="wrap ghero-in">
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
+    <p class="kicker">{g["name"]}</p>
+    <h1>What does an AI see when it sees a face?</h1>
+    <p class="desc">A face becomes points, patterns, and a prediction.</p>
+    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
+    <p class="scan-note" data-note>When the system gets it wrong, the consequences are not abstract.</p>
   </div>
 </section>
 
@@ -813,7 +847,19 @@ def page_projects():
         </div>
         {fig}
       </article>''')
-    return pagetop(["Projects"], "Projects") + f'''<section class="section">
+    return f'''<section class="hero hero--wall" data-hero="wall">
+  <canvas data-field aria-hidden="true"></canvas>
+  <div class="wrap hero-in">
+    <p class="crumb"><a href="index.html">Home</a> / Projects</p>
+    <h1>Projects</h1>
+    <p class="hero-sub">Work that members made in SAIL, from a first classifier to a live detector. Hover a piece to see what it is.</p>
+    <div class="hero-actions">
+      <a class="btn btn--line" href="#showcase">See the work</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="showcase">
   <div class="wrap showcase">
     {"".join(feats)}
   </div>
@@ -1233,6 +1279,7 @@ def build():
     written = []
     for filename, title, desc, active, body in pages:
         scenes = {"nlp.html": ["scene-nlp"], "agents.html": ["scene-agents"], "society.html": ["scene-ethics"]}
+        if filename == "projects.html": active = "projects"
         extra = "".join(f'<script src="assets/js/{s}.js"></script>\n' for s in ["demos"] + scenes.get(filename, [])) if active == "group" else ""
         html = head(title, desc) + masthead(active) + body + footer(extra)
         with open(os.path.join(HERE, filename), "w", encoding="utf-8") as fh:
