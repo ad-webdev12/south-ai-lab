@@ -285,7 +285,8 @@ img,svg{max-width:100%}
 .ghero-ui{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 .ghero-ui > *{pointer-events:auto}
 .ghero[data-demo="agents"]::after{display:none}
-.ghero[data-demo="agents"] .hint{font:500 .86rem var(--sans);color:#c9d3e2;margin:-4px 0 18px;text-shadow:0 1px 8px #05070b;transition:color .4s}
+.ghero[data-demo="agents"] .hint{font:500 .86rem var(--sans);color:#c9d3e2;margin:-6px 0 10px;transition:color .4s}
+.ghero[data-demo="agents"] .console{margin-top:88px}
 .ghero[data-demo="agents"][data-state="warning"] .hint{color:#ffc476}
 .ghero[data-demo="agents"][data-state="destruction"] .hint,.ghero[data-demo="agents"][data-state="aftermath"] .hint{color:#ff7a6e}
 .ghero[data-demo="agents"][data-state="recovery"] .hint{color:#9cc8ff}
@@ -313,7 +314,7 @@ img,svg{max-width:100%}
 .ghero[data-demo="agents"] h1 .l .lb:focus-visible{outline:2px solid #9cc8ff;outline-offset:3px}
 .ghero[data-demo="agents"] h1 .l .lb:disabled{cursor:default}
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px;padding:0;border:0}
-.ghero[data-demo="agents"] canvas.ghero-mid{z-index:3;pointer-events:none}
+.ghero[data-demo="agents"] canvas.ghero-mid{z-index:1;pointer-events:none}
 .ghero[data-demo="agents"] canvas.ghero-top{z-index:5;pointer-events:none}
 .ghero[data-demo="agents"] .ghero-in{z-index:auto}
 .ghero[data-demo="agents"] .ghero-in > *:not(h1){position:relative;z-index:4}
@@ -501,6 +502,8 @@ img,svg{max-width:100%}
   .ghero-in{justify-content:flex-start;padding-bottom:46vh}
   .ghero-in > *,.ghero .sub{max-width:none}
   .ghero[data-demo="agents"] .ghero-in{padding-bottom:min(300px,40vh)}
+  .ghero[data-demo="agents"] .console{margin-top:0}
+  .ghero[data-demo="agents"] h1 .l.out{z-index:1}
   .ghero[data-demo="agents"] .ghero-in > *,.ghero[data-demo="nlp"] .ghero-in > *,.ghero[data-demo="nlp"] .sub,.ghero[data-demo="society"] .ghero-in > *,.console{max-width:none}
   .ghero[data-demo="nlp"] .ghero-in{justify-content:flex-start;padding-bottom:min(360px,46vh)}
   .ghero[data-demo="society"] .ghero-in{justify-content:flex-start;padding-bottom:min(380px,50vh)}

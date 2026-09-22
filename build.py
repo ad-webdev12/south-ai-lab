@@ -749,10 +749,10 @@ def page_group(g):
   <div class="wrap ghero-in">
     <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>{g["name"]}</h1>
-    <p class="hint" data-hint>Tap a letter to knock it loose.</p>
     <p class="vh" aria-live="polite" data-live></p>
     <div class="console" data-console>
       <p class="kicker">Agents + Reinforcement Learning</p>
+      <p class="hint" data-hint>Tap a letter to knock it loose.</p>
       <p class="desc">Agents make a plan, use tools, check the result, and try again when a step fails.</p>
       <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
     </div>
