@@ -284,7 +284,7 @@ img,svg{max-width:100%}
 .ghero-ui > *{pointer-events:auto}
 .ghero[data-demo="agents"]::after{display:none}
 .ghero[data-demo="agents"] .ghero-in{justify-content:flex-start;padding-bottom:0}
-.ghero[data-demo="agents"] h1{margin-bottom:8px}
+.ghero[data-demo="agents"] h1{margin-bottom:10px}
 .ghero[data-demo="agents"] .hint{font:500 .86rem var(--sans);color:#c9d3e2;margin:0 0 auto;padding-bottom:clamp(120px,19vh,250px);text-shadow:0 1px 8px #05070b;transition:color .4s}
 .ghero[data-demo="agents"][data-state="warning"] .hint{color:#ffc476}
 .ghero[data-demo="agents"][data-state="destruction"] .hint,.ghero[data-demo="agents"][data-state="aftermath"] .hint{color:#ff7a6e}
@@ -311,8 +311,6 @@ img,svg{max-width:100%}
 .ghero[data-demo="agents"] h1 .l.out{z-index:4}
 .ghero[data-demo="agents"] .ghero-bar{z-index:6}
 .ghero[data-demo="agents"] canvas,.navwreck{translate:var(--shx,0) var(--shy,0)}
-.ghero[data-demo="agents"] h1{color:#ebe7de;font-size:clamp(2.4rem,5vw,4rem);letter-spacing:-.01em;line-height:1.08;
-  text-shadow:0 1px 0 #cfcbc2,0 2px 0 #b3afa7,0 3px 0 #97948d,0 4px 0 #7b7872,0 5px 0 #5f5d58,0 9px 12px rgba(0,0,0,.75),0 0 1px rgba(255,255,255,.9)}
 .ghero[data-demo="agents"] h1 .l{cursor:pointer}
 .ghero[data-demo="agents"] h1 .l.lock{animation:lock .22s cubic-bezier(.3,1.8,.5,1)}
 @keyframes lock{0%{translate:0 -3px}60%{translate:0 1px}100%{translate:0 0}}
@@ -478,7 +476,6 @@ img,svg{max-width:100%}
   .ghero::after{background:linear-gradient(180deg, rgba(4,10,22,.94) 0%, rgba(4,10,22,.8) 38%, rgba(4,10,22,.1) 52%, rgba(4,10,22,0) 60%)}
   .ghero-in{justify-content:flex-start;padding-bottom:46vh}
   .ghero-in > *,.ghero .sub{max-width:none}
-  .ghero[data-demo="agents"] h1{font-size:clamp(2rem,9vw,2.6rem)}
   .ghero[data-demo="agents"] .hint{padding-bottom:min(330px,46vh)}
   .ghero[data-demo="agents"] .ghero-copy{max-width:none;padding:14px 16px 4px}
   .ghero[data-demo="agents"] .ghero-in > .panel{right:18px;left:18px;width:auto;bottom:130px}
