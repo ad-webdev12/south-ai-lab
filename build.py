@@ -134,10 +134,10 @@ GROUPS = [
         "stages": ["deep-learning"], "related": ["vision", "nlp", "agents"],
     },
     {
-        "key": "agents", "slug": "agents.html", "name": "Agents and Reinforcement Learning", "sub": "Build systems that learn from feedback and use tools to complete tasks.",
+        "key": "agents", "slug": "agents.html", "name": "Agents and Reinforcement Learning", "sub": "Systems that plan, act, check their work, and adapt.",
         "first": False,
         "line": "Programs that learn by trial and error, and LLM-based assistants that use tools.",
-        "desc": "Members build agents that plan, use tools, check their work, and revise when a step fails.",
+        "desc": "Members build agents that use tools, test outcomes, and revise a plan when a step fails.",
         "make_short": "Game-playing agents, tool-using assistants",
         "level": "Can debug a small Python program independently",
         "experience": "You can write and debug a small Python program without help.",
@@ -690,47 +690,8 @@ def page_research():
 '''
 
 
-def page_group(g):
-    d = DEMOS[g["key"]]
-    work = "".join(f"<li>{w}</li>" for w in g["work"])
-    past = "\n        ".join(
-        f'<li><span class="when">{w}</span><div><p>{t}</p>{linkrow(links)}</div></li>' for w, t, links in g["past"])
-    res_items = []
-    for key in g["stages"]:
-        if key == "safety":
-            res_items.extend(next(b for b in BUILD_SECTION if b["key"] == "responsible")["items"])
-            continue
-        stage = next(s for s in STAGES if s["key"] == key)
-        res_items.extend([i for i in stage["items"] if i["role"] != "reference"][:3 if len(g["stages"]) > 1 else 4])
-    more = ("reading.html", "Reading group plan") if "safety" in g["stages"] else ("learn.html", "Full learning path")
-    related = "".join(f'<li><a href="{GROUP_BY_KEY[k]["slug"]}">{GROUP_BY_KEY[k]["name"]}</a></li>' for k in g["related"])
-    flag = '<p class="flag" style="margin-left:0">Good first group</p>' if g["first"] else ""
-
-    sub = f'<p class="sub">{g["sub"]}</p>' if g["sub"] else ""
-    video = ('<video src="assets/video/street.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>'
-             if g["key"] == "vision" else "")
-    pause = '<button type="button" data-act="pause">Pause</button>' if d["pause"] else ""
-    return f'''<section class="ghero" data-demo="{g["key"]}">
-  {video}<canvas aria-hidden="true"></canvas>
-  <div class="ghero-ui" data-ui></div>
-  <div class="wrap ghero-in">
-    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
-    <h1>{g["name"]}</h1>
-    {sub}<p class="desc">{g["desc"]}</p>
-    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
-  </div>
-  <div class="ghero-bar">
-    <div class="wrap ghero-bar-in">
-      <p class="how"><strong>{d["title"]}.</strong> {d["text"]} <span data-status></span></p>
-      <div class="demo-controls">
-        {d["controls"]}
-        {pause}
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
+def group_rest(g, work, past, res_items, more, related, flag):
+    return f'''<section class="section">
   <div class="wrap split">
     <div class="prose">
       {flag}
@@ -760,6 +721,80 @@ def page_group(g):
   </div>
 </section>
 '''
+
+
+def page_group(g):
+    d = DEMOS[g["key"]]
+    work = "".join(f"<li>{w}</li>" for w in g["work"])
+    past = "\n        ".join(
+        f'<li><span class="when">{w}</span><div><p>{t}</p>{linkrow(links)}</div></li>' for w, t, links in g["past"])
+    res_items = []
+    for key in g["stages"]:
+        if key == "safety":
+            res_items.extend(next(b for b in BUILD_SECTION if b["key"] == "responsible")["items"])
+            continue
+        stage = next(s for s in STAGES if s["key"] == key)
+        res_items.extend([i for i in stage["items"] if i["role"] != "reference"][:3 if len(g["stages"]) > 1 else 4])
+    more = ("reading.html", "Reading group plan") if "safety" in g["stages"] else ("learn.html", "Full learning path")
+    related = "".join(f'<li><a href="{GROUP_BY_KEY[k]["slug"]}">{GROUP_BY_KEY[k]["name"]}</a></li>' for k in g["related"])
+    flag = '<p class="flag" style="margin-left:0">Good first group</p>' if g["first"] else ""
+
+    sub = f'<p class="sub">{g["sub"]}</p>' if g["sub"] else ""
+    video = ('<video src="assets/video/street.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>'
+             if g["key"] == "vision" else "")
+    pause = '<button type="button" data-act="pause">Pause</button>' if d["pause"] else ""
+    rest = group_rest(g, work, past, res_items, more, related, flag)
+    if g["key"] == "agents":
+        return f'''<section class="ghero" data-demo="agents" data-state="calm">
+  <canvas aria-hidden="true"></canvas>
+  <div class="ghero-ui" data-ui></div>
+  <div class="wrap ghero-in">
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
+    <h1>{g["name"]}</h1>
+    <p class="hint" data-hint>Tap a letter to knock it loose.</p>
+    <p class="vh" aria-live="polite" data-live></p>
+    <div class="ghero-copy">
+      {sub}<p class="desc">{g["desc"]}</p>
+      <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
+    </div>
+    <div class="panel" data-panel hidden>
+      <p><span>TITLE SYSTEM</span> OFFLINE</p>
+      <p><span>NAVIGATION SURFACE</span> DAMAGED</p>
+      <button type="button" data-act="restore">Restore interface</button>
+    </div>
+  </div>
+  <div class="ghero-bar">
+    <div class="wrap ghero-bar-in">
+      <p class="how"><strong>Observe, act, verify, adapt.</strong> The agent watches the title, picks up what fell, checks that every letter is back, and rebuilds after an interruption. Knock letters loose faster than it can cope and see what it does. <span data-status></span></p>
+      <div class="demo-controls">{pause}</div>
+    </div>
+  </div>
+</section>
+
+''' + rest
+    return f'''<section class="ghero" data-demo="{g["key"]}">
+  {video}<canvas aria-hidden="true"></canvas>
+  <div class="ghero-ui" data-ui></div>
+  <div class="wrap ghero-in">
+    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
+    <h1>{g["name"]}</h1>
+    {sub}<p class="desc">{g["desc"]}</p>
+    <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
+  </div>
+  <div class="ghero-bar">
+    <div class="wrap ghero-bar-in">
+      <p class="how"><strong>{d["title"]}.</strong> {d["text"]} <span data-status></span></p>
+      <div class="demo-controls">
+        {d["controls"]}
+        {pause}
+      </div>
+    </div>
+  </div>
+</section>
+
+''' + rest
+
+
 
 
 def page_projects():

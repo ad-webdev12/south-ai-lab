@@ -283,10 +283,26 @@ img,svg{max-width:100%}
 .ghero-ui{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 .ghero-ui > *{pointer-events:auto}
 .ghero[data-demo="agents"]::after{display:none}
-.ghero[data-demo="agents"] .ghero-in{justify-content:flex-start;padding-bottom:6px}
-.ghero[data-demo="agents"] h1{margin-bottom:auto;padding-bottom:clamp(118px,17.5vh,240px)}
-.ghero[data-demo="agents"] .desc{margin-bottom:12px}
-.ghero[data-demo="agents"] .sub{margin-top:0}
+.ghero[data-demo="agents"] .ghero-in{justify-content:flex-start;padding-bottom:0}
+.ghero[data-demo="agents"] h1{margin-bottom:8px}
+.ghero[data-demo="agents"] .hint{font:500 .86rem var(--sans);color:#c9d3e2;margin:0 0 auto;padding-bottom:clamp(120px,19vh,250px);text-shadow:0 1px 8px #05070b;transition:color .4s}
+.ghero[data-demo="agents"][data-state="warning"] .hint{color:#ffc476}
+.ghero[data-demo="agents"][data-state="destruction"] .hint,.ghero[data-demo="agents"][data-state="aftermath"] .hint{color:#ff7a6e}
+.ghero[data-demo="agents"][data-state="recovery"] .hint{color:#9cc8ff}
+.ghero[data-demo="agents"] .ghero-copy{position:relative;z-index:4;max-width:min(46ch,44vw);margin:0;padding:18px 20px 6px;background:rgba(10,13,19,.72);border-left:2px solid rgba(255,244,225,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ghero[data-demo="agents"] .ghero-copy .sub{font-size:1.02rem;color:#e6ecf6;font-weight:600;margin:0 0 8px;max-width:none}
+.ghero[data-demo="agents"] .ghero-copy .desc{font-size:.98rem;margin-bottom:14px;max-width:none}
+.ghero[data-demo="agents"] .ghero-copy .btn{margin-bottom:6px}
+.ghero[data-demo="agents"] .ghero-in > .panel{position:absolute;z-index:6;right:max(18px,calc((100vw - var(--wrap)) / 2));bottom:150px;width:min(300px,calc(100vw - 36px));background:rgba(6,8,11,.92);border:1px solid rgba(255,120,110,.55);border-top:3px solid #ff7a6e;padding:14px 16px;font:600 .74rem/1.7 ui-monospace,Consolas,monospace;color:#ff9a90;letter-spacing:.06em}
+.ghero[data-demo="agents"] .panel p{margin:0;max-width:none;display:flex;justify-content:space-between;gap:12px}
+.ghero[data-demo="agents"] .panel span{color:#8a97ab}
+.ghero[data-demo="agents"] .panel button{margin-top:12px;width:100%;font:600 .84rem var(--sans);letter-spacing:.06em;color:#fff;background:rgba(255,255,255,.06);border:1px solid #fff;padding:10px 14px;cursor:pointer}
+.ghero[data-demo="agents"] .panel button:hover,.ghero[data-demo="agents"] .panel button:focus-visible{background:#fff;color:#05070b;outline:none}
+.ghero[data-demo="agents"] h1 .l .lb{position:absolute;inset:-2px 0;width:100%;background:none;border:0;padding:0;margin:0;cursor:pointer;color:transparent}
+.ghero[data-demo="agents"] h1 .l .lb:focus-visible{outline:2px solid #9cc8ff;outline-offset:3px}
+.ghero[data-demo="agents"] h1 .l .lb:disabled{cursor:default}
+.ghero[data-demo="agents"] .ghero-bar{background:linear-gradient(180deg,rgba(7,9,13,0) 0%,rgba(7,9,13,.6) 100%)}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px;padding:0;border:0}
 .ghero[data-demo="agents"] canvas.ghero-mid{z-index:3;pointer-events:none}
 .ghero[data-demo="agents"] canvas.ghero-top{z-index:5;pointer-events:none}
 .ghero[data-demo="agents"] .ghero-in{z-index:auto}
@@ -304,7 +320,7 @@ img,svg{max-width:100%}
 .ghero[data-demo="agents"] .ghero-bar{background:linear-gradient(180deg,rgba(5,7,11,0) 0%,rgba(5,7,11,.92) 50%)}
 .navwreck{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden;transform-origin:50% 36px}
 .navwreck span,.navwreck i{position:absolute;display:block;white-space:pre;text-align:center;will-change:transform;font-style:normal}
-.masthead.wrecked:not(.scrolled):not(.sunk) .brand-text,.masthead.wrecked:not(.scrolled):not(.sunk) .mainnav > a,.masthead.wrecked:not(.scrolled):not(.sunk) .navgroup > button,.masthead.wrecked:not(.scrolled):not(.sunk) .mast-join{color:transparent!important;border-color:transparent!important;background-image:none!important}
+.masthead.wrecked:not(.scrolled):not(.sunk) .brand-text b,.masthead.wrecked:not(.scrolled):not(.sunk) .brand-text span,.masthead.wrecked:not(.scrolled):not(.sunk) .mainnav > a,.masthead.wrecked:not(.scrolled):not(.sunk) .navgroup > button,.masthead.wrecked:not(.scrolled):not(.sunk) .mast-join{color:transparent!important;border-color:transparent!important;background-image:none!important}
 .masthead.wrecked:not(.scrolled):not(.sunk) .mainnav > a::after,.masthead.wrecked:not(.scrolled):not(.sunk) .navgroup > button::after{opacity:0}
 .masthead .brand img{transition:transform .5s cubic-bezier(.2,.7,.2,1),filter .3s}
 .ghero h1 .w{display:inline-block;white-space:nowrap}
@@ -462,8 +478,18 @@ img,svg{max-width:100%}
   .ghero::after{background:linear-gradient(180deg, rgba(4,10,22,.94) 0%, rgba(4,10,22,.8) 38%, rgba(4,10,22,.1) 52%, rgba(4,10,22,0) 60%)}
   .ghero-in{justify-content:flex-start;padding-bottom:46vh}
   .ghero-in > *,.ghero .sub{max-width:none}
-  .ghero[data-demo="agents"] .ghero-in{padding-bottom:10px}
-  .ghero[data-demo="agents"] h1{padding-bottom:300px}
+  .ghero[data-demo="agents"] h1{font-size:clamp(2rem,9vw,2.6rem)}
+  .ghero[data-demo="agents"] .hint{padding-bottom:min(330px,46vh)}
+  .ghero[data-demo="agents"] .ghero-copy{max-width:none;padding:14px 16px 4px}
+  .ghero[data-demo="agents"] .ghero-in > .panel{right:18px;left:18px;width:auto;bottom:130px}
+  .ghero[data-demo="agents"] .ghero-bar{padding:14px 0 12px}
+  .ghero[data-demo="agents"] .ghero-bar-in{grid-template-columns:1fr}
+  .ghero[data-demo="agents"] .how{font-size:.78rem}
+  .ghero[data-demo="agents"] .ghero-bar{position:static}
+  .ghero[data-demo="agents"] .ghero-bar-in{position:static}
+  .ghero[data-demo="agents"] .demo-controls{position:absolute;top:calc(var(--bar) + 12px);right:16px;z-index:6}
+  .ghero[data-demo="agents"] .crumb{padding-right:52px}
+  .ghero[data-demo="agents"] .demo-controls button{width:38px;height:38px;min-height:0;padding:0;font-size:0;border-color:rgba(255,255,255,.4);background:rgba(5,7,11,.5) center/14px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='%23fff'%3E%3Crect x='2' y='1' width='3.5' height='12'/%3E%3Crect x='8.5' y='1' width='3.5' height='12'/%3E%3C/svg%3E")}
   .ghero-bar-in{grid-template-columns:1fr}
   .demo-controls{justify-content:flex-start;max-width:none}
   .groups{grid-template-columns:1fr 1fr}
