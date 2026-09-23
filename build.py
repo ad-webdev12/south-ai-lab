@@ -485,12 +485,10 @@ def masthead(active):
 
 
 def pagetop(crumbs, title, lede="", sub=""):
-    trail = " / ".join(['<a href="index.html">Home</a>'] + crumbs)
     sub_html = f'<p class="sub">{sub}</p>' if sub else ""
     lede_html = f'<p class="lede">{lede}</p>' if lede else ""
     return f'''<section class="pagetop">
   <div class="wrap">
-    <p class="crumb">{trail}</p>
     <h1>{title}</h1>
     {sub_html}{lede_html}
   </div>
@@ -501,18 +499,13 @@ def pagetop(crumbs, title, lede="", sub=""):
 def footer(extra_script=""):
     groups = "".join(f'<li><a href="{g["slug"]}">{g["name"]}</a></li>' for g in GROUPS)
     return f'''</main>
-<footer class="foot">
-  <svg class="foot-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
-    <path class="w1" d="M0 52c120-30 240-30 360 0s240 30 360 0 240-30 360 0 240 30 360 0v38H0z"/>
-    <path class="w2" d="M0 62c180-26 300-22 480 2s300 24 480 0 300-26 480 0v26H0z"/>
-    <path class="w3" d="M0 74c160-16 320-16 480 0s320 16 480 0 320-16 480 0v16H0z"/>
-  </svg>
-  <div class="foot-bg" aria-hidden="true"><i></i><i></i><i></i></div>
+<footer class="foot" id="foot">
   <div class="wrap">
     <div class="foot-grid">
-      <div>
+      <div class="foot-brand">
         {brand()}
-        <p>{SITE["name"]}, the AI and machine learning club at {SITE["school"]}.</p>
+        <p>Student research in machine learning at {SITE["school"]}.</p>
+        <p class="foot-meet">Every other Tuesday, 3:00 to 4:00 PM, Room 700F.</p>
       </div>
       <div>
         <h2>Research</h2>
@@ -536,7 +529,10 @@ def footer(extra_script=""):
         </ul>
       </div>
     </div>
-    <p class="foot-bot">&copy; <span data-year>2026</span> {SITE["name"]}. Run by students.</p>
+    <div class="foot-bot">
+      <span>&copy; <span data-year>2026</span> {SITE["name"]}. Run by students.</span>
+      <a href="#top" class="foot-top">Back to top</a>
+    </div>
   </div>
 </footer>
 <script src="assets/js/site.js"></script>
@@ -576,7 +572,8 @@ def page_index():
   <canvas data-field aria-hidden="true"></canvas>
   <div class="wrap hero-in">
     <h1>{SITE["name"]}</h1>
-    <p class="hero-sub">Students at High School South learning AI and building projects together.</p>
+    <p class="hero-sub">Student research in machine learning.</p>
+    <p class="hero-status" data-status><span>Vision</span><i>&middot;</i><span>Language</span><i>&middot;</i><span>Data</span><i>&middot;</i><span>Agents</span></p>
     <div class="hero-actions">
       <a class="btn btn--light" href="join.html">Join SAIL</a>
       <a class="btn btn--line" href="projects.html">See projects</a>
@@ -747,18 +744,17 @@ def page_group(g):
   <canvas aria-hidden="true"></canvas>
   <div class="ghero-ui" data-ui></div>
   <div class="wrap ghero-in">
-    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>{g["name"]}</h1>
     <p class="vh" aria-live="polite" data-live></p>
+    <p class="hint" data-hint>Tap a letter to knock it loose.</p>
     <div class="console" data-console>
       <p class="kicker">Agents + Reinforcement Learning</p>
-      <p class="hint" data-hint>Tap a letter to knock it loose.</p>
       <p class="desc">Agents make a plan, use tools, check the result, and try again when a step fails.</p>
       <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
     </div>
     <div class="panel" data-panel hidden>
       <p>TITLE SYSTEM OFFLINE</p>
-      <button type="button" data-act="restore">Restart title system &rarr;</button>
+      <button type="button" data-act="restore">Restart &rarr;</button>
     </div>
   </div>
 </section>
@@ -769,7 +765,6 @@ def page_group(g):
   <canvas aria-hidden="true"></canvas>
   <div class="ghero-ui" data-ui></div>
   <div class="wrap ghero-in">
-    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>{g["name"]}</h1>
     {sub}
     <div class="console">
@@ -792,7 +787,6 @@ def page_group(g):
   <canvas aria-hidden="true"></canvas>
   <div class="ghero-ui" data-ui></div>
   <div class="wrap ghero-in">
-    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <p class="kicker">{g["name"]}</p>
     <h1>What does an AI see when it sees a face?</h1>
     <p class="desc">A face becomes points, patterns, and a prediction.</p>
@@ -806,7 +800,6 @@ def page_group(g):
   {video}<canvas aria-hidden="true"></canvas>
   <div class="ghero-ui" data-ui></div>
   <div class="wrap ghero-in">
-    <p class="crumb"><a href="index.html">Home</a> / <a href="research.html">Research</a></p>
     <h1>{g["name"]}</h1>
     {sub}<p class="desc">{g["desc"]}</p>
     <p><a class="btn btn--light" href="join.html#join-{g["key"]}">Join this group</a></p>
@@ -850,7 +843,6 @@ def page_projects():
     return f'''<section class="hero hero--wall" data-hero="wall">
   <canvas data-field aria-hidden="true"></canvas>
   <div class="wrap hero-in">
-    <p class="crumb"><a href="index.html">Home</a> / Projects</p>
     <h1>Projects</h1>
     <p class="hero-sub">Work that members made in SAIL, from a first classifier to a live detector. Hover a piece to see what it is.</p>
     <div class="hero-actions">

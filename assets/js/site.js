@@ -264,174 +264,155 @@
     build(); paint(); if (running) window.requestAnimationFrame(frame);
   }
 
+  // The home hero: a field of soft particles that a hidden model keeps pulling into four calm
+  // neighbourhoods (vision, language, data, agents), which clear, dissolve, and form again.
+  // Loose signal drifts in from the edges; strands appear only inside a formed cluster; a faint
+  // contour bends around each one. The centre stays dark so the name stays dominant.
   function hero() {
     var host = document.querySelector("[data-hero]");
     var canvas = document.querySelector("[data-field]");
     if (!host || !canvas || !canvas.getContext) return;
     var ctx = canvas.getContext("2d");
-    var pauseBtn = document.querySelector("[data-pause]");
+    var title = host.querySelector("h1"), status = host.querySelector("[data-status]");
+    var words = status ? [].slice.call(status.querySelectorAll("span")) : [];
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var W = 0, H = 0, dpr = 1, t = 0, orbs = [], sprite = null;
-    var mouse = { x: 0, y: 0, tx: 0, ty: 0, on: false, k: 0 };
-    var running = !reduced, offscreen = false, last = 0, slow = 0, strands = 2;
+    var W = 0, H = 0, dpr = 1, t = 0, pts = [], hubs = [], sprites = [], box = null, grid = {}, GC = 28;
+    var mouse = { x: -9999, y: -9999, tx: 0, ty: 0, on: false, k: 0 };
+    var running = !reduced, offscreen = false, last = 0, T = 26, wordAt = -1, wordT = 0;
+    var COL = [[120, 176, 255], [196, 150, 255], [156, 236, 196], [255, 240, 220]];
 
-    function makeSprite() {
-      var s = document.createElement("canvas"); s.width = s.height = 256;
-      var g = s.getContext("2d"), grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-      grad.addColorStop(0, "rgba(255,245,255,1)");
-      grad.addColorStop(0.08, "rgba(255,190,250,0.95)");
-      grad.addColorStop(0.22, "rgba(196,110,255,0.55)");
-      grad.addColorStop(0.5, "rgba(96,70,255,0.18)");
-      grad.addColorStop(1, "rgba(40,30,160,0)");
-      g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
+    function sprite(c) {
+      var s = document.createElement("canvas"); s.width = s.height = 64;
+      var g = s.getContext("2d"), grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",1)");
+      grad.addColorStop(0.25, "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0.55)");
+      grad.addColorStop(1, "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0)");
+      g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
       return s;
     }
-
+    function edgeSpawn(p) {
+      var e = Math.random() * 4, m = 30;
+      if (e < 1) { p.x = -m; p.y = Math.random() * H; } else if (e < 2) { p.x = W + m; p.y = Math.random() * H; }
+      else if (e < 3) { p.x = Math.random() * W; p.y = -m; } else { p.x = Math.random() * W; p.y = H + m; }
+      var ang = Math.atan2(H / 2 - p.y, W / 2 - p.x) + (Math.random() - 0.5) * 0.8, sp = 14 + Math.random() * 18;
+      p.vx = Math.cos(ang) * sp; p.vy = Math.sin(ang) * sp; p.life = 0; p.span = 18 + Math.random() * 20;
+    }
+    function measure() {
+      var r = host.getBoundingClientRect(), tr = title ? title.getBoundingClientRect() : r;
+      box = { x0: tr.left - r.left, y0: tr.top - r.top, x1: tr.right - r.left, y1: tr.bottom - r.top };
+      var cx = (box.x0 + box.x1) / 2, cy = (box.y0 + box.y1) / 2, hw = (box.x1 - box.x0) / 2, hh = (box.y1 - box.y0) / 2, u = Math.min(W, H);
+      // four neighbourhoods around the title, never across it
+      var raw = [[cx - hw - u * 0.16, cy - hh - u * 0.06], [cx + hw + u * 0.14, cy - hh - u * 0.1], [cx + hw + u * 0.1, cy + hh + u * 0.2], [cx - hw - u * 0.1, cy + hh + u * 0.24]];
+      hubs = raw.map(function (q, i) { return { x: Math.min(W * 0.9, Math.max(W * 0.1, q[0])), y: Math.min(H * 0.9, Math.max(H * 0.14, q[1])), r: u * (0.17 + i * 0.01), ph: i * 1.7 }; });
+      if (W < 700) hubs.forEach(function (h, i) { h.x = i % 2 ? W * 0.8 : W * 0.2; h.y = i < 2 ? H * 0.2 : H * 0.82; h.r = u * 0.2; });
+    }
     function build() {
       var rect = host.getBoundingClientRect();
       if (rect.width < 2 || rect.height < 2) return false;
-      dpr = Math.min(window.devicePixelRatio || 1, rect.width > 900 ? 1.25 : 2);
-      W = rect.width; H = rect.height;
-      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.lineCap = "round"; ctx.lineJoin = "round";
-      if (!sprite) sprite = makeSprite();
-      var n = W < 700 ? 5 : 8, unit = Math.min(W, H);
-      orbs = [];
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5); W = rect.width; H = rect.height;
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!sprites.length) sprites = COL.map(sprite);
+      measure();
+      var n = W < 700 ? 360 : W < 1100 ? 640 : 880; pts = [];
       for (var i = 0; i < n; i++) {
-        var o = { x: W * (0.08 + 0.84 * Math.random()), y: H * (0.1 + 0.8 * Math.random()),
-                  vx: (Math.random() - 0.5) * 34, vy: (Math.random() - 0.5) * 26,
-                  r: unit * (0.035 + Math.random() * 0.03), ph: Math.random() * 100, arms: [] };
-        for (var a = 0; a < 6; a++) o.arms.push({ ang: a / 6 * 6.2832 + Math.random(), len: unit * (0.16 + Math.random() * 0.14), ph: Math.random() * 100 });
-        orbs.push(o);
+        var p = { c: i % 4, s: 2.2 + Math.random() * 3.2, ph: Math.random() * 6.28, x: 0, y: 0, vx: 0, vy: 0, life: 0, span: 0 };
+        edgeSpawn(p); p.x = Math.random() * W; p.y = Math.random() * H; p.life = Math.random() * p.span;
+        pts.push(p);
       }
-      draw();
-      return true;
+      if (reduced) { t = 11; for (var k = 0; k < 400; k++) advance(1 / 30, true); }
+      draw(); return true;
     }
-
-    function advance(dt) {
+    // the loop: scattered signal enters, the field bends and groups it, clusters clear, then dissolve
+    function pull(tt) {
+      var u = tt % T;
+      if (u < 3) return 0; if (u < 9) return (u - 3) / 6; if (u < 15) return 1; if (u < 19) return 1 - (u - 15) / 4; return 0;
+    }
+    function advance(dt, quiet) {
       t += dt;
-      if (mouse.on) { mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 10); mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 10); }
-      mouse.k += ((mouse.on ? 1 : 0) - mouse.k) * Math.min(1, dt * 4);
-      for (var i = 0; i < orbs.length; i++) {
-        var o = orbs[i];
-        o.vx += Math.sin(t * 0.21 + o.ph) * 4 * dt; o.vy += Math.cos(t * 0.17 + o.ph * 1.3) * 4 * dt;
-        for (var j = 0; j < orbs.length; j++) {
-          if (j === i) continue;
-          var dx = o.x - orbs[j].x, dy = o.y - orbs[j].y, d = Math.sqrt(dx * dx + dy * dy) || 1, min = (o.r + orbs[j].r) * 2.4;
-          if (d < min) { o.vx += dx / d * (min - d) * 1.6 * dt; o.vy += dy / d * (min - d) * 1.6 * dt; }
-        }
-        if (mouse.k > 0.05) {
-          var mx = mouse.x - o.x, my = mouse.y - o.y, md = Math.sqrt(mx * mx + my * my) || 1;
-          if (md < 420 && md > 90) { o.vx += mx / md * 22 * mouse.k * dt; o.vy += my / md * 22 * mouse.k * dt; }
-        }
-        var sp = Math.sqrt(o.vx * o.vx + o.vy * o.vy);
-        if (sp > 46) { o.vx *= 46 / sp; o.vy *= 46 / sp; }
-        o.x += o.vx * dt; o.y += o.vy * dt;
-        if (o.x < o.r) { o.x = o.r; o.vx = Math.abs(o.vx); } if (o.x > W - o.r) { o.x = W - o.r; o.vx = -Math.abs(o.vx); }
-        if (o.y < o.r) { o.y = o.r; o.vy = Math.abs(o.vy); } if (o.y > H - o.r) { o.y = H - o.r; o.vy = -Math.abs(o.vy); }
+      if (mouse.on) { mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 12); mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 12); }
+      mouse.k += ((mouse.on ? 1 : 0) - mouse.k) * Math.min(1, dt * 3);
+      var k = pull(t), ks = k * k * (3 - 2 * k), i;
+      for (i = 0; i < pts.length; i++) {
+        var p = pts[i], h = hubs[p.c];
+        p.life += dt;
+        // a slow flow field, so the loose signal moves with purpose rather than jitter
+        var fx = Math.sin(p.y * 0.006 + t * 0.19 + p.ph) * 9 + Math.sin(p.x * 0.004 - t * 0.13) * 6, fy = Math.cos(p.x * 0.005 + t * 0.17 + p.ph) * 8 + Math.cos(p.y * 0.0045 + t * 0.11) * 5;
+        p.vx += fx * dt * (1.6 - ks); p.vy += fy * dt * (1.6 - ks);
+        // the model field: similar particles gather around their hub, with a gentle swirl once they are close
+        var dx = h.x + Math.sin(t * 0.23 + h.ph) * h.r * 0.25 - p.x, dy = h.y + Math.cos(t * 0.2 + h.ph) * h.r * 0.2 - p.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+        var g = ks * (d > h.r ? 42 : 42 * (d / h.r) * 0.6 + 6);
+        p.vx += dx / d * g * dt; p.vy += dy / d * g * dt;
+        if (d < h.r * 1.2) { p.vx += -dy / d * 10 * ks * dt; p.vy += dx / d * 10 * ks * dt; }
+        // the cursor is a small local disturbance; the field reorganises around it and settles
+        if (mouse.k > 0.02) { var mx = p.x - mouse.x, my = p.y - mouse.y, md = Math.sqrt(mx * mx + my * my) || 1; if (md < 150) { var f = (1 - md / 150) * 380 * mouse.k; p.vx += mx / md * f * dt; p.vy += my / md * f * dt; } }
+        var damp = Math.pow(0.28 + 0.4 * (1 - ks), dt); p.vx *= damp; p.vy *= damp;
+        var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy), cap = 26 + 60 * ks + 90 * mouse.k; if (sp > cap) { p.vx *= cap / sp; p.vy *= cap / sp; }
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.life > p.span || p.x < -60 || p.x > W + 60 || p.y < -60 || p.y > H + 60) edgeSpawn(p);
       }
+      if (quiet) return;
+      // the status line: one word brightens at a time, slowly
+      wordT += dt;
+      var target = k > 0.4 ? Math.floor(((t % T) - 3) / 3.2) % 4 : -1;
+      if (target !== wordAt && wordT > 1.5) { wordAt = target; wordT = 0; words.forEach(function (w, n) { w.classList.toggle("on", n === wordAt); }); }
     }
-
-    // one filament from a to b: a smooth writhing curve, drawn three times for the glow
-    function bolt(ax, ay, bx, by, alpha, seed, fork) {
-      var dx = bx - ax, dy = by - ay, d = Math.sqrt(dx * dx + dy * dy);
-      if (d < 4 || alpha < 0.02) return;
-      var nx = -dy / d, ny = dx / d, N = Math.max(10, Math.min(30, Math.round(d / 22))), amp = Math.min(70, d * 0.13), pts = [];
-      for (var i = 0; i <= N; i++) {
-        var u = i / N, env = Math.sin(Math.PI * u);
-        var off = env * amp * (Math.sin(u * 7 + t * 1.7 + seed) * 0.6 + Math.sin(u * 15 - t * 2.6 + seed * 2.1) * 0.3 + Math.sin(u * 31 + t * 4.1 + seed * 0.7) * 0.12);
-        pts.push([ax + dx * u + nx * off, ay + dy * u + ny * off]);
-      }
-      var passes = [[16, "96,84,255", 0.10], [5, "208,128,255", 0.32], [1.5, "255,238,255", 1]];
-      for (var p = 0; p < 3; p++) {
-        ctx.lineWidth = passes[p][0]; ctx.strokeStyle = "rgba(" + passes[p][1] + "," + (passes[p][2] * alpha).toFixed(3) + ")";
-        ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
-        for (var k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
-        ctx.stroke();
-      }
-      if (fork) {
-        var m = pts[Math.round(N * 0.58)], ang = Math.atan2(dy, dx) + Math.sin(t * 0.9 + seed) * 0.9 + 0.6, L = d * 0.22;
-        bolt(m[0], m[1], m[0] + Math.cos(ang) * L, m[1] + Math.sin(ang) * L, alpha * 0.55, seed + 9, false);
-      }
+    function bucket() { grid = {}; for (var i = 0; i < pts.length; i++) { var p = pts[i], key = ((p.x / GC) | 0) + "," + ((p.y / GC) | 0); (grid[key] || (grid[key] = [])).push(i); } }
+    function calm(x, y) {          // how much to dim near the name
+      if (!box) return 1;
+      var dx = Math.max(box.x0 - 40 - x, 0, x - box.x1 - 40), dy = Math.max(box.y0 - 30 - y, 0, y - box.y1 - 30), d = Math.sqrt(dx * dx + dy * dy);
+      return d === 0 ? 0.12 : Math.min(1, 0.12 + d / 160);
     }
-
     function draw() {
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "#04020c"; ctx.fillRect(0, 0, W, H);
-      var bg = ctx.createRadialGradient(W / 2, H * 0.55, 0, W / 2, H * 0.55, Math.max(W, H) * 0.75);
-      bg.addColorStop(0, "rgba(72,28,150,0.6)"); bg.addColorStop(0.55, "rgba(24,12,80,0.4)"); bg.addColorStop(1, "rgba(4,2,12,0)");
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#04060d"; ctx.fillRect(0, 0, W, H);
+      var k = pull(t), ks = k * k * (3 - 2 * k), i, j;
+      // a faint contour field that bends around each formed cluster
+      if (ks > 0.05) for (i = 0; i < hubs.length; i++) {
+        var h = hubs[i], c = COL[i];
+        for (var ring = 1; ring <= 3; ring++) {
+          ctx.beginPath();
+          for (var a = 0; a <= 40; a++) { var an = a / 40 * 6.2832, rr = h.r * (0.55 + ring * 0.38) * (1 + Math.sin(an * 3 + t * 0.5 + h.ph) * 0.09 + Math.sin(an * 5 - t * 0.3) * 0.05); var px = h.x + Math.cos(an) * rr, py = h.y + Math.sin(an) * rr * 0.86; if (a) ctx.lineTo(px, py); else ctx.moveTo(px, py); }
+          ctx.closePath(); ctx.lineWidth = 0.8; ctx.strokeStyle = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (0.11 * ks / ring * calm(h.x, h.y)).toFixed(3) + ")"; ctx.stroke();
+        }
+      }
       ctx.globalCompositeOperation = "lighter";
-
-      var reach = Math.min(W, H) * 0.62, i, j;
-      for (i = 0; i < orbs.length; i++) {
-        var o = orbs[i];
-        for (var a = 0; a < o.arms.length; a++) {
-          var arm = o.arms[a], ang = arm.ang + t * 0.05 + Math.sin(t * 0.31 + arm.ph) * 0.7, len = arm.len * (0.75 + 0.25 * Math.sin(t * 0.5 + arm.ph));
-          bolt(o.x, o.y, o.x + Math.cos(ang) * len, o.y + Math.sin(ang) * len, 0.30, arm.ph, false);
-        }
-        for (j = i + 1; j < orbs.length; j++) {
-          var q = orbs[j], d = Math.hypot(o.x - q.x, o.y - q.y);
-          if (d < reach) { var al = Math.pow(1 - d / reach, 1.35); for (var s = 0; s < strands; s++) bolt(o.x, o.y, q.x, q.y, al, i * 7 + j * 3 + s * 11, s === 0); }
-        }
-        if (mouse.k > 0.03) {
-          var md = Math.hypot(o.x - mouse.x, o.y - mouse.y), mr = Math.min(W, H) * 0.7;
-          if (md < mr) { var ma = Math.pow(1 - md / mr, 1.1) * mouse.k; bolt(o.x, o.y, mouse.x, mouse.y, ma * 1.15, i * 5 + 40, true); bolt(o.x, o.y, mouse.x, mouse.y, ma * 0.7, i * 5 + 71, false); }
+      // fine strands only inside active neighbourhoods
+      if (ks > 0.35) {
+        bucket();
+        for (i = 0; i < pts.length; i++) {
+          var p = pts[i], hb = hubs[p.c]; if (Math.hypot(p.x - hb.x, p.y - hb.y) > hb.r * 1.1) continue;
+          var gx = (p.x / GC) | 0, gy = (p.y / GC) | 0, col = COL[p.c];
+          for (var ox = 0; ox <= 1; ox++) for (var oy = -1; oy <= 1; oy++) {
+            if (ox === 0 && oy < 0) continue; var cell = grid[(gx + ox) + "," + (gy + oy)]; if (!cell) continue;
+            for (var n = 0; n < cell.length; n++) { j = cell[n]; if (j <= i && ox === 0 && oy === 0) continue; var q = pts[j]; if (q.c !== p.c) continue; var d = Math.hypot(p.x - q.x, p.y - q.y); if (d > 34) continue;
+              ctx.strokeStyle = "rgba(" + col[0] + "," + col[1] + "," + col[2] + "," + (0.34 * (1 - d / 26) * (ks - 0.35) / 0.65 * calm(p.x, p.y)).toFixed(3) + ")"; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
+          }
         }
       }
-      for (i = 0; i < orbs.length; i++) {
-        var ob = orbs[i], size = ob.r * (12 + Math.sin(t * 1.3 + ob.ph) * 1.4);
-        ctx.globalAlpha = 0.95; ctx.drawImage(sprite, ob.x - size / 2, ob.y - size / 2, size, size);
+      for (i = 0; i < pts.length; i++) {
+        var pp = pts[i], hh = hubs[pp.c], dd = Math.hypot(pp.x - hh.x, pp.y - hh.y), near = Math.max(0, 1 - dd / (hh.r * 1.4));
+        var fade = Math.min(1, pp.life * 0.8, (pp.span - pp.life) * 0.8), al = (0.34 + 0.6 * near * ks) * fade * calm(pp.x, pp.y), size = pp.s * (3.4 + near * ks * 2.6);
+        if (al < 0.02) continue;
+        ctx.globalAlpha = al; ctx.drawImage(sprites[pp.c], pp.x - size / 2, pp.y - size / 2, size, size);
       }
-      if (mouse.k > 0.03) { var ms = 150 * mouse.k; ctx.globalAlpha = 0.9 * mouse.k; ctx.drawImage(sprite, mouse.x - ms / 2, mouse.y - ms / 2, ms, ms); }
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
     }
-
     function frame(ts) {
       if (!running || offscreen) { last = 0; return; }
       if (!last) last = ts;
-      var dt = Math.min((ts - last) / 1000, 0.05);
-      last = ts;
-      slow = dt > 0.04 ? slow + 1 : Math.max(0, slow - 2);
-      if (slow > 40 && strands > 1) { strands = 1; slow = 0; }      // slower machines get one strand per pair
+      var dt = Math.min((ts - last) / 1000, 0.05); last = ts;
       if (dt > 0) { advance(dt); draw(); }
       window.requestAnimationFrame(frame);
     }
-    function setRunning(on) {
-      running = on;
-      if (pauseBtn) pauseBtn.textContent = on ? "Pause animation" : "Play animation";
-      if (on) { last = 0; window.requestAnimationFrame(frame); }
-    }
-
-    host.addEventListener("pointermove", function (ev) {
-      var rect = host.getBoundingClientRect();
-      mouse.tx = ev.clientX - rect.left; mouse.ty = ev.clientY - rect.top;
-      if (!mouse.on) { mouse.x = mouse.tx; mouse.y = mouse.ty; }
-      mouse.on = true;
-      if (!running) { mouse.k = 1; mouse.x = mouse.tx; mouse.y = mouse.ty; draw(); }
-    });
+    host.addEventListener("pointermove", function (ev) { var rect = host.getBoundingClientRect(); mouse.tx = ev.clientX - rect.left; mouse.ty = ev.clientY - rect.top; if (!mouse.on) { mouse.x = mouse.tx; mouse.y = mouse.ty; } mouse.on = true; });
     host.addEventListener("pointerleave", function () { mouse.on = false; });
-    if (pauseBtn) pauseBtn.addEventListener("click", function () { setRunning(!running); });
-
     var timer;
-    function fit() {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(function () {
-        var rect = host.getBoundingClientRect();
-        if (Math.abs(rect.width - W) > 1 || Math.abs(rect.height - H) > 1) build();
-      }, 160);
-    }
-    if ("ResizeObserver" in window) new ResizeObserver(fit).observe(host);
-    else window.addEventListener("resize", fit);
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(function (entries) {
-        var was = offscreen; offscreen = !entries[0].isIntersecting;
-        if (was && !offscreen && running) { last = 0; window.requestAnimationFrame(frame); }
-      }).observe(host);
-    }
+    function fit() { window.clearTimeout(timer); timer = window.setTimeout(function () { var rect = host.getBoundingClientRect(); if (Math.abs(rect.width - W) > 1 || Math.abs(rect.height - H) > 1) build(); else measure(); }, 160); }
+    if ("ResizeObserver" in window) new ResizeObserver(fit).observe(host); else window.addEventListener("resize", fit);
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (entries) { var was = offscreen; offscreen = !entries[0].isIntersecting; if (was && !offscreen && running) { last = 0; window.requestAnimationFrame(frame); } }).observe(host);
     build();
-    setRunning(running);
+    if (running) window.requestAnimationFrame(frame);
+    host.__kick = function () { last = 0; if (running) window.requestAnimationFrame(frame); };
   }
 
   document.addEventListener("DOMContentLoaded", function () {
